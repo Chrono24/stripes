@@ -18,6 +18,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import net.sourceforge.stripes.action.Form;
+
 
 /**
  * <p>Encapsulates the validation metadata for a single property of a single class. Structure
@@ -35,6 +37,7 @@ import java.util.regex.Pattern;
 public class ValidationMetadata {
 
    private final String                         _property;
+   private       Class<Form<?>>                 _form;
    private       boolean                        _encrypted;
    private       boolean                        _required;
    private       boolean                        _trim;
@@ -105,10 +108,15 @@ public class ValidationMetadata {
       }
    }
 
+   public ValidationMetadata( String property, Class<Form<?>> form ) {
+      _property = property;
+      _form = form;
+   }
+
    /** Sets the overridden TypeConveter to use to convert values. */
    @SuppressWarnings("rawtypes")
    public ValidationMetadata converter( Class<? extends TypeConverter> converter ) {
-       _converter = converter;
+      _converter = converter;
       return this;
    }
 
@@ -127,15 +135,19 @@ public class ValidationMetadata {
 
    /** Sets the expression that should be used to validate values. */
    public ValidationMetadata expression( String expression ) {
-       _expression = expression;
+      _expression = expression;
       if ( !_expression.startsWith("${") ) {
-          _expression = "${" + _expression + "}";
+         _expression = "${" + _expression + "}";
       }
       return this;
    }
 
    /** Returns the overridden TypeConverter if there is one, or null. */
    public String expression() { return _expression; }
+
+   public Class<Form<?>> getForm() {
+      return _form;
+   }
 
    /** Returns the name of the property this validation metadata represents. */
    public String getProperty() {
@@ -159,7 +171,7 @@ public class ValidationMetadata {
 
    /** Sets the mask which the String form of the property must match. */
    public ValidationMetadata mask( String mask ) {
-       _mask = Pattern.compile(mask);
+      _mask = Pattern.compile(mask);
       return this;
    }
 

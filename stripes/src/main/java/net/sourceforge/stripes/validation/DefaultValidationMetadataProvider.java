@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.sourceforge.stripes.action.Form;
 import net.sourceforge.stripes.config.Configuration;
 import net.sourceforge.stripes.controller.ParameterName;
 import net.sourceforge.stripes.exception.StripesRuntimeException;
@@ -243,39 +244,78 @@ public class DefaultValidationMetadataProvider implements ValidationMetadataProv
       Map<String, ValidationMetadata> meta = new HashMap<>();
 
       @SuppressWarnings("unchecked") Map<String, AnnotationInfo> annotationInfoMap = getAnnotationInfoMap(beanType, Validate.class,
-            ValidateNestedProperties.class);
+            ValidateNestedProperties.class, ValidateForm.class);
 
       for ( String propertyName : annotationInfoMap.keySet() ) {
          AnnotationInfo annotationInfo = annotationInfoMap.get(propertyName);
 
          // get the @Validate and/or @ValidateNestedProperties
-         Validate simple = annotationInfo.getAnnotation(Validate.class);
-         ValidateNestedProperties nested = annotationInfo.getAnnotation(ValidateNestedProperties.class);
+         Validate simpleAnnotation = annotationInfo.getAnnotation(Validate.class);
+         ValidateNestedProperties nestedAnnotation = annotationInfo.getAnnotation(ValidateNestedProperties.class);
+         ValidateForm formAnnotation = annotationInfo.getAnnotation(ValidateForm.class);
          Class<?> clazz = annotationInfo.getTargetClass();
 
          // add to allow list if @Validate present
-         if ( simple != null ) {
-            if ( simple.field() == null || "".equals(simple.field()) ) {
-               meta.put(propertyName, new ValidationMetadata(propertyName, simple));
+         if ( simpleAnnotation != null ) {
+            if ( "".equals(simpleAnnotation.field()) ) {
+               meta.put(propertyName, new ValidationMetadata(propertyName, simpleAnnotation));
             } else {
-               log.warn("Field name present in @Validate but should be omitted: ", clazz, ", property ", propertyName, ", given field name ", simple.field());
+               log.warn("Field name present in @Validate but should be omitted: ", clazz, ", property ", propertyName, ", given field name ",
+                     simpleAnnotation.field());
             }
          }
 
          // add all sub-properties referenced in @ValidateNestedProperties
-         if ( nested != null ) {
-            Validate[] validates = nested.value();
-            if ( validates != null ) {
-               for ( Validate validate : validates ) {
-                  if ( validate.field() != null && !"".equals(validate.field()) ) {
-                     String fullName = propertyName + '.' + validate.field();
-                     if ( meta.containsKey(fullName) ) {
-                        log.warn("More than one nested @Validate with same field name: " + validate.field() + " on property " + propertyName);
-                     }
-                     meta.put(fullName, new ValidationMetadata(fullName, validate));
+         if ( nestedAnnotation != null || formAnnotation != null ) {
+            Validate[] validates;
+            String[] additionalOns;
+
+            if ( formAnnotation != null && formAnnotation.form() != Form.class ) {
+               Class<?> form = formAnnotation.form();
+               additionalOns = formAnnotation.on();
+               //noinspection unchecked
+               Map<String, AnnotationInfo> formAnnotationInfoMap = getAnnotationInfoMap(form, Validate.class, ValidateNestedProperties.class);
+               if ( formAnnotationInfoMap.size() != 1 ) {
+                  log.warn("Form used for proerty ", propertyName, " defines ", formAnnotationInfoMap.size(),
+                        " validations. Expecting exactly 1 for property 'bean'.");
+                  continue;
+               } else {
+                  AnnotationInfo validatedProperty = formAnnotationInfoMap.get("bean");
+                  if ( validatedProperty == null ) {
+                     log.warn("Form used for proerty ", propertyName, " does not define a validation for the property 'bean'.");
+                     continue;
                   } else {
-                     log.warn("Field name missing from nested @Validate: ", clazz, ", property ", propertyName);
+                     validates = validatedProperty.getAnnotation(ValidateNestedProperties.class).value();
                   }
+               }
+               //noinspection unchecked
+               ValidationMetadata validationMetadata = new ValidationMetadata(propertyName, (Class<Form<?>>)form);
+               for ( String additionalOn : additionalOns ) {
+                  validationMetadata.on(additionalOn);
+               }
+               meta.put(propertyName, validationMetadata);
+            } else {
+               additionalOns = new String[0];
+               if ( nestedAnnotation != null ) {
+                  validates = nestedAnnotation.value();
+               } else {
+                  validates = new Validate[0];
+               }
+            }
+
+            for ( Validate validate : validates ) {
+               if ( !"".equals(validate.field()) ) {
+                  String fullName = propertyName + '.' + validate.field();
+                  if ( meta.containsKey(fullName) ) {
+                     log.warn("More than one nestedAnnotation @Validate with same field name: " + validate.field() + " on property " + propertyName);
+                  }
+                  ValidationMetadata validationMetadata = new ValidationMetadata(fullName, validate);
+                  for ( String additionalOn : additionalOns ) {
+                     validationMetadata.on(additionalOn);
+                  }
+                  meta.put(fullName, validationMetadata);
+               } else {
+                  log.warn("Field name missing from nestedAnnotation @Validate: ", clazz, ", property ", propertyName);
                }
             }
          }

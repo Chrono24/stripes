@@ -19,6 +19,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -34,15 +35,19 @@ import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
 import net.sourceforge.stripes.action.DontBind;
 import net.sourceforge.stripes.action.DontValidate;
+import net.sourceforge.stripes.action.Form;
 import net.sourceforge.stripes.action.Resolution;
 import net.sourceforge.stripes.config.Configuration;
 import net.sourceforge.stripes.exception.StripesServletException;
 import net.sourceforge.stripes.util.CollectionUtil;
 import net.sourceforge.stripes.util.HtmlUtil;
 import net.sourceforge.stripes.util.Log;
+import net.sourceforge.stripes.util.bean.BeanUtil;
+import net.sourceforge.stripes.validation.FormValidation;
 import net.sourceforge.stripes.validation.ValidationError;
 import net.sourceforge.stripes.validation.ValidationErrorHandler;
 import net.sourceforge.stripes.validation.ValidationErrors;
+import net.sourceforge.stripes.validation.ValidationMetadata;
 import net.sourceforge.stripes.validation.ValidationMethod;
 import net.sourceforge.stripes.validation.ValidationState;
 
@@ -169,6 +174,38 @@ public class DispatcherHelper {
                         validation.invoke(bean);
                      }
                   }
+               }
+
+               Map<String, FormValidation> forms = context.getForms();
+               for ( Map.Entry<String, FormValidation> formEntry : forms.entrySet() ) {
+                  FormValidation formValidation = formEntry.getValue();
+                  //noinspection rawtypes
+                  Form form = formValidation.getForm();
+
+                  if ( !CollectionUtil.applies(formValidation.getOn().toArray(new String[0]), ctx.getActionBeanContext().getEventName()) ) {
+                     continue;
+                  }
+
+                  //noinspection unchecked
+                  form.setBean(BeanUtil.getPropertyValue(formEntry.getKey(), bean));
+
+                  Method[] formValidations = findCustomValidationMethods(form.getClass());
+                  for ( Method validation : formValidations ) {
+                     ValidationMethod ann = validation.getAnnotation(ValidationMethod.class);
+
+                     boolean run =
+                           (ann.when() == ValidationState.ALWAYS) || (ann.when() == ValidationState.DEFAULT && alwaysInvokeValidate) || errors.isEmpty();
+
+                     if ( run && applies(ann, ctx.getActionBeanContext().getEventName()) ) {
+                        Class<?>[] args = validation.getParameterTypes();
+                        if ( args.length == 1 && args[0].equals(ValidationErrors.class) ) {
+                           validation.invoke(form, errors);
+                        } else {
+                           validation.invoke(form);
+                        }
+                     }
+                  }
+
                }
 
                fillInValidationErrors(ctx);
@@ -459,7 +496,10 @@ public class DispatcherHelper {
             // Look up the ActionBean and set it on the context
             ActionBeanContext context = ctx.getActionBeanContext();
             ActionBean bean = StripesFilter.getConfiguration().getActionResolver().getActionBean(context);
+
             ctx.setActionBean(bean);
+
+            Class<? extends ActionBean> beanClass = bean.getClass();
 
             // Prefer the context from the resolved bean if it differs from the ExecutionContext
             if ( context != bean.getContext() ) {
@@ -471,6 +511,26 @@ public class DispatcherHelper {
                context = other;
                ctx.setActionBeanContext(context);
             }
+
+            Map<String, ValidationMetadata> validationMetadata = StripesFilter.getConfiguration()
+                  .getValidationMetadataProvider()
+                  .getValidationMetadata(beanClass);
+            Map<String, FormValidation> additionalForms = new HashMap<>();
+            for ( Map.Entry<String, ValidationMetadata> validationMetadataEntry : validationMetadata.entrySet() ) {
+               if ( validationMetadataEntry.getValue().getForm() == null ) {
+                  continue;
+               }
+
+               Form<?> form = StripesFilter.getConfiguration().getObjectFactory().newInstance(validationMetadataEntry.getValue().getForm());
+               form.setContext(context);
+
+               FormValidation formValidation = new FormValidation();
+               formValidation.setForm(form);
+               formValidation.setOn(validationMetadataEntry.getValue().on());
+
+               additionalForms.put(validationMetadataEntry.getKey(), formValidation);
+            }
+            ctx.setForms(additionalForms);
 
             // Then register it in the Request as THE ActionBean for this request
             HttpServletRequest request = context.getRequest();

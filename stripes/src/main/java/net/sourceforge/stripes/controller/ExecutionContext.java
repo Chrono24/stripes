@@ -17,11 +17,13 @@ package net.sourceforge.stripes.controller;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 
 import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
 import net.sourceforge.stripes.action.Resolution;
 import net.sourceforge.stripes.util.Log;
+import net.sourceforge.stripes.validation.FormValidation;
 
 
 /**
@@ -47,15 +49,16 @@ public class ExecutionContext {
       return currentContext.get();
    }
 
-   private Collection<Interceptor> _interceptors;
-   private Iterator<Interceptor>   _iterator;
-   private Interceptor             _target;
-   private ActionBeanContext       _actionBeanContext;
-   private ActionBean              _actionBean;
-   private Method                  _handler;
-   private Resolution              _resolution;
-   private LifecycleStage          _lifecycleStage;
-   private boolean                 _resolutionFromHandler = false;
+   private Collection<Interceptor>     _interceptors;
+   private Iterator<Interceptor>       _iterator;
+   private Interceptor                 _target;
+   private ActionBeanContext           _actionBeanContext;
+   private ActionBean                  _actionBean;
+   private Method                      _handler;
+   private Resolution                  _resolution;
+   private LifecycleStage              _lifecycleStage;
+   private boolean                     _resolutionFromHandler = false;
+   private Map<String, FormValidation> forms;
 
    /**
     * Retrieves the ActionBean instance that is associated with the current request. Available
@@ -73,6 +76,10 @@ public class ExecutionContext {
     */
    public ActionBeanContext getActionBeanContext() {
       return _actionBeanContext;
+   }
+
+   public Map<String, FormValidation> getForms() {
+      return forms;
    }
 
    /**
@@ -132,6 +139,10 @@ public class ExecutionContext {
    /** Sets the ActionBeanContext for the current request. */
    public void setActionBeanContext( ActionBeanContext actionBeanContext ) {
        _actionBeanContext = actionBeanContext;
+   }
+
+   public void setForms( Map<String, FormValidation> forms ) {
+      this.forms = forms;
    }
 
    /** Sets the handler method that will be invoked to process the current request. */
