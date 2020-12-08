@@ -517,11 +517,11 @@ public class DispatcherHelper {
                   .getValidationMetadata(beanClass);
             Map<String, FormValidation> additionalForms = new HashMap<>();
             for ( Map.Entry<String, ValidationMetadata> validationMetadataEntry : validationMetadata.entrySet() ) {
-               if ( validationMetadataEntry.getValue().getForm() == null ) {
+               if ( validationMetadataEntry.getValue().form() == null ) {
                   continue;
                }
 
-               Form<?> form = StripesFilter.getConfiguration().getObjectFactory().newInstance(validationMetadataEntry.getValue().getForm());
+               Form<?> form = StripesFilter.getConfiguration().getObjectFactory().newInstance(validationMetadataEntry.getValue().form());
                form.setContext(context);
 
                FormValidation formValidation = new FormValidation();

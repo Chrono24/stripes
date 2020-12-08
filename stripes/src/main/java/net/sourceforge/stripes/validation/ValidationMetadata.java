@@ -53,6 +53,8 @@ public class ValidationMetadata {
    @SuppressWarnings("rawtypes")
    private       Class<? extends TypeConverter> _converter;
    private       String                         _label;
+   private       boolean                        _rootBinding;
+   private       String                         _bindingPrefix;
 
    /**
     * Constructs a ValidationMetadata object for the specified property. Further constraints
@@ -113,6 +115,15 @@ public class ValidationMetadata {
       _form = form;
    }
 
+   public ValidationMetadata bindingPrefix( String bindingPrefix ) {
+      _bindingPrefix = bindingPrefix;
+      return this;
+   }
+
+   public String bindingPrefix() {
+      return _bindingPrefix;
+   }
+
    /** Sets the overridden TypeConveter to use to convert values. */
    @SuppressWarnings("rawtypes")
    public ValidationMetadata converter( Class<? extends TypeConverter> converter ) {
@@ -145,7 +156,7 @@ public class ValidationMetadata {
    /** Returns the overridden TypeConverter if there is one, or null. */
    public String expression() { return _expression; }
 
-   public Class<Form<?>> getForm() {
+   public Class<Form<?>> form() {
       return _form;
    }
 
@@ -255,6 +266,15 @@ public class ValidationMetadata {
    /** Returns true if the field is required when processing the specified event. */
    public boolean requiredOn( String event ) {
       return _required && !_ignore && ((_on == null) || (_onIsPositive && _on.contains(event)) || (!_onIsPositive && !_on.contains(event)));
+   }
+
+   public boolean rootBinding() {
+      return _rootBinding;
+   }
+
+   public ValidationMetadata rootBinding( boolean rootBinding ) {
+      _rootBinding = rootBinding;
+      return this;
    }
 
    /**

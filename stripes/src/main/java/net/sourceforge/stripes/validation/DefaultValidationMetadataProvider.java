@@ -269,10 +269,13 @@ public class DefaultValidationMetadataProvider implements ValidationMetadataProv
          if ( nestedAnnotation != null || formAnnotation != null ) {
             Validate[] validates;
             String[] additionalOns;
+            boolean rootBinding;
 
             if ( formAnnotation != null && formAnnotation.form() != Form.class ) {
                Class<?> form = formAnnotation.form();
+               rootBinding = formAnnotation.rootBinding();
                additionalOns = formAnnotation.on();
+
                //noinspection unchecked
                Map<String, AnnotationInfo> formAnnotationInfoMap = getAnnotationInfoMap(form, Validate.class, ValidateNestedProperties.class);
                if ( formAnnotationInfoMap.size() != 1 ) {
@@ -289,12 +292,13 @@ public class DefaultValidationMetadataProvider implements ValidationMetadataProv
                   }
                }
                //noinspection unchecked
-               ValidationMetadata validationMetadata = new ValidationMetadata(propertyName, (Class<Form<?>>)form);
+               ValidationMetadata validationMetadata = new ValidationMetadata(propertyName, (Class<Form<?>>)form).rootBinding(rootBinding);
                for ( String additionalOn : additionalOns ) {
                   validationMetadata.on(additionalOn);
                }
                meta.put(propertyName, validationMetadata);
             } else {
+               rootBinding = false;
                additionalOns = new String[0];
                if ( nestedAnnotation != null ) {
                   validates = nestedAnnotation.value();
@@ -305,15 +309,37 @@ public class DefaultValidationMetadataProvider implements ValidationMetadataProv
 
             for ( Validate validate : validates ) {
                if ( !"".equals(validate.field()) ) {
+                  String shortName;
+                  String bindingPrefix;
+                  if ( rootBinding ) {
+                     shortName = validate.field();
+                     bindingPrefix = propertyName + '.';
+                  } else {
+                     shortName = null;
+                     bindingPrefix = null;
+                  }
+
                   String fullName = propertyName + '.' + validate.field();
                   if ( meta.containsKey(fullName) ) {
-                     log.warn("More than one nestedAnnotation @Validate with same field name: " + validate.field() + " on property " + propertyName);
+                     log.warn("More than one nestedAnnotation @Validate with same field name: " + fullName + " on property " + propertyName);
                   }
                   ValidationMetadata validationMetadata = new ValidationMetadata(fullName, validate);
                   for ( String additionalOn : additionalOns ) {
                      validationMetadata.on(additionalOn);
                   }
                   meta.put(fullName, validationMetadata);
+
+                  if ( shortName != null ) {
+                     if ( meta.containsKey(shortName) ) {
+                        log.warn("More than one nestedAnnotation @Validate with same field name: " + shortName + " on property " + propertyName);
+                     }
+                     ValidationMetadata shortNameValidationMetadata = new ValidationMetadata(shortName, validate);
+                     shortNameValidationMetadata.rootBinding(true).bindingPrefix(bindingPrefix);
+                     for ( String additionalOn : additionalOns ) {
+                        shortNameValidationMetadata.on(additionalOn);
+                     }
+                     meta.put(shortName, shortNameValidationMetadata);
+                  }
                } else {
                   log.warn("Field name missing from nestedAnnotation @Validate: ", clazz, ", property ", propertyName);
                }

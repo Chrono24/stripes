@@ -39,4 +39,6 @@ public @interface ValidateForm {
 
    String[] on() default {};
 
+   boolean rootBinding() default false;
+
 }

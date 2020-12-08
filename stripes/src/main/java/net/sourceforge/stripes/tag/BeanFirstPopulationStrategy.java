@@ -14,12 +14,16 @@
  */
 package net.sourceforge.stripes.tag;
 
+import java.util.Map;
+
 import net.sourceforge.stripes.action.ActionBean;
+import net.sourceforge.stripes.controller.ParameterName;
 import net.sourceforge.stripes.controller.StripesConstants;
 import net.sourceforge.stripes.exception.StripesJspException;
 import net.sourceforge.stripes.util.Log;
 import net.sourceforge.stripes.util.bean.BeanUtil;
 import net.sourceforge.stripes.util.bean.ExpressionException;
+import net.sourceforge.stripes.validation.ValidationMetadata;
 
 
 /**
@@ -61,7 +65,19 @@ public class BeanFirstPopulationStrategy extends DefaultPopulationStrategy {
          boolean kaboom = false;
          if ( bean != null ) {
             try {
-               value = BeanUtil.getPropertyValue(tag.getName(), bean);
+               String propertyName = tag.getName();
+
+               Map<String, ValidationMetadata> validationInfos = getConfiguration().getValidationMetadataProvider().getValidationMetadata(bean.getClass());
+               ValidationMetadata validationInfo = validationInfos.get(new ParameterName(propertyName).getStrippedName());
+
+               String fullPropertyName;
+               if ( validationInfo != null && validationInfo.rootBinding() ) {
+                  fullPropertyName = validationInfo.bindingPrefix() + propertyName;
+               } else {
+                  fullPropertyName = propertyName;
+               }
+
+               value = BeanUtil.getPropertyValue(fullPropertyName, bean);
             }
             catch ( ExpressionException ee ) {
                if ( !StripesConstants.SPECIAL_URL_KEYS.contains(tag.getName()) ) {
