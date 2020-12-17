@@ -37,7 +37,8 @@ import net.sourceforge.stripes.action.Form;
 public class ValidationMetadata {
 
    private final String                         _property;
-   private       Class<Form<?>>                 _form;
+   private       Validate                       _validate;
+   private       Class<Form>                    _form;
    private       boolean                        _encrypted;
    private       boolean                        _required;
    private       boolean                        _trim;
@@ -77,6 +78,7 @@ public class ValidationMetadata {
    public ValidationMetadata( String property, Validate validate ) {
       // Copy over all the simple values
       _property = property;
+      _validate = validate;
       encrypted(validate.encrypted());
       required(validate.required());
       trim(validate.trim());
@@ -110,7 +112,7 @@ public class ValidationMetadata {
       }
    }
 
-   public ValidationMetadata( String property, Class<Form<?>> form ) {
+   public ValidationMetadata( String property, Class<Form> form ) {
       _property = property;
       _form = form;
    }
@@ -156,7 +158,7 @@ public class ValidationMetadata {
    /** Returns the overridden TypeConverter if there is one, or null. */
    public String expression() { return _expression; }
 
-   public Class<Form<?>> form() {
+   public Class<Form> form() {
       return _form;
    }
 
@@ -302,5 +304,9 @@ public class ValidationMetadata {
 
    /** Returns true if the field should be trimmed before validation or type conversion. */
    public boolean trim() { return _trim; }
+
+   public Validate validate() {
+      return _validate;
+   }
 }
 

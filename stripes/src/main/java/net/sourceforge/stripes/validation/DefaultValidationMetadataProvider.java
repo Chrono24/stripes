@@ -292,7 +292,7 @@ public class DefaultValidationMetadataProvider implements ValidationMetadataProv
                   }
                }
                //noinspection unchecked
-               ValidationMetadata validationMetadata = new ValidationMetadata(propertyName, (Class<Form<?>>)form).rootBinding(rootBinding);
+               ValidationMetadata validationMetadata = new ValidationMetadata(propertyName, (Class<Form>)form).rootBinding(rootBinding);
                for ( String additionalOn : additionalOns ) {
                   validationMetadata.on(additionalOn);
                }

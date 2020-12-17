@@ -8,10 +8,10 @@ import net.sourceforge.stripes.action.Form;
 
 public class FormValidation {
 
-   private Form<?>     form;
+   private Form        form;
    private Set<String> on;
 
-   public Form<?> getForm() {
+   public Form getForm() {
       return form;
    }
 
@@ -22,7 +22,7 @@ public class FormValidation {
       return on;
    }
 
-   public void setForm( Form<?> form ) {
+   public void setForm( Form form ) {
       this.form = form;
    }
 
