@@ -1,6 +1,6 @@
 package net.sourceforge.stripes.action;
 
-public interface SingleBeanForm<T> extends Form {
+public interface SingleBeanForm<T> extends ActionBean {
 
    T getBean();
 

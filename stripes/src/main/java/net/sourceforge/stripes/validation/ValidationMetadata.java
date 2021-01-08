@@ -18,7 +18,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import net.sourceforge.stripes.action.Form;
+import net.sourceforge.stripes.action.SingleBeanForm;
 
 
 /**
@@ -36,26 +36,34 @@ import net.sourceforge.stripes.action.Form;
  */
 public class ValidationMetadata {
 
-   private final String                         _property;
-   private       Validate                       _validate;
-   private       Class<Form>                    _form;
-   private       boolean                        _encrypted;
-   private       boolean                        _required;
-   private       boolean                        _trim;
-   private       Set<String>                    _on;
-   private       boolean                        _onIsPositive;
-   private       boolean                        _ignore;
-   private       Integer                        _minlength;
-   private       Integer                        _maxlength;
-   private       Double                         _minvalue;
-   private       Double                         _maxvalue;
-   private       Pattern                        _mask;
-   private       String                         _expression;
+   public static ValidationMetadata copy( String property, ValidationMetadata original ) {
+      if ( original.validate() != null ) {
+         return new ValidationMetadata(property, original.validate());
+      } else {
+         return new ValidationMetadata(property, original.form());
+      }
+   }
+
+   private final String                             _property;
+   private       Validate                           _validate;
+   private       Class<? extends SingleBeanForm<?>> _form;
+   private       boolean                            _encrypted;
+   private       boolean                            _required;
+   private       boolean                            _trim;
+   private       Set<String>                        _on;
+   private       boolean                            _onIsPositive;
+   private       boolean                            _ignore;
+   private       Integer                            _minlength;
+   private       Integer                            _maxlength;
+   private       Double                             _minvalue;
+   private       Double                             _maxvalue;
+   private       Pattern                            _mask;
+   private       String                             _expression;
    @SuppressWarnings("rawtypes")
-   private       Class<? extends TypeConverter> _converter;
-   private       String                         _label;
-   private       boolean                        _rootBinding;
-   private       String                         _bindingPrefix;
+   private       Class<? extends TypeConverter>     _converter;
+   private       String                             _label;
+   private       boolean                            _rootBinding;
+   private       String                             _bindingPrefix;
 
    /**
     * Constructs a ValidationMetadata object for the specified property. Further constraints
@@ -112,7 +120,7 @@ public class ValidationMetadata {
       }
    }
 
-   public ValidationMetadata( String property, Class<Form> form ) {
+   public ValidationMetadata( String property, Class<? extends SingleBeanForm<?>> form ) {
       _property = property;
       _form = form;
    }
@@ -158,7 +166,7 @@ public class ValidationMetadata {
    /** Returns the overridden TypeConverter if there is one, or null. */
    public String expression() { return _expression; }
 
-   public Class<Form> form() {
+   public Class<? extends SingleBeanForm<?>> form() {
       return _form;
    }
 

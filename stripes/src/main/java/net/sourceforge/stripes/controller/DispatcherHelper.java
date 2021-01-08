@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.WeakHashMap;
@@ -36,7 +37,6 @@ import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
 import net.sourceforge.stripes.action.DontBind;
 import net.sourceforge.stripes.action.DontValidate;
-import net.sourceforge.stripes.action.Form;
 import net.sourceforge.stripes.action.Resolution;
 import net.sourceforge.stripes.action.SingleBeanForm;
 import net.sourceforge.stripes.config.Configuration;
@@ -46,6 +46,7 @@ import net.sourceforge.stripes.util.HtmlUtil;
 import net.sourceforge.stripes.util.Log;
 import net.sourceforge.stripes.util.bean.BeanUtil;
 import net.sourceforge.stripes.validation.FormValidation;
+import net.sourceforge.stripes.validation.ValidateForm;
 import net.sourceforge.stripes.validation.ValidationError;
 import net.sourceforge.stripes.validation.ValidationErrorHandler;
 import net.sourceforge.stripes.validation.ValidationErrors;
@@ -168,15 +169,42 @@ public class DispatcherHelper {
                Map<String, FormValidation> forms = context.getForms();
                for ( Map.Entry<String, FormValidation> formEntry : forms.entrySet() ) {
                   FormValidation formValidation = formEntry.getValue();
-                  Form form = formValidation.getForm();
+                  SingleBeanForm<?> form = formValidation.getForm();
 
-                  if ( !CollectionUtil.applies(formValidation.getOn().toArray(new String[0]), ctx.getActionBeanContext().getEventName()) ) {
+                  Set<String> on = formValidation.getOn();
+                  if ( on != null && !CollectionUtil.applies(on.toArray(new String[0]), ctx.getActionBeanContext().getEventName()) ) {
                      continue;
                   }
 
-                  if ( form instanceof SingleBeanForm ) {
-                     //noinspection unchecked,rawtypes
-                     ((SingleBeanForm)form).setBean(BeanUtil.getPropertyValue(formEntry.getKey(), bean));
+                  //noinspection unchecked,rawtypes
+                  ((SingleBeanForm)form).setBean(BeanUtil.getPropertyValue(formEntry.getKey(), bean));
+
+                  Method[] formValidations = findCustomValidationMethods(form.getClass());
+                  doCustomValidation(ctx, form, formValidations, alwaysInvokeValidate, errors);
+               }
+
+               Map<String, ValidationMetadata> validationMetadata = StripesFilter.getConfiguration()
+                     .getValidationMetadataProvider()
+                     .getValidationMetadata(bean.getClass());
+
+               for ( Map.Entry<String, ValidationMetadata> validationMetadataEntry : validationMetadata.entrySet() ) {
+                  ValidationMetadata formValidation = validationMetadataEntry.getValue();
+                  Class<? extends SingleBeanForm<?>> formClass = formValidation.form();
+                  if ( formClass == null ) {
+                     continue;
+                  }
+                  if ( formClass != ValidateForm.AnyForm.class ) {
+                     continue;
+                  }
+
+                  Object form = BeanUtil.getPropertyValue(validationMetadataEntry.getKey(), bean);
+                  if ( form == null ) {
+                     continue;
+                  }
+
+                  Set<String> on = formValidation.on();
+                  if ( on != null && !CollectionUtil.applies(on.toArray(new String[0]), ctx.getActionBeanContext().getEventName()) ) {
+                     continue;
                   }
 
                   Method[] formValidations = findCustomValidationMethods(form.getClass());
@@ -285,7 +313,7 @@ public class DispatcherHelper {
     * @return a Method[] containing all methods marked as custom validations. May return
     *         an empty array, but never null.
     */
-   public static Method[] findCustomValidationMethods( Class<? extends ActionBean> type ) throws Exception {
+   public static Method[] findCustomValidationMethods( Class<?> type ) throws Exception {
       Method[] validations = null;
       WeakReference<Method[]> ref = customValidations.get(type);
       if ( ref != null ) {
@@ -490,13 +518,18 @@ public class DispatcherHelper {
             Map<String, ValidationMetadata> validationMetadata = StripesFilter.getConfiguration()
                   .getValidationMetadataProvider()
                   .getValidationMetadata(beanClass);
+
             Map<String, FormValidation> additionalForms = new HashMap<>();
             for ( Map.Entry<String, ValidationMetadata> validationMetadataEntry : validationMetadata.entrySet() ) {
-               if ( validationMetadataEntry.getValue().form() == null ) {
+               Class<? extends SingleBeanForm<?>> formClass = validationMetadataEntry.getValue().form();
+               if ( formClass == null ) {
+                  continue;
+               }
+               if ( formClass == ValidateForm.AnyForm.class ) {
                   continue;
                }
 
-               Form form = StripesFilter.getConfiguration().getObjectFactory().newInstance(validationMetadataEntry.getValue().form());
+               SingleBeanForm<?> form = StripesFilter.getConfiguration().getObjectFactory().newInstance(formClass);
                form.setContext(context);
 
                FormValidation formValidation = new FormValidation();
@@ -581,7 +614,7 @@ public class DispatcherHelper {
       }
    }
 
-   private static void doCustomValidation( ExecutionContext ctx, ActionBean bean, Method[] validations, boolean alwaysInvokeValidate, ValidationErrors errors )
+   private static void doCustomValidation( ExecutionContext ctx, Object bean, Method[] validations, boolean alwaysInvokeValidate, ValidationErrors errors )
          throws IllegalAccessException, InvocationTargetException {
       for ( Method validation : validations ) {
          ValidationMethod ann = validation.getAnnotation(ValidationMethod.class);

@@ -3,15 +3,15 @@ package net.sourceforge.stripes.validation;
 import java.util.Collections;
 import java.util.Set;
 
-import net.sourceforge.stripes.action.Form;
+import net.sourceforge.stripes.action.SingleBeanForm;
 
 
 public class FormValidation {
 
-   private Form        form;
-   private Set<String> on;
+   private SingleBeanForm<?> form;
+   private Set<String>       on;
 
-   public Form getForm() {
+   public SingleBeanForm<?> getForm() {
       return form;
    }
 
@@ -22,7 +22,7 @@ public class FormValidation {
       return on;
    }
 
-   public void setForm( Form form ) {
+   public void setForm( SingleBeanForm<?> form ) {
       this.form = form;
    }
 

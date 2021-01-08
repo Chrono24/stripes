@@ -29,6 +29,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.sourceforge.stripes.action.ActionBean;
+import net.sourceforge.stripes.action.ActionBeanContext;
+import net.sourceforge.stripes.controller.ExecutionContext;
 import net.sourceforge.stripes.controller.StripesFilter;
 import net.sourceforge.stripes.util.ReflectUtil;
 
@@ -60,8 +63,8 @@ public class PropertyExpressionEvaluation {
     * @param bean a non-null bean against which to evaluate the expression
     */
    public PropertyExpressionEvaluation( PropertyExpression expression, Object bean ) {
-       _expression = expression;
-       _bean = bean;
+      _expression = expression;
+      _bean = bean;
 
       for ( Node node = expression.getRootNode(); node != null; node = node.getNext() ) {
          NodeEvaluation evaluation = new NodeEvaluation(this, node);
@@ -686,6 +689,11 @@ public class PropertyExpressionEvaluation {
             return Array.newInstance(clazz.getComponentType(), 0);
          } else if ( clazz.isEnum() ) {
             return clazz.getEnumConstants()[0];
+         } else if ( ActionBean.class.isAssignableFrom(clazz) ) {
+            ActionBean form = (ActionBean)StripesFilter.getConfiguration().getObjectFactory().newInstance(clazz);
+            ActionBeanContext actionBeanContext = ExecutionContext.currentContext().getActionBeanContext();
+            form.setContext(actionBeanContext);
+            return form;
          } else {
             return StripesFilter.getConfiguration().getObjectFactory().newInstance(clazz);
          }

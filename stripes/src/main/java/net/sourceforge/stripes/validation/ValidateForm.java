@@ -20,7 +20,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import net.sourceforge.stripes.action.Form;
+import net.sourceforge.stripes.action.SingleBeanForm;
 
 
 /**
@@ -35,10 +35,12 @@ import net.sourceforge.stripes.action.Form;
 @Documented
 public @interface ValidateForm {
 
-   Class<?> form() default Form.class;
+   Class<? extends SingleBeanForm<?>> form() default AnyForm.class;
 
    String[] on() default {};
 
    boolean rootBinding() default false;
+
+   interface AnyForm extends SingleBeanForm<Object> {}
 
 }
