@@ -10,8 +10,8 @@ import net.sourceforge.stripes.action.ActionBean;
 import net.sourceforge.stripes.action.ActionBeanContext;
 import net.sourceforge.stripes.action.Resolution;
 import net.sourceforge.stripes.controller.StripesFilter;
-import net.sourceforge.stripes.extensions.MyIntegerTypeConverter;
-import net.sourceforge.stripes.extensions.MyStringTypeConverter;
+import net.sourceforge.stripes.extensions.MyDoubleIntegerTypeConverter;
+import net.sourceforge.stripes.extensions.MyUppercaseStringTypeConverter;
 import net.sourceforge.stripes.mock.MockRoundtrip;
 import net.sourceforge.stripes.util.CryptoUtil;
 
@@ -25,17 +25,17 @@ public class ValidationAnnotationsTest extends FilterEnabledTestBase implements 
 
    private ActionBeanContext context;
    @Validate(required = true, on = "validateRequiredAndIgnored", ignore = true)
-   private String first;
+   private String            first;
    @Validate(required = true, on = "validatePublicField")
-   public String publicField;
-   public Integer shouldBeDoubled;
+   public  String            publicField;
+   public  Integer           shouldBeDoubled;
    @Validate(converter = IntegerTypeConverter.class)
-   public Integer shouldNotBeDoubled;
-   public String shouldBeUpperCased;
+   public  Integer           shouldNotBeDoubled;
+   public  String            shouldBeUpperCased;
    @Validate(converter = StringTypeConverter.class)
-   public String shouldNotBeUpperCased;
+   public  String            shouldNotBeUpperCased;
    @Validate(encrypted = true)
-   public String encryptedParam;
+   public  String            encryptedParam;
 
    @Override
    public ActionBeanContext getContext() { return context; }
@@ -103,7 +103,7 @@ public class ValidationAnnotationsTest extends FilterEnabledTestBase implements 
             String.class, Locale.getDefault()).getClass();
       try {
          MockRoundtrip trip = new MockRoundtrip(getMockServletContext(), getClass());
-         factory.add(String.class, MyStringTypeConverter.class);
+         factory.add(String.class, MyUppercaseStringTypeConverter.class);
          trip.addParameter("shouldBeUpperCased", "test");
          trip.addParameter("shouldNotBeUpperCased", "test");
          trip.execute("validateTypeConverters");
@@ -131,7 +131,7 @@ public class ValidationAnnotationsTest extends FilterEnabledTestBase implements 
       TypeConverterFactory factory = StripesFilter.getConfiguration().getTypeConverterFactory();
       TypeConverter<?> tc = factory.getTypeConverter(Integer.class, locale);
       try {
-         factory.add(Integer.class, MyIntegerTypeConverter.class);
+         factory.add(Integer.class, MyDoubleIntegerTypeConverter.class);
          trip.addParameter("shouldBeDoubled", "42");
          trip.addParameter("shouldNotBeDoubled", "42");
          trip.execute("validateTypeConverters");
