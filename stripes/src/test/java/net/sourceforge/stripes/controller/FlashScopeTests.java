@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.jupiter.api.Test;
-import org.testng.Assert;
 
 import net.sourceforge.stripes.StripesTestFixture;
 import net.sourceforge.stripes.action.ActionBean;
@@ -104,10 +103,10 @@ public class FlashScopeTests implements ActionBean {
          ActionBeanContext tmp = trip3.getActionBean(getClass()).getContext();
          HttpServletResponse response = tmp.getResponse();
          HttpServletRequest request = tmp.getRequest();
-         Assert.assertNotNull(request);
-         Assert.assertNotNull(response);
-         Assert.assertTrue(Proxy.class.isAssignableFrom(response.getClass()));
-         Assert.assertEquals(StripesRequestWrapper.class, request.getClass());
+         assertThat(request).isNotNull();
+         assertThat(response).isNotNull();
+         assertThat(Proxy.class.isAssignableFrom(response.getClass())).isTrue();
+         assertThat(request.getClass()).isEqualTo(StripesRequestWrapper.class);
 
          Throwable throwable = catchThrowable(response::isCommitted);
 
