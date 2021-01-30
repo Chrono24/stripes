@@ -10,6 +10,7 @@ public class GenericType {
       return resolve(clazz, 0);
    }
 
+   @SuppressWarnings("unchecked")
    public static <T> Class<T> resolve( Type type, Class<?> clazz, int index ) {
       Type[] genericInterfaces = clazz.getGenericInterfaces();
 
@@ -17,7 +18,6 @@ public class GenericType {
          if ( ParameterizedType.class.isAssignableFrom(genericInterface.getClass()) ) {
             ParameterizedType parameterizedType = (ParameterizedType)genericInterface;
             if ( parameterizedType.getRawType() == type ) {
-               //noinspection unchecked
                return (Class<T>)(parameterizedType.getActualTypeArguments()[index]);
             }
          }
