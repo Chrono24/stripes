@@ -9,7 +9,6 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
-import org.testng.Assert;
 
 import net.sourceforge.stripes.FilterEnabledTestBase;
 import net.sourceforge.stripes.action.ActionBean;
@@ -62,7 +61,7 @@ public class MapBindingTests extends FilterEnabledTestBase implements ActionBean
       Date key = cal.getTime();
 
       MapBindingTests bean = trip.getActionBean(MapBindingTests.class);
-      Assert.assertNotNull(bean.getMapDateDate().get(key));
+      assertThat(bean.getMapDateDate()).containsKey(key);
    }
 
    @Test
