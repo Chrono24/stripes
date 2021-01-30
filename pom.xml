@@ -15,6 +15,7 @@
 	<modules>
 		<module>stripes</module>
 		<module>examples</module>
+		<module>test-report</module>
 		<module>dist</module>
 	</modules>
 
@@ -54,6 +55,7 @@
 	<properties>
 		<spring.version>5.0.8.RELEASE</spring.version>
 		<junit.jupiter.version>5.7.0</junit.jupiter.version>
+		<jacoco.version>0.8.5</jacoco.version>
 	</properties>
 
 	<dependencyManagement>
@@ -293,6 +295,31 @@
 			<modules>
 				<module>webtests</module>
 			</modules>
+		</profile>
+
+		<!-- Code coverage -->
+		<profile>
+			<id>coverage</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<version>${jacoco.version}</version>
+						<executions>
+							<execution>
+								<id>prepare-agent</id>
+								<goals>
+									<goal>prepare-agent</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 	</profiles>
 </project>
