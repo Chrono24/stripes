@@ -1,332 +1,337 @@
 package net.sourceforge.stripes.util.bean;
 
-import net.sourceforge.stripes.FilterEnabledTestBase;
-import net.sourceforge.stripes.StripesTestFixture;
-import net.sourceforge.stripes.mock.MockServletContext;
-import net.sourceforge.stripes.test.TestActionBean;
-import net.sourceforge.stripes.test.TestBean;
-import net.sourceforge.stripes.test.TestEnum;
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
-/**
- * 
- */
+import org.junit.jupiter.api.Test;
+
+import net.sourceforge.stripes.FilterEnabledTestBase;
+import net.sourceforge.stripes.testbeans.TestActionBean;
+import net.sourceforge.stripes.testbeans.TestBean;
+import net.sourceforge.stripes.testbeans.TestEnum;
+
+
 public class PropertyExpressionEvaluationTests extends FilterEnabledTestBase {
 
-    @Test(groups="fast")
-    public void testGetBasicPropertyType() {
-        PropertyExpression expr = PropertyExpression.getExpression("singleLong");
-        PropertyExpressionEvaluation eval = new PropertyExpressionEvaluation(expr, new TestActionBean());
-        Class<?> type = eval.getType();
-        Assert.assertEquals(type, Long.class);
-    }
+   /**
+    * Fix for a problem whereby in certain circumstances the PropertyExpressionEvaluation
+    * would not fall back to looking at instance information to figure out the type info.
+    */
+   @Test
+   public void testFallBackToInstanceInfo() {
+      Map<String, TestBean> map = new HashMap<>();
+      map.put("foo", new TestBean());
+      map.get("foo").setStringProperty("bar");
+      Map.Entry<String, TestBean> entry = map.entrySet().iterator().next();
+      String value = (String)BeanUtil.getPropertyValue("value.stringProperty", entry);
+      assertThat(value).isEqualTo("bar");
+   }
 
-    @Test(groups="fast")
-    public void testGetPropertyTypeWithPropertyAccess() {
-        PropertyExpression expr = PropertyExpression.getExpression("publicLong");
-        PropertyExpressionEvaluation eval = new PropertyExpressionEvaluation(expr, new TestActionBean());
-        Class<?> type = eval.getType();
-        Assert.assertEquals(type, Long.class);
-    }
+   @Test
+   public void testGetBasicPropertyType() {
+      PropertyExpression expr = PropertyExpression.getExpression("singleLong");
+      PropertyExpressionEvaluation eval = new PropertyExpressionEvaluation(expr, new TestActionBean());
+      assertThat(eval.getType()).isSameAs(Long.class);
+   }
 
-    @Test(groups="fast")
-    public void testGetPropertyTypeForListOfLongs() {
-        PropertyExpression expr = PropertyExpression.getExpression("listOfLongs[17]");
-        PropertyExpressionEvaluation eval = new PropertyExpressionEvaluation(expr, new TestActionBean());
-        Class<?> type = eval.getType();
-        Assert.assertEquals(type, Long.class);
-    }
+   @Test
+   public void testGetNestedProperties() {
+      TestBean root = new TestBean();
+      TestBean nested = new TestBean();
+      root.setNestedBean(nested);
+      nested.setStringProperty("testValue");
+      nested.setIntProperty(77);
+      nested.setLongProperty(777L);
+      nested.setEnumProperty(TestEnum.Seventh);
 
-    @Test(groups="fast")
-    public void testGetPropertyTypeForReadThroughList() {
-        PropertyExpression expr = PropertyExpression.getExpression("listOfBeans[3].enumProperty");
-        PropertyExpressionEvaluation eval = new PropertyExpressionEvaluation(expr, new TestActionBean());
-        Class<?> type = eval.getType();
-        Assert.assertEquals(type, TestEnum.class);
-    }
+      assertThat(BeanUtil.getPropertyValue("nestedBean.stringProperty", root)).isEqualTo("testValue");
+      assertThat(BeanUtil.getPropertyValue("nestedBean.intProperty", root)).isEqualTo(77);
+      assertThat(BeanUtil.getPropertyValue("nestedBean.longProperty", root)).isEqualTo(777L);
+      assertThat(BeanUtil.getPropertyValue("nestedBean.enumProperty", root)).isEqualTo(TestEnum.Seventh);
+   }
 
-    @Test(groups="fast")
-    public void testGetPropertyTypeWithBackToBackMapIndexing() {
-        PropertyExpression expr = PropertyExpression.getExpression("nestedMap['foo']['bar']");
-        PropertyExpressionEvaluation eval = new PropertyExpressionEvaluation(expr, new TestBean());
-        Class<?> type = eval.getType();
-        Assert.assertEquals(type, Boolean.class);
-    }
+   @Test
+   public void testGetNullProperties() {
+      TestBean root = new TestBean();
 
-    @Test(groups="fast")
-    public void testGetPropertyTypeWithBackToBackListArrayIndexing() {
-        PropertyExpression expr = PropertyExpression.getExpression("genericArray[1][0]");
-        PropertyExpressionEvaluation eval = new PropertyExpressionEvaluation(expr, new TestBean());
-        Class<?> type = eval.getType();
-        Assert.assertEquals(type, Float.class);
-    }
+      // Test simple and nested props, leaving out primitives
+      assertThat(BeanUtil.getPropertyValue("stringProperty", root)).isNull();
+      assertThat(BeanUtil.getPropertyValue("longProperty", root)).isNull();
+      assertThat(BeanUtil.getPropertyValue("enumProperty", root)).isNull();
+      assertThat(BeanUtil.getPropertyValue("nestedBean.stringProperty", root)).isNull();
+      assertThat(BeanUtil.getPropertyValue("nestedBean.longProperty", root)).isNull();
+      assertThat(BeanUtil.getPropertyValue("nestedBean.enumProperty", root)).isNull();
 
-    //////////////////////////////////////////////////////////////////////////////////////
+      assertThat(BeanUtil.getPropertyValue("stringArray", root)).isNull();
+      assertThat(BeanUtil.getPropertyValue("stringList[7]", root)).isNull();
+      assertThat(BeanUtil.getPropertyValue("stringList", root)).isNull();
+      assertThat(BeanUtil.getPropertyValue("stringMap['seven']", root)).isNull();
+      assertThat(BeanUtil.getPropertyValue("stringMap", root)).isNull();
+   }
 
-    @Test(groups="fast")
-    public void testGetSimpleProperties() throws Exception {
-        TestBean root = new TestBean();
-        root.setStringProperty("testValue");
-        root.setIntProperty(77);
-        root.setLongProperty(777l);
-        root.setEnumProperty(TestEnum.Seventh);
+   @Test
+   public void testGetPropertyTypeForListOfLongs() {
+      PropertyExpression expr = PropertyExpression.getExpression("listOfLongs[17]");
+      PropertyExpressionEvaluation eval = new PropertyExpressionEvaluation(expr, new TestActionBean());
+      assertThat(eval.getType()).isSameAs(Long.class);
+   }
 
-        Assert.assertEquals("testValue", BeanUtil.getPropertyValue("stringProperty", root));
-        Assert.assertEquals(77, BeanUtil.getPropertyValue("intProperty", root));
-        Assert.assertEquals(777l, BeanUtil.getPropertyValue("longProperty", root));
-        Assert.assertEquals(TestEnum.Seventh, BeanUtil.getPropertyValue("enumProperty", root));
-    }
+   @Test
+   public void testGetPropertyTypeForReadThroughList() {
+      PropertyExpression expr = PropertyExpression.getExpression("listOfBeans[3].enumProperty");
+      PropertyExpressionEvaluation eval = new PropertyExpressionEvaluation(expr, new TestActionBean());
+      assertThat(eval.getType()).isSameAs(TestEnum.class);
+   }
 
-    @Test(groups="fast")
-    public void testGetNestedProperties() throws Exception {
-        TestBean root = new TestBean();
-        TestBean nested = new TestBean();
-        root.setNestedBean(nested);
-        nested.setStringProperty("testValue");
-        nested.setIntProperty(77);
-        nested.setLongProperty(777l);
-        nested.setEnumProperty(TestEnum.Seventh);
+   @Test
+   public void testGetPropertyTypeWithBackToBackListArrayIndexing() {
+      PropertyExpression expr = PropertyExpression.getExpression("genericArray[1][0]");
+      PropertyExpressionEvaluation eval = new PropertyExpressionEvaluation(expr, new TestBean());
+      assertThat(eval.getType()).isSameAs(Float.class);
+   }
 
-        Assert.assertEquals("testValue", BeanUtil.getPropertyValue("nestedBean.stringProperty", root));
-        Assert.assertEquals(77, BeanUtil.getPropertyValue("nestedBean.intProperty", root));
-        Assert.assertEquals(777l, BeanUtil.getPropertyValue("nestedBean.longProperty", root));
-        Assert.assertEquals(TestEnum.Seventh, BeanUtil.getPropertyValue("nestedBean.enumProperty", root));
-    }
+   @Test
+   public void testGetPropertyTypeWithBackToBackMapIndexing() {
+      PropertyExpression expr = PropertyExpression.getExpression("nestedMap['foo']['bar']");
+      PropertyExpressionEvaluation eval = new PropertyExpressionEvaluation(expr, new TestBean());
+      assertThat(eval.getType()).isSameAs(Boolean.class);
+   }
 
-    @Test(groups="fast")
-    public void testGetNullProperties() throws Exception {
-        TestBean root = new TestBean();
+   @Test
+   public void testGetPropertyTypeWithPropertyAccess() {
+      PropertyExpression expr = PropertyExpression.getExpression("publicLong");
+      PropertyExpressionEvaluation eval = new PropertyExpressionEvaluation(expr, new TestActionBean());
+      assertThat(eval.getType()).isSameAs(Long.class);
+   }
 
-        // Test simple and nested props, leaving out primitives
-        Assert.assertNull( BeanUtil.getPropertyValue("stringProperty" , root) );
-        Assert.assertNull( BeanUtil.getPropertyValue("longProperty" , root) );
-        Assert.assertNull( BeanUtil.getPropertyValue("enumProperty" , root) );
-        Assert.assertNull( BeanUtil.getPropertyValue("nestedBean.stringProperty" , root) );
-        Assert.assertNull( BeanUtil.getPropertyValue("nestedBean.longProperty" , root) );
-        Assert.assertNull( BeanUtil.getPropertyValue("nestedBean.enumProperty" , root) );
+   @Test
+   public void testGetSimpleProperties() {
+      TestBean root = new TestBean();
+      root.setStringProperty("testValue");
+      root.setIntProperty(77);
+      root.setLongProperty(777L);
+      root.setEnumProperty(TestEnum.Seventh);
 
-        Assert.assertNull( BeanUtil.getPropertyValue("stringArray", root));
-        Assert.assertNull( BeanUtil.getPropertyValue("stringList[7]", root));
-        Assert.assertNull( BeanUtil.getPropertyValue("stringList", root));
-        Assert.assertNull( BeanUtil.getPropertyValue("stringMap['seven']", root));
-        Assert.assertNull( BeanUtil.getPropertyValue("stringMap", root));
-    }
+      assertThat(BeanUtil.getPropertyValue("stringProperty", root)).isEqualTo("testValue");
+      assertThat(BeanUtil.getPropertyValue("intProperty", root)).isEqualTo(77);
+      assertThat(BeanUtil.getPropertyValue("longProperty", root)).isEqualTo(777L);
+      assertThat(BeanUtil.getPropertyValue("enumProperty", root)).isEqualTo(TestEnum.Seventh);
+   }
 
-    @Test(groups="fast")
-    public void testSetThenGetSimpleProperties() throws Exception {
-        TestBean root = new TestBean();
+   @Test
+   public void testGnarlyInheritanceAndGenerics() {
+      Owner owner = new Owner();
+      Foo<SubWombat> foo = new Foo<>();
+      owner.setFoo(foo);
+      foo.setWombat(new SubWombat());
 
-        BeanUtil.setPropertyValue("stringProperty", root, "testValue");
-        BeanUtil.setPropertyValue("intProperty",    root, 77);
-        BeanUtil.setPropertyValue("longProperty",   root, 777l);
-        BeanUtil.setPropertyValue("enumProperty",   root, TestEnum.Seventh);
+      String value = (String)BeanUtil.getPropertyValue("foo.wombat.name", owner);
 
-        Assert.assertEquals("testValue", root.getStringProperty());
-        Assert.assertEquals("testValue", BeanUtil.getPropertyValue("stringProperty", root));
+      assertThat(value).isEqualTo("SubWombat");
+   }
 
-        Assert.assertEquals(77, root.getIntProperty());
-        Assert.assertEquals(77, BeanUtil.getPropertyValue("intProperty", root));
+   @Test
+   public void testListProperties() {
+      TestBean root = new TestBean();
 
-        Assert.assertEquals(new Long(777l), root.getLongProperty());
-        Assert.assertEquals(777l, BeanUtil.getPropertyValue("longProperty", root));
+      BeanUtil.setPropertyValue("beanList[3]", root, new TestBean());
+      assertThat(BeanUtil.getPropertyValue("beanList[0]", root)).isNull();
+      assertThat(BeanUtil.getPropertyValue("beanList[1]", root)).isNull();
+      assertThat(BeanUtil.getPropertyValue("beanList[2]", root)).isNull();
+      assertThat(BeanUtil.getPropertyValue("beanList[3]", root)).isNotNull();
+      assertThat(BeanUtil.getPropertyValue("beanList[4]", root)).isNull();
 
-        Assert.assertEquals(TestEnum.Seventh, root.getEnumProperty());
-        Assert.assertEquals(TestEnum.Seventh, BeanUtil.getPropertyValue("enumProperty", root));
+      BeanUtil.setPropertyValue("beanList[3].stringProperty", root, "testValue");
+      assertThat(root.getBeanList().get(3).getStringProperty()).isEqualTo("testValue");
 
-    }
+      BeanUtil.setPropertyValue("stringList[1]", root, "testValue");
+      BeanUtil.setPropertyValue("stringList[5]", root, "testValue");
+      BeanUtil.setPropertyValue("stringList[9]", root, "testValue");
+      BeanUtil.setPropertyValue("stringList[7]", root, "testValue");
+      BeanUtil.setPropertyValue("stringList[3]", root, "testValue");
 
-    @Test(groups="fast")
-    public void testSetThenGetNestedProperties() throws Exception {
-        TestBean root = new TestBean();
+      for ( int i = 0; i < 10; ++i ) {
+         if ( i % 2 == 0 ) {
+            assertThat(root.getStringList().get(i)).describedAs("String list index " + i + " should be null.").isNull();
+         } else {
+            assertThat(root.getStringList().get(i)).describedAs("String list index " + i + " should be 'testValue'.").isEqualTo("testValue");
+         }
+      }
+   }
 
-        BeanUtil.setPropertyValue("nestedBean.stringProperty", root, "testValue");
-        BeanUtil.setPropertyValue("nestedBean.intProperty",    root, 77);
-        BeanUtil.setPropertyValue("nestedBean.longProperty",   root, 777l);
-        BeanUtil.setPropertyValue("nestedBean.enumProperty",   root, TestEnum.Seventh);
+   /**
+    * Tests a bug whereby the Introspector/PropertyDescriptor returns inaccessible
+    * methods for getKey() and getValue() on all the JDK implementations of Map. A general
+    * fix has been implmented to work up the chain and find an accessible method to invoke.
+    */
+   @Test
+   public void testMapEntryPropertyDescriptorBug() {
+      Map<String, String> map = new HashMap<>();
+      map.put("key", "value");
+      Map.Entry<String, String> entry = map.entrySet().iterator().next();
+      String value = (String)BeanUtil.getPropertyValue("value", entry);
+      assertThat(value).isEqualTo("value");
+   }
 
-        Assert.assertEquals("testValue", root.getNestedBean().getStringProperty());
-        Assert.assertEquals("testValue", BeanUtil.getPropertyValue("nestedBean.stringProperty", root));
+   @Test
+   public void testMapProperties() {
+      TestBean root = new TestBean();
 
-        Assert.assertEquals(77, root.getNestedBean().getIntProperty());
-        Assert.assertEquals(77, BeanUtil.getPropertyValue("nestedBean.intProperty", root));
+      assertThat(BeanUtil.getPropertyValue("stringMap['foo']", root)).isNull();
+      assertThat(BeanUtil.getPropertyValue("stringMap['bar']", root)).isNull();
+      assertThat(BeanUtil.getPropertyValue("stringMap['testValue']", root)).isNull();
 
-        Assert.assertEquals(new Long(777l), root.getNestedBean().getLongProperty());
-        Assert.assertEquals(777l, BeanUtil.getPropertyValue("nestedBean.longProperty", root));
+      assertThat(BeanUtil.getPropertyValue("beanMap['foo']", root)).isNull();
+      assertThat(BeanUtil.getPropertyValue("beanMap['bar']", root)).isNull();
+      assertThat(BeanUtil.getPropertyValue("beanMap['testValue']", root)).isNull();
 
-        Assert.assertEquals(TestEnum.Seventh, root.getNestedBean().getEnumProperty());
-        Assert.assertEquals(TestEnum.Seventh, BeanUtil.getPropertyValue("nestedBean.enumProperty", root));
+      assertThat(BeanUtil.getPropertyValue("beanMap['foo'].longProperty", root)).isNull();
+      assertThat(BeanUtil.getPropertyValue("beanMap['bar'].stringProperty", root)).isNull();
+      assertThat(BeanUtil.getPropertyValue("beanMap['testValue'].enumProperty", root)).isNull();
 
-        Assert.assertTrue(root.getNestedBean() == BeanUtil.getPropertyValue("nestedBean", root));
-    }
+      BeanUtil.setPropertyValue("stringMap['testKey']", root, "testValue");
+      assertThat(root.getStringMap().get("testKey")).isEqualTo("testValue");
 
-    @Test(groups="fast")
-    public void testListProperties() throws Exception {
-        TestBean root = new TestBean();
+      BeanUtil.setPropertyValue("beanMap['testKey'].enumProperty", root, TestEnum.Fifth);
+      assertThat(root.getBeanMap()).isNotNull();
+      assertThat(root.getBeanMap().get("testKey")).isNotNull();
+      assertThat(root.getBeanMap().get("testKey").getEnumProperty()).isEqualTo(TestEnum.Fifth);
+   }
 
-        BeanUtil.setPropertyValue("beanList[3]", root, new TestBean());
-        Assert.assertNull( BeanUtil.getPropertyValue("beanList[0]", root) );
-        Assert.assertNull( BeanUtil.getPropertyValue("beanList[1]", root) );
-        Assert.assertNull( BeanUtil.getPropertyValue("beanList[2]", root) );
-        Assert.assertNotNull( BeanUtil.getPropertyValue("beanList[3]", root) );
-        Assert.assertNull( BeanUtil.getPropertyValue("beanList[4]", root) );
+   @Test
+   public void testSetNull() {
+      TestBean root = new TestBean();
 
-        BeanUtil.setPropertyValue("beanList[3].stringProperty", root, "testValue");
-        Assert.assertEquals("testValue", root.getBeanList().get(3).getStringProperty());
+      // Try setting a null on a null nested property and make sure the nested
+      // property doesn't get instantiated
+      assertThat(root.getNestedBean()).isNull();
+      BeanUtil.setPropertyToNull("nestedBean.stringProperty", root);
+      assertThat(root.getNestedBean()).isNull();
 
-        BeanUtil.setPropertyValue("stringList[1]", root, "testValue");
-        BeanUtil.setPropertyValue("stringList[5]", root, "testValue");
-        BeanUtil.setPropertyValue("stringList[9]", root, "testValue");
-        BeanUtil.setPropertyValue("stringList[7]", root, "testValue");
-        BeanUtil.setPropertyValue("stringList[3]", root, "testValue");
+      // Now set the property set the nest bean and do it again
+      root.setNestedBean(new TestBean());
+      BeanUtil.setPropertyToNull("nestedBean.stringProperty", root);
+      assertThat(root.getNestedBean()).isNotNull();
+      assertThat(root.getNestedBean().getStringProperty()).isNull();
 
-        for (int i=0; i<10; ++i) {
-            if (i%2 == 0) {
-                Assert.assertNull(root.getStringList().get(i),
-                                  "String list index " + i + " should be null.");
-            }
-            else {
-                Assert.assertEquals("testValue", root.getStringList().get(i),
-                                    "String list index " + i + " should be 'testValue'.");
-            }
-        }
-    }
+      // Now set the string property and null it out for real
+      root.getNestedBean().setStringProperty("Definitely Not Null");
+      BeanUtil.setPropertyToNull("nestedBean.stringProperty", root);
+      assertThat(root.getNestedBean()).isNotNull();
+      assertThat(root.getNestedBean().getStringProperty()).isNull();
 
-    @Test(groups="fast")
-    public void testMapProperties() throws Exception {
-        TestBean root = new TestBean();
+      // Now use setNullValue to trim the nestedBean
+      BeanUtil.setPropertyToNull("nestedBean", root);
+      assertThat(root.getNestedBean()).isNull();
 
-        Assert.assertNull( BeanUtil.getPropertyValue("stringMap['foo']", root) );
-        Assert.assertNull( BeanUtil.getPropertyValue("stringMap['bar']", root) );
-        Assert.assertNull( BeanUtil.getPropertyValue("stringMap['testValue']", root) );
+      // Now try some nulling out of indexed properties
+      root.setStringList(new ArrayList<>());
+      root.getStringList().add("foo");
+      root.getStringList().add("bar");
+      assertThat(root.getStringList().get(0)).isNotNull();
+      assertThat(root.getStringList().get(1)).isNotNull();
+      BeanUtil.setPropertyToNull("stringList[1]", root);
+      assertThat(root.getStringList().get(0)).isNotNull();
+      assertThat(root.getStringList().get(1)).isNull();
+   }
 
-        Assert.assertNull( BeanUtil.getPropertyValue("beanMap['foo']", root) );
-        Assert.assertNull( BeanUtil.getPropertyValue("beanMap['bar']", root) );
-        Assert.assertNull( BeanUtil.getPropertyValue("beanMap['testValue']", root) );
+   @Test
+   public void testSetNullPrimitives() {
+      TestBean root = new TestBean();
+      root.setBooleanProperty(true);
+      root.setIntProperty(77);
 
-        Assert.assertNull( BeanUtil.getPropertyValue("beanMap['foo'].longProperty", root) );
-        Assert.assertNull( BeanUtil.getPropertyValue("beanMap['bar'].stringProperty", root) );
-        Assert.assertNull( BeanUtil.getPropertyValue("beanMap['testValue'].enumProperty", root) );
+      assertThat(root.getIntProperty()).isEqualTo(77);
+      assertThat(root.isBooleanProperty()).isTrue();
 
-        BeanUtil.setPropertyValue("stringMap['testKey']", root, "testValue");
-        Assert.assertEquals("testValue", root.getStringMap().get("testKey"));
+      BeanUtil.setPropertyToNull("intProperty", root);
+      BeanUtil.setPropertyToNull("booleanProperty", root);
 
-        BeanUtil.setPropertyValue("beanMap['testKey'].enumProperty", root, TestEnum.Fifth);
-        Assert.assertNotNull(root.getBeanMap());
-        Assert.assertNotNull(root.getBeanMap().get("testKey"));
-        Assert.assertEquals(TestEnum.Fifth, root.getBeanMap().get("testKey").getEnumProperty());
-    }
+      assertThat(root.getIntProperty()).isEqualTo(0);
+      assertThat(root.isBooleanProperty()).isFalse();
+   }
 
-    @Test(groups="fast")
-    public void testSetNull() throws Exception {
-        TestBean root = new TestBean();
+   @Test
+   public void testSetThenGetNestedProperties() {
+      TestBean root = new TestBean();
 
-        // Try setting a null on a null nested property and make sure the nested
-        // property doesn't get instantiated
-        Assert.assertNull(root.getNestedBean());
-        BeanUtil.setPropertyToNull("nestedBean.stringProperty", root);
-        Assert.assertNull(root.getNestedBean());
+      BeanUtil.setPropertyValue("nestedBean.stringProperty", root, "testValue");
+      BeanUtil.setPropertyValue("nestedBean.intProperty", root, 77);
+      BeanUtil.setPropertyValue("nestedBean.longProperty", root, 777L);
+      BeanUtil.setPropertyValue("nestedBean.enumProperty", root, TestEnum.Seventh);
 
-        // Now set the property set the nest bean and do it again
-        root.setNestedBean( new TestBean() );
-        BeanUtil.setPropertyToNull("nestedBean.stringProperty", root);
-        Assert.assertNotNull(root.getNestedBean());
-        Assert.assertNull(root.getNestedBean().getStringProperty());
+      assertThat(root.getNestedBean().getStringProperty()).isEqualTo("testValue");
+      assertThat(BeanUtil.getPropertyValue("nestedBean.stringProperty", root)).isEqualTo("testValue");
 
-        // Now set the string property and null it out for real
-        root.getNestedBean().setStringProperty("Definitely Not Null");
-        BeanUtil.setPropertyToNull("nestedBean.stringProperty", root);
-        Assert.assertNotNull(root.getNestedBean());
-        Assert.assertNull(root.getNestedBean().getStringProperty());
+      assertThat(root.getNestedBean().getIntProperty()).isEqualTo(77);
+      assertThat(BeanUtil.getPropertyValue("nestedBean.intProperty", root)).isEqualTo(77);
 
-        // Now use setNullValue to trim the nestedBean
-        BeanUtil.setPropertyToNull("nestedBean", root);
-        Assert.assertNull(root.getNestedBean());
+      assertThat(root.getNestedBean().getLongProperty()).isEqualTo(777L);
+      assertThat(BeanUtil.getPropertyValue("nestedBean.longProperty", root)).isEqualTo(777L);
 
-        // Now try some nulling out of indexed properties
-        root.setStringList(new ArrayList<String>());
-        root.getStringList().add("foo");
-        root.getStringList().add("bar");
-        Assert.assertNotNull(root.getStringList().get(0));
-        Assert.assertNotNull(root.getStringList().get(1));
-        BeanUtil.setPropertyToNull("stringList[1]", root);
-        Assert.assertNotNull(root.getStringList().get(0));
-        Assert.assertNull(root.getStringList().get(1));
-    }
+      assertThat(root.getNestedBean().getEnumProperty()).isEqualTo(TestEnum.Seventh);
+      assertThat(BeanUtil.getPropertyValue("nestedBean.enumProperty", root)).isEqualTo(TestEnum.Seventh);
 
-    @Test(groups="fast")
-    public void testSetNullPrimitives() throws Exception {
-        TestBean root = new TestBean();
-        root.setBooleanProperty(true);
-        root.setIntProperty(77);
+      assertThat(BeanUtil.getPropertyValue("nestedBean", root)).isSameAs(root.getNestedBean());
+   }
 
-        Assert.assertEquals(77, root.getIntProperty());
-        Assert.assertEquals(true, root.isBooleanProperty());
+   @Test
+   public void testSetThenGetSimpleProperties() {
+      TestBean root = new TestBean();
 
-        BeanUtil.setPropertyToNull("intProperty", root);
-        BeanUtil.setPropertyToNull("booleanProperty", root);
+      BeanUtil.setPropertyValue("stringProperty", root, "testValue");
+      BeanUtil.setPropertyValue("intProperty", root, 77);
+      BeanUtil.setPropertyValue("longProperty", root, 777L);
+      BeanUtil.setPropertyValue("enumProperty", root, TestEnum.Seventh);
 
-        Assert.assertEquals(0, root.getIntProperty());
-        Assert.assertEquals(false, root.isBooleanProperty());
-    }
+      assertThat(root.getStringProperty()).isEqualTo("testValue");
+      assertThat(BeanUtil.getPropertyValue("stringProperty", root)).isEqualTo("testValue");
 
-    /**
-     * Tests a bug whereby the Introspector/PropertyDescriptor returns inaccessible
-     * methods for getKey() and getValue() on all the JDK implementations of Map. A general
-     * fix has been implmented to work up the chain and find an accessible method to invoke.
-     */
-    @Test(groups="fast")
-    public void testMapEntryPropertyDescriptorBug() throws Exception {
-        Map<String,String> map = new HashMap<String,String>();
-        map.put("key", "value");
-        Map.Entry<String,String> entry = map.entrySet().iterator().next();
-        String value = (String) BeanUtil.getPropertyValue("value", entry);
-        Assert.assertEquals(value, "value");
-    }
+      assertThat(root.getIntProperty()).isEqualTo(77);
+      assertThat(BeanUtil.getPropertyValue("intProperty", root)).isEqualTo(77);
 
-    /**
-     * Fix for a problem whereby in certain circumstances the PropertyExpressionEvaluation
-     * would not fall back to looking at instance information to figure out the type info.
-     */
-    @Test(groups="fast")
-    public void testFallBackToInstanceInfo() throws Exception {
-        Map<String,TestBean> map = new HashMap<String,TestBean>();
-        map.put("foo", new TestBean());
-        map.get("foo").setStringProperty("bar");
-        Map.Entry<String,TestBean> entry = map.entrySet().iterator().next();
-        String value = (String) BeanUtil.getPropertyValue("value.stringProperty", entry);
-        Assert.assertEquals(value, "bar");
-    }
+      assertThat(root.getLongProperty()).isEqualTo(777L);
+      assertThat(BeanUtil.getPropertyValue("longProperty", root)).isEqualTo(777L);
 
-    /** Following classes are part of an inheritance torture test! */
-    public static class Wombat { public String getName() { return "Wombat"; } }
-    public static class SubWombat extends Wombat { @Override public String getName() { return "SubWombat"; } }
-    public static class Foo<P extends Wombat> {
-        private P wombat;
-        public P getWombat() { return this.wombat; }
-        public void setWombat(P wombat) { this.wombat = wombat; }
-    }
-    public static class Owner {
-        private Foo<SubWombat> foo;
-        public Foo<SubWombat> getFoo() { return foo; }
-        public void setFoo(final Foo<SubWombat> foo) { this.foo = foo; }
-    }
+      assertThat(root.getEnumProperty()).isEqualTo(TestEnum.Seventh);
+      assertThat(BeanUtil.getPropertyValue("enumProperty", root)).isEqualTo(TestEnum.Seventh);
+   }
 
-    @Test(groups="fast")
-    public void testGnarlyInheritanceAndGenerics() throws Exception {
-        Owner owner = new Owner();
-        Foo<SubWombat> foo = new Foo<SubWombat>();
-        owner.setFoo(foo);
-        foo.setWombat(new SubWombat());
-        String value = (String) BeanUtil.getPropertyValue("foo.wombat.name", owner);
-        Assert.assertEquals(value, "SubWombat");
-    }
+   @SuppressWarnings("unused")
+   public static class Foo<P extends Wombat> {
 
+      private P wombat;
+
+      public P getWombat() { return wombat; }
+
+      public void setWombat( P wombat ) { this.wombat = wombat; }
+   }
+
+
+   public static class Owner {
+
+      private Foo<SubWombat> foo;
+
+      public Foo<SubWombat> getFoo() { return foo; }
+
+      public void setFoo( final Foo<SubWombat> foo ) { this.foo = foo; }
+   }
+
+
+   public static class SubWombat extends Wombat {
+
+      @Override
+      public String getName() { return "SubWombat"; }
+   }
+
+
+   /** Following classes are part of an inheritance torture test! */
+   public static class Wombat {
+
+      public String getName() { return "Wombat"; }
+   }
 
 }
