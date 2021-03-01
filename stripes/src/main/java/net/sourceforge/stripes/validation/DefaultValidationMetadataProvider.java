@@ -324,7 +324,9 @@ public class DefaultValidationMetadataProvider implements ValidationMetadataProv
                   if ( meta.containsKey(fullName) ) {
                      log.warn("More than one nestedAnnotation @Validate with same field name: " + fullName + " on property " + propertyName);
                   }
-                  ValidationMetadata validationMetadata = new ValidationMetadata(fullName, validate);
+
+                  boolean ignoreFullNameProperty = shortName != null;
+                  ValidationMetadata validationMetadata = new ValidationMetadata(fullName, validate).ignore(ignoreFullNameProperty);
                   if ( ons != null ) {
                      validationMetadata.on(ons);
                   }
@@ -387,7 +389,8 @@ public class DefaultValidationMetadataProvider implements ValidationMetadataProv
                log.warn("More than one nestedAnnotation @Validate with same field name: " + fullName + " on property " + propertyName);
             }
 
-            ValidationMetadata validationMetadata = ValidationMetadata.copy(fullName, formPropertyValidationMetadata);
+            boolean ignoreFullNameProperty = shortName != null;
+            ValidationMetadata validationMetadata = ValidationMetadata.copy(fullName, formPropertyValidationMetadata).ignore(ignoreFullNameProperty);
             validationMetadata.on(ons);
             meta.put(fullName, validationMetadata);
 
