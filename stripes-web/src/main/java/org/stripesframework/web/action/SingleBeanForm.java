@@ -1,4 +1,4 @@
-package net.sourceforge.stripes.action;
+package org.stripesframework.web.action;
 
 public interface SingleBeanForm<T> extends ActionBean {
 

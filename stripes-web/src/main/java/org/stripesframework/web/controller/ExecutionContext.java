@@ -23,7 +23,7 @@ import org.stripesframework.web.action.ActionBean;
 import org.stripesframework.web.action.ActionBeanContext;
 import org.stripesframework.web.action.Resolution;
 import org.stripesframework.web.util.Log;
-import net.sourceforge.stripes.validation.FormValidation;
+import org.stripesframework.web.validation.FormValidation;
 
 
 /**
@@ -138,7 +138,7 @@ public class ExecutionContext {
 
    /** Sets the ActionBeanContext for the current request. */
    public void setActionBeanContext( ActionBeanContext actionBeanContext ) {
-       _actionBeanContext = actionBeanContext;
+      _actionBeanContext = actionBeanContext;
    }
 
    public void setForms( Map<String, FormValidation> forms ) {
@@ -160,14 +160,14 @@ public class ExecutionContext {
 
    /** Sets the current stage in the request processing lifecycle. */
    public void setLifecycleStage( LifecycleStage lifecycleStage ) {
-       _lifecycleStage = lifecycleStage;
+      _lifecycleStage = lifecycleStage;
    }
 
    /** Sets the Resolution that will be executed to terminate this execution. */
    public void setResolution( Resolution resolution ) { _resolution = resolution; }
 
    public void setResolutionFromHandler( boolean resolutionFromHandler ) {
-       _resolutionFromHandler = resolutionFromHandler;
+      _resolutionFromHandler = resolutionFromHandler;
    }
 
    /**
@@ -181,7 +181,7 @@ public class ExecutionContext {
     * @throws Exception if the lifecycle code or an interceptor throws an Exception
     */
    public Resolution wrap( Interceptor target ) throws Exception {
-       _target = target;
+      _target = target;
       _iterator = null;
 
       // Before executing RequestInit, set this as the current execution context

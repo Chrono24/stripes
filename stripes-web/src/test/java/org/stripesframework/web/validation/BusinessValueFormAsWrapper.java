@@ -1,4 +1,4 @@
-package net.sourceforge.stripes.validation;
+package org.stripesframework.web.validation;
 
 public class BusinessValueFormAsWrapper {
 
@@ -39,8 +39,8 @@ public class BusinessValueFormAsWrapper {
       businessValue.setNumberZero(numberZero);
    }
 
-   @ValidationMethod(priority = 0)
    @SuppressWarnings("DefaultAnnotationParam")
+   @ValidationMethod(priority = 0)
    public void validateAlways( ValidationErrors errors ) {
       if ( errors == null ) {
          throw new RuntimeException("errors must not be null");

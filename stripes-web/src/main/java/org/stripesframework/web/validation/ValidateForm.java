@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.sourceforge.stripes.validation;
+package org.stripesframework.web.validation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -20,7 +20,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import net.sourceforge.stripes.action.SingleBeanForm;
+import org.stripesframework.web.action.SingleBeanForm;
 
 
 /**

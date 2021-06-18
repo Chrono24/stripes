@@ -1,9 +1,9 @@
-package net.sourceforge.stripes.validation;
+package org.stripesframework.web.validation;
 
 import java.util.Collections;
 import java.util.Set;
 
-import net.sourceforge.stripes.action.SingleBeanForm;
+import org.stripesframework.web.action.SingleBeanForm;
 
 
 public class FormValidation {

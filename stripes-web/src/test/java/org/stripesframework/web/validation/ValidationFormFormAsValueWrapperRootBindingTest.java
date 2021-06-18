@@ -1,18 +1,17 @@
-package net.sourceforge.stripes.validation;
+package org.stripesframework.web.validation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import net.sourceforge.stripes.FilterEnabledTestBase;
-import net.sourceforge.stripes.action.ActionBean;
-import net.sourceforge.stripes.action.ActionBeanContext;
-import net.sourceforge.stripes.action.DefaultHandler;
-import net.sourceforge.stripes.action.HandlesEvent;
-import net.sourceforge.stripes.action.Resolution;
-import net.sourceforge.stripes.action.UrlBinding;
-import net.sourceforge.stripes.mock.MockRoundtrip;
+import org.stripesframework.web.FilterEnabledTestBase;
+import org.stripesframework.web.action.ActionBean;
+import org.stripesframework.web.action.ActionBeanContext;
+import org.stripesframework.web.action.DefaultHandler;
+import org.stripesframework.web.action.HandlesEvent;
+import org.stripesframework.web.action.Resolution;
+import org.stripesframework.web.action.UrlBinding;
+import org.stripesframework.web.mock.MockRoundtrip;
 
 
 /**

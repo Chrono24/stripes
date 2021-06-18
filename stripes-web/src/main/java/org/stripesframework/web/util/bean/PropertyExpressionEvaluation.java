@@ -29,9 +29,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.sourceforge.stripes.action.ActionBean;
-import net.sourceforge.stripes.action.ActionBeanContext;
-import net.sourceforge.stripes.controller.ExecutionContext;
+import org.stripesframework.web.action.ActionBean;
+import org.stripesframework.web.action.ActionBeanContext;
+import org.stripesframework.web.controller.ExecutionContext;
 import org.stripesframework.web.controller.StripesFilter;
 import org.stripesframework.web.util.ReflectUtil;
 

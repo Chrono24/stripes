@@ -18,7 +18,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import net.sourceforge.stripes.action.SingleBeanForm;
+import org.stripesframework.web.action.SingleBeanForm;
 
 
 /**
@@ -60,10 +60,10 @@ public class ValidationMetadata {
    private       Pattern                            _mask;
 
    @SuppressWarnings("rawtypes")
-   private       Class<? extends TypeConverter>     _converter;
-   private       String                             _label;
-   private       boolean                            _rootBinding;
-   private       String                             _bindingPrefix;
+   private Class<? extends TypeConverter> _converter;
+   private String                         _label;
+   private boolean                        _rootBinding;
+   private String                         _bindingPrefix;
 
    /**
     * Constructs a ValidationMetadata object for the specified property. Further constraints

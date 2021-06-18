@@ -1,4 +1,4 @@
-package net.sourceforge.stripes.validation;
+package org.stripesframework.web.validation;
 
 public class BusinessValue {
 

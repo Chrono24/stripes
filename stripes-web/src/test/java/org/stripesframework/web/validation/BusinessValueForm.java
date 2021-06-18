@@ -1,7 +1,7 @@
-package net.sourceforge.stripes.validation;
+package org.stripesframework.web.validation;
 
-import net.sourceforge.stripes.action.ActionBeanContext;
-import net.sourceforge.stripes.action.SingleBeanForm;
+import org.stripesframework.web.action.ActionBeanContext;
+import org.stripesframework.web.action.SingleBeanForm;
 
 
 public class BusinessValueForm implements SingleBeanForm<BusinessValue> {

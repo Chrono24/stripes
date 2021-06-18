@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.sourceforge.stripes.action.SingleBeanForm;
+import org.stripesframework.web.action.SingleBeanForm;
 import org.stripesframework.web.config.Configuration;
 import org.stripesframework.web.controller.ParameterName;
 import org.stripesframework.web.exception.StripesRuntimeException;
