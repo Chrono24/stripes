@@ -8,25 +8,25 @@ import org.stripesframework.web.action.SingleBeanForm;
 
 public class FormValidation {
 
-   private SingleBeanForm<?> form;
-   private Set<String>       on;
+   private SingleBeanForm<?> _form;
+   private Set<String>       _on;
 
    public SingleBeanForm<?> getForm() {
-      return form;
+      return _form;
    }
 
    public Set<String> getOn() {
-      if ( on == null ) {
+      if ( _on == null ) {
          return Collections.emptySet();
       }
-      return on;
+      return _on;
    }
 
    public void setForm( SingleBeanForm<?> form ) {
-      this.form = form;
+      _form = form;
    }
 
    public void setOn( Set<String> on ) {
-      this.on = on;
+      _on = on;
    }
 }

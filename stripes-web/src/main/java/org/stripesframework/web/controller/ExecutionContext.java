@@ -58,7 +58,7 @@ public class ExecutionContext {
    private Resolution                  _resolution;
    private LifecycleStage              _lifecycleStage;
    private boolean                     _resolutionFromHandler = false;
-   private Map<String, FormValidation> forms;
+   private Map<String, FormValidation> _forms;
 
    /**
     * Retrieves the ActionBean instance that is associated with the current request. Available
@@ -79,7 +79,7 @@ public class ExecutionContext {
    }
 
    public Map<String, FormValidation> getForms() {
-      return forms;
+      return _forms;
    }
 
    /**
@@ -142,7 +142,7 @@ public class ExecutionContext {
    }
 
    public void setForms( Map<String, FormValidation> forms ) {
-      this.forms = forms;
+      _forms = forms;
    }
 
    /** Sets the handler method that will be invoked to process the current request. */
