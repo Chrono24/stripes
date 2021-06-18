@@ -17,8 +17,15 @@ import org.stripesframework.web.mock.MockRoundtrip;
 /**
  * Test out various aspects of the validation subsystem in Stripes with regard to optional
  * application, ordering and flow control. Each of the individual test methods has javadoc
- * explaining why the expected results are as they are.
- *
+ * explaining why the expected results are as they are.<br/>
+ * <br/>
+ * This test handles the usecase for filling up business value objects (domain model, {@link BusinessValue})
+ * by using a spezilized form ({@link BusinessValueForm}). The form defines all
+ * validations for validating the input parameters.<br/>
+ * <br/>
+ * This test tests the rootBinding option. This allows to bind a property like "businessValue1.numberOne"
+ * by using the parameter "numberOne" (the properties of the given beans are directly bound to the action).<br/>
+ * <br/>
  * @author Olaf Stracke
  */
 @UrlBinding("/test/ValidationFormSingleBeanRootBindingTest.action")
