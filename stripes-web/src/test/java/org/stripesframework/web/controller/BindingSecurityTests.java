@@ -377,7 +377,7 @@ class BindingSecurityTests extends FilterEnabledTestBase {
 
       @Override
       public boolean[] getExpectSuccess() {
-         return new boolean[] { true, false };
+         return new boolean[] { false, false };
       }
 
       @Override
