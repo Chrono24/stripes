@@ -554,6 +554,9 @@ public class PropertyExpressionEvaluation {
          if ( n.getType() == NodeType.BeanProperty && n.getNode().isBracketed() ) {
             throw new EvaluationException(
                   "The expression \"" + getExpression().getSource() + "\" illegally attempts to access a bean property using bracket notation");
+         } else if ( n.getType() != NodeType.BeanProperty && !n.getNode().isBracketed() ) {
+            throw new EvaluationException(
+                  "The expression \"" + getExpression().getSource() + "\" illegally attempts to access a bean property using dot notation");
          }
       }
    }
