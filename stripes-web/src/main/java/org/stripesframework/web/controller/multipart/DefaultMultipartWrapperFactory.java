@@ -111,6 +111,10 @@ public class DefaultMultipartWrapperFactory implements MultipartWrapperFactory {
       // See if a maximum post size was configured
       String limit = config.getBootstrapPropertyResolver().getProperty(MAX_POST);
       if ( limit != null ) {
+         if ( "unlimited".equals(limit) ) {
+            _maxPostSizeInBytes = Long.MAX_VALUE;
+         }
+
          Pattern pattern = Pattern.compile("([\\d,]+)([kKmMgG]?).*");
          Matcher matcher = pattern.matcher(limit);
          if ( !matcher.matches() ) {
