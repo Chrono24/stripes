@@ -68,17 +68,15 @@ public class LocalizationUtility {
     * simply foo).</p>
     *
     * @param fieldName The name of the field whose localized name to look up
-    * @param actionPath The action path of the form in which the field is nested. If for some
-    *        reason this is not available, null may be passed without causing errors.
     * @param locale The desired locale of the looked up name.
     * @return a localized field name if one can be found, or null otherwise.
     */
-   public static String getLocalizedFieldName( String fieldName, String actionPath, Class<? extends ActionBean> beanclass, Locale locale ) {
+   public static String getLocalizedFieldName( String fieldName, Class<? extends ActionBean> beanclass, Locale locale ) {
 
       ParameterName parameterName = new ParameterName(fieldName);
       String strippedName = parameterName.getStrippedName();
       String localizedValue = null;
-      ResourceBundle bundle = null;
+      ResourceBundle bundle;
 
       try {
          bundle = StripesFilter.getConfiguration().getLocalizationBundleFactory().getFormFieldBundle(locale);
@@ -137,6 +135,7 @@ public class LocalizationUtility {
     * @param fieldNameKey the programmatic name of a form field
     * @return String a more user friendly name for the field in the absence of anything better
     */
+   @SuppressWarnings("ConstantConditions")
    public static String makePseudoFriendlyName( String fieldNameKey ) {
       StringBuilder builder = new StringBuilder(fieldNameKey.length() + 10);
       char[] characters = fieldNameKey.toCharArray();
