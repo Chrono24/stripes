@@ -63,6 +63,7 @@
         <attribute><description>@size@</description><name>size</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
         <attribute><description>@value@</description><name>value</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
         <attribute><description>@disabled@</description><name>disabled</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
+        <attribute><description>@required@</description><name>required</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
         <!-- End: Standard Form Input   attributes -->
 
         <!-- Start: Standard HTML attributes -->
@@ -174,6 +175,7 @@
         <attribute><description>@name@</description><name>name</name><required>true</required><rtexprvalue>true</rtexprvalue></attribute>
         <attribute><description>@size@</description><name>size</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
         <attribute><description>@disabled@</description><name>disabled</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
+        <attribute><description>@required@</description><name>required</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
         <!-- End: Standard Form Input   attributes -->
 
         <!-- Start: Standard HTML attributes -->
@@ -346,6 +348,7 @@
         <attribute><description>@name@</description><name>name</name><required>true</required><rtexprvalue>true</rtexprvalue></attribute>
         <attribute><description>@size@</description><name>size</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
         <attribute><description>@disabled@</description><name>disabled</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
+        <attribute><description>@required@</description><name>required</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
         <!-- End: Standard Form Input   attributes -->
 
         <attribute>
@@ -601,6 +604,7 @@
             <name>alt</name><required>false</required><rtexprvalue>true</rtexprvalue>
         </attribute>
         <attribute><description>@disabled@</description><name>disabled</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
+        <attribute><description>@required@</description><name>required</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
         <attribute>
             <description>
                 The src URL for the image button.  If the value starts with a slash it will have the context path
@@ -1007,6 +1011,7 @@
             <name>selected</name><required>false</required><rtexprvalue>true</rtexprvalue>
         </attribute>
         <attribute><description>@disabled@</description><name>disabled</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
+        <attribute><description>@required@</description><name>required</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
         <attribute><description>@formatType@</description><name>formatType</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
         <attribute><description>@formatPattern@</description><name>formatPattern</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
 
@@ -1470,6 +1475,7 @@
         <attribute><description>@size@</description><name>size</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
         <attribute><description>@value@</description><name>value</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
         <attribute><description>@disabled@</description><name>disabled</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
+        <attribute><description>@required@</description><name>required</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
         <!-- End: Standard Form Input   attributes -->
 
         <attribute><description>@readonly@</description><name>readonly</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
@@ -1560,6 +1566,7 @@
         <attribute><description>@name@</description><name>name</name><required>true</required><rtexprvalue>true</rtexprvalue></attribute>
         <attribute><description>@size@</description><name>size</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
         <attribute><description>@disabled@</description><name>disabled</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
+        <attribute><description>@required@</description><name>required</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
         <!-- End: Standard Form Input   attributes -->
 
 
@@ -1617,6 +1624,7 @@
         <attribute><description>@size@</description><name>size</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
         <attribute><description>@value@</description><name>value</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
         <attribute><description>@disabled@</description><name>disabled</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
+        <attribute><description>@required@</description><name>required</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
         <!-- End: Standard Form Input   attributes -->
 
         <!-- Start: Standard HTML attributes -->
@@ -1675,6 +1683,7 @@
             <type>java.lang.Object</type>
         </attribute>
         <attribute><description>@disabled@</description><name>disabled</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
+        <attribute><description>@required@</description><name>required</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
         <attribute>
             <description>
                 If the value passed in matches the empty string or (ignoring case) "multiple",
@@ -1740,6 +1749,7 @@
         <attribute><description>@size@</description><name>size</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
         <attribute><description>@value@</description><name>value</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
         <attribute><description>@disabled@</description><name>disabled</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
+        <attribute><description>@required@</description><name>required</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
         <!-- End: Standard Form Input   attributes -->
 
         <!-- Start: Standard HTML attributes -->
@@ -1801,6 +1811,7 @@
             <type>java.lang.Object</type>
         </attribute>
         <attribute><description>@disabled@</description><name>disabled</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
+        <attribute><description>@required@</description><name>required</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
         <!-- End: Standard Form Input   attributes -->
 
         <attribute><description>@readonly@</description><name>readonly</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
@@ -1866,6 +1877,7 @@
             <type>java.lang.Object</type>
         </attribute>
         <attribute><description>@disabled@</description><name>disabled</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
+        <attribute><description>@required@</description><name>required</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>
         <!-- End: Standard Form Input   attributes -->
 
         <attribute><description>@readonly@</description><name>readonly</name><required>false</required><rtexprvalue>true</rtexprvalue></attribute>

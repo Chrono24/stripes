@@ -160,6 +160,8 @@ public abstract class InputTagSupport extends HtmlTagSupport implements TryCatch
 
    public String getDisabled() { return get("disabled"); }
 
+   public String getRequired() { return get("required"); }
+
    /**
     * Access for the field errors that occurred on the form input this tag represents
     * @return List<ValidationError> the list of validation errors for this field
@@ -283,6 +285,27 @@ public abstract class InputTagSupport extends HtmlTagSupport implements TryCatch
          getAttributes().remove("disabled");
       }
    }
+
+   /**
+    * Checks to see if the value provided is either 'required' or a value that the
+    * {@link BooleanTypeConverter} believes it true. If so, adds a required attribute
+    * to the tag, otherwise does not.
+    */
+   public void setRequired( String required ) {
+      boolean isRequired = "required".equalsIgnoreCase(required);
+      if ( !isRequired ) {
+         BooleanTypeConverter converter = new BooleanTypeConverter();
+         isRequired = converter.convert(required, Boolean.class, null);
+      }
+
+      if ( isRequired ) {
+         set("required", "required");
+      } else {
+         getAttributes().remove("required");
+      }
+   }
+
+
 
    /**
     * Informs the tag that it should render JavaScript to ensure that it is focused
