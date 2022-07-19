@@ -51,6 +51,17 @@
 		<url>https://github.com/chrono24/stripes/actions</url>
 	</ciManagement>
 
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
+
 	<properties>
 		<spring.version>5.0.8.RELEASE</spring.version>
 		<junit.jupiter.version>5.7.0</junit.jupiter.version>
@@ -345,7 +356,7 @@
 					<plugin>
 						<groupId>org.sonatype.plugins</groupId>
 						<artifactId>nexus-staging-maven-plugin</artifactId>
-						<version>1.6.8</version>
+						<version>1.6.9</version>
 						<extensions>true</extensions>
 						<configuration>
 							<serverId>ossrh</serverId>
