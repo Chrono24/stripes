@@ -27,6 +27,8 @@ import javax.servlet.ServletContext;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
@@ -93,12 +95,22 @@ public class SpringHelper {
          }
       } else if ( beanNames.length > 1 ) {
          boolean found = false;
+         final AutowireCapableBeanFactory autowireCapableBeanFactory = ctx.getAutowireCapableBeanFactory();
+         BeanDefinitionRegistry beanDefinitionRegistry = null;
+         if ( autowireCapableBeanFactory instanceof BeanDefinitionRegistry ) {
+            beanDefinitionRegistry = (BeanDefinitionRegistry)autowireCapableBeanFactory;
+         }
          for ( String beanName : beanNames ) {
             if ( beanName.equals(name) ) {
                found = true;
                break;
+            } else if ( beanDefinitionRegistry != null && beanDefinitionRegistry.getBeanDefinition(beanName).isPrimary() ) {
+               found = true;
+               name = beanName;
+               break;
             }
          }
+
          if ( !found ) {
             if ( required ) {
                throw new StripesRuntimeException("Unable to find SpringBean with name [" + name + "] or unique bean with type [" + type.getName()
