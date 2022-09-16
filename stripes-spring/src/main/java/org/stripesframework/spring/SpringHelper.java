@@ -104,10 +104,24 @@ public class SpringHelper {
             if ( beanName.equals(name) ) {
                found = true;
                break;
-            } else if ( beanDefinitionRegistry != null && beanDefinitionRegistry.getBeanDefinition(beanName).isPrimary() ) {
+            }
+         }
+
+         if ( !found && beanDefinitionRegistry != null ) {
+            List<String> primaryBeanNames = new ArrayList<>();
+            for ( String beanName : beanNames ) {
+               if ( beanDefinitionRegistry.containsBeanDefinition(beanName) && beanDefinitionRegistry.getBeanDefinition(beanName).isPrimary() ) {
+                  primaryBeanNames.add(beanName);
+               }
+            }
+
+            if ( primaryBeanNames.size() == 1 ) {
                found = true;
-               name = beanName;
-               break;
+               name = primaryBeanNames.get(0);
+            } else if ( primaryBeanNames.size() > 1 ) {
+               throw new StripesRuntimeException(
+                     "Found more than one 'primary' SpringBean of type [" + type.getName() + "] in the Spring application context. Found " + primaryBeanNames
+                           + " as primary beans.");
             }
          }
 
