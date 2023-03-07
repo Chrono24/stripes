@@ -82,7 +82,8 @@ public class CommonsMultipartWrapper implements MultipartWrapper {
          factory.setRepository(tempDir);
          ServletFileUpload upload = new ServletFileUpload(factory);
          upload.setSizeMax(maxPostSize);
-         upload.setFileCountMax(1000);
+         Object maxFormKeys = request.getAttribute("maxFormKeys");
+         upload.setFileCountMax(maxFormKeys != null ? (Long) maxFormKeys : 1000);
          List<FileItem> items = upload.parseRequest(request);
          Map<String, List<String>> params = new HashMap<>();
 
