@@ -17,11 +17,13 @@ package org.stripesframework.web.controller;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.stripesframework.web.action.ActionBean;
 import org.stripesframework.web.action.ActionBeanContext;
 import org.stripesframework.web.action.Resolution;
 import org.stripesframework.web.util.Log;
+import org.stripesframework.web.validation.FormValidation;
 
 
 /**
@@ -47,15 +49,16 @@ public class ExecutionContext {
       return currentContext.get();
    }
 
-   private Collection<Interceptor> _interceptors;
-   private Iterator<Interceptor>   _iterator;
-   private Interceptor             _target;
-   private ActionBeanContext       _actionBeanContext;
-   private ActionBean              _actionBean;
-   private Method                  _handler;
-   private Resolution              _resolution;
-   private LifecycleStage          _lifecycleStage;
-   private boolean                 _resolutionFromHandler = false;
+   private Collection<Interceptor>     _interceptors;
+   private Iterator<Interceptor>       _iterator;
+   private Interceptor                 _target;
+   private ActionBeanContext           _actionBeanContext;
+   private ActionBean                  _actionBean;
+   private Method                      _handler;
+   private Resolution                  _resolution;
+   private LifecycleStage              _lifecycleStage;
+   private boolean                     _resolutionFromHandler = false;
+   private Map<String, FormValidation> _forms;
 
    /**
     * Retrieves the ActionBean instance that is associated with the current request. Available
@@ -73,6 +76,10 @@ public class ExecutionContext {
     */
    public ActionBeanContext getActionBeanContext() {
       return _actionBeanContext;
+   }
+
+   public Map<String, FormValidation> getForms() {
+      return _forms;
    }
 
    /**
@@ -131,7 +138,11 @@ public class ExecutionContext {
 
    /** Sets the ActionBeanContext for the current request. */
    public void setActionBeanContext( ActionBeanContext actionBeanContext ) {
-       _actionBeanContext = actionBeanContext;
+      _actionBeanContext = actionBeanContext;
+   }
+
+   public void setForms( Map<String, FormValidation> forms ) {
+      _forms = forms;
    }
 
    /** Sets the handler method that will be invoked to process the current request. */
@@ -149,14 +160,14 @@ public class ExecutionContext {
 
    /** Sets the current stage in the request processing lifecycle. */
    public void setLifecycleStage( LifecycleStage lifecycleStage ) {
-       _lifecycleStage = lifecycleStage;
+      _lifecycleStage = lifecycleStage;
    }
 
    /** Sets the Resolution that will be executed to terminate this execution. */
    public void setResolution( Resolution resolution ) { _resolution = resolution; }
 
    public void setResolutionFromHandler( boolean resolutionFromHandler ) {
-       _resolutionFromHandler = resolutionFromHandler;
+      _resolutionFromHandler = resolutionFromHandler;
    }
 
    /**
@@ -170,7 +181,7 @@ public class ExecutionContext {
     * @throws Exception if the lifecycle code or an interceptor throws an Exception
     */
    public Resolution wrap( Interceptor target ) throws Exception {
-       _target = target;
+      _target = target;
       _iterator = null;
 
       // Before executing RequestInit, set this as the current execution context

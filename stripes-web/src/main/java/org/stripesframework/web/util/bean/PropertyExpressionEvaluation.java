@@ -29,6 +29,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.stripesframework.web.action.ActionBean;
+import org.stripesframework.web.action.ActionBeanContext;
+import org.stripesframework.web.controller.ExecutionContext;
 import org.stripesframework.web.controller.StripesFilter;
 import org.stripesframework.web.util.ReflectUtil;
 
@@ -689,6 +692,11 @@ public class PropertyExpressionEvaluation {
             return Array.newInstance(clazz.getComponentType(), 0);
          } else if ( clazz.isEnum() ) {
             return clazz.getEnumConstants()[0];
+         } else if ( ActionBean.class.isAssignableFrom(clazz) ) {
+            ActionBean form = (ActionBean)StripesFilter.getConfiguration().getObjectFactory().newInstance(clazz);
+            ActionBeanContext actionBeanContext = ExecutionContext.currentContext().getActionBeanContext();
+            form.setContext(actionBeanContext);
+            return form;
          } else {
             return StripesFilter.getConfiguration().getObjectFactory().newInstance(clazz);
          }

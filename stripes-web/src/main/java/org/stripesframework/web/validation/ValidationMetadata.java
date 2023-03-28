@@ -18,6 +18,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.stripesframework.web.action.SingleBeanForm;
+
 
 /**
  * <p>Encapsulates the validation metadata for a single property of a single class. Structure
@@ -34,21 +36,34 @@ import java.util.regex.Pattern;
  */
 public class ValidationMetadata {
 
-   private final String                         _property;
-   private       boolean                        _encrypted;
-   private       boolean                        _required;
-   private       boolean                        _trim;
-   private       Set<String>                    _on;
-   private       boolean                        _onIsPositive;
-   private       boolean                        _ignore;
-   private       Integer                        _minlength;
-   private       Integer                        _maxlength;
-   private       Double                         _minvalue;
-   private       Double                         _maxvalue;
-   private       Pattern                        _mask;
+   public static ValidationMetadata copy( String property, ValidationMetadata original ) {
+      if ( original.validate() != null ) {
+         return new ValidationMetadata(property, original.validate());
+      } else {
+         return new ValidationMetadata(property, original.form());
+      }
+   }
+
+   private final String                             _property;
+   private       Validate                           _validate;
+   private       Class<? extends SingleBeanForm<?>> _form;
+   private       boolean                            _encrypted;
+   private       boolean                            _required;
+   private       boolean                            _trim;
+   private       Set<String>                        _on;
+   private       boolean                            _onIsPositive;
+   private       boolean                            _ignore;
+   private       Integer                            _minlength;
+   private       Integer                            _maxlength;
+   private       Double                             _minvalue;
+   private       Double                             _maxvalue;
+   private       Pattern                            _mask;
+
    @SuppressWarnings("rawtypes")
-   private       Class<? extends TypeConverter> _converter;
-   private       String                         _label;
+   private Class<? extends TypeConverter> _converter;
+   private String                         _label;
+   private boolean                        _rootBinding;
+   private String                         _bindingPrefix;
 
    /**
     * Constructs a ValidationMetadata object for the specified property. Further constraints
@@ -71,6 +86,7 @@ public class ValidationMetadata {
    public ValidationMetadata( String property, Validate validate ) {
       // Copy over all the simple values
       _property = property;
+      _validate = validate;
       encrypted(validate.encrypted());
       required(validate.required());
       trim(validate.trim());
@@ -101,6 +117,20 @@ public class ValidationMetadata {
       }
    }
 
+   public ValidationMetadata( String property, Class<? extends SingleBeanForm<?>> form ) {
+      _property = property;
+      _form = form;
+   }
+
+   public ValidationMetadata bindingPrefix( String bindingPrefix ) {
+      _bindingPrefix = bindingPrefix;
+      return this;
+   }
+
+   public String bindingPrefix() {
+      return _bindingPrefix;
+   }
+
    /** Sets the overridden TypeConveter to use to convert values. */
    @SuppressWarnings("rawtypes")
    public ValidationMetadata converter( Class<? extends TypeConverter> converter ) {
@@ -120,6 +150,10 @@ public class ValidationMetadata {
 
    /** Returns true if the field in question is encrypted. */
    public boolean encrypted() { return _encrypted; }
+
+   public Class<? extends SingleBeanForm<?>> form() {
+      return _form;
+   }
 
    /** Returns the name of the property this validation metadata represents. */
    public String getProperty() {
@@ -229,6 +263,15 @@ public class ValidationMetadata {
       return _required && !_ignore && ((_on == null) || (_onIsPositive && _on.contains(event)) || (!_onIsPositive && !_on.contains(event)));
    }
 
+   public boolean rootBinding() {
+      return _rootBinding;
+   }
+
+   public ValidationMetadata rootBinding( boolean rootBinding ) {
+      _rootBinding = rootBinding;
+      return this;
+   }
+
    /**
     * Overidden toString() that only outputs the constraints that are specified by
     * the instance of validation metadata (i.e. omits nulls, defaults etc.)
@@ -254,5 +297,9 @@ public class ValidationMetadata {
 
    /** Returns true if the field should be trimmed before validation or type conversion. */
    public boolean trim() { return _trim; }
+
+   public Validate validate() {
+      return _validate;
+   }
 }
 
