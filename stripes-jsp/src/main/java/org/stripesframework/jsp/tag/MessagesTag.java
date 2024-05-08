@@ -20,10 +20,10 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspWriter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspWriter;
 
 import org.stripesframework.web.action.Message;
 import org.stripesframework.web.controller.FlashScope;

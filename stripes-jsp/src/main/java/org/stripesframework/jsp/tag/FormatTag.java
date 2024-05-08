@@ -16,7 +16,7 @@ package org.stripesframework.jsp.tag;
 
 import java.io.IOException;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 import org.stripesframework.web.controller.StripesFilter;
 import org.stripesframework.web.format.Formatter;

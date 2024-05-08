@@ -16,7 +16,7 @@ package org.stripesframework.jsp.tag;
 
 import java.util.Locale;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 import org.stripesframework.jsp.exception.StripesJspException;
 import org.stripesframework.web.localization.LocalizationUtility;

@@ -17,10 +17,10 @@ package org.stripesframework.jsp.tag;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.servlet.jsp.tagext.TagData;
-import javax.servlet.jsp.tagext.TagExtraInfo;
-import javax.servlet.jsp.tagext.ValidationMessage;
-import javax.servlet.jsp.tagext.VariableInfo;
+import jakarta.servlet.jsp.tagext.TagData;
+import jakarta.servlet.jsp.tagext.TagExtraInfo;
+import jakarta.servlet.jsp.tagext.ValidationMessage;
+import jakarta.servlet.jsp.tagext.VariableInfo;
 
 
 /**

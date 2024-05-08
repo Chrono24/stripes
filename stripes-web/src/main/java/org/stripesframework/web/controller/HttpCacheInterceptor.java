@@ -18,7 +18,7 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.stripesframework.web.action.ActionBean;
 import org.stripesframework.web.action.HttpCache;

@@ -23,7 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.stripesframework.web.action.HandlesEvent;
 import org.stripesframework.web.action.UrlBinding;

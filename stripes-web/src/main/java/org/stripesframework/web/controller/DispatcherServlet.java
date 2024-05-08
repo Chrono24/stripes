@@ -17,10 +17,10 @@ package org.stripesframework.web.controller;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Stack;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.stripesframework.web.action.ActionBean;
 import org.stripesframework.web.action.ActionBeanContext;
