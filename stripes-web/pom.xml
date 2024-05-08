@@ -15,12 +15,12 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>javax.mail</groupId>
-			<artifactId>mail</artifactId>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>jakarta.mail</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
@@ -43,8 +43,8 @@
 			<artifactId>cos</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>commons-fileupload</groupId>
-			<artifactId>commons-fileupload</artifactId>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-fileupload2</artifactId>
 		</dependency>
 	</dependencies>
 
