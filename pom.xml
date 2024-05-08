@@ -63,7 +63,7 @@
 	</distributionManagement>
 
 	<properties>
-		<spring.version>5.0.8.RELEASE</spring.version>
+		<spring.version>6.0.19</spring.version>
 		<junit.jupiter.version>5.7.0</junit.jupiter.version>
 		<jacoco.version>0.8.5</jacoco.version>
 	</properties>
