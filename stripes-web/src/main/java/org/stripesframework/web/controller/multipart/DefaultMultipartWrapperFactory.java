@@ -30,7 +30,7 @@ import org.stripesframework.web.util.Log;
 /**
  * <p>Default implementation of a factory for MultipartWrappers. Looks up a class name in
  * Configuration under the key specified by {@link #WRAPPER_CLASS_NAME}. If no class
- * name is configured, defaults to the {@link CosMultipartWrapper}. An additional configuration
+ * name is configured, defaults to the {@link CommonsMultipartWrapper}. An additional configuration
  * parameter is supported to specify the maximum post size allowable.</p>
  *
  * @author Tim Fennell
@@ -42,8 +42,7 @@ public class DefaultMultipartWrapperFactory implements MultipartWrapperFactory {
    public static final String WRAPPER_CLASS_NAME = "MultipartWrapper.Class";
 
    /** The names of the MultipartWrapper classes that will be tried if no other is specified. */
-   public static final String[] BUNDLED_IMPLEMENTATIONS = { "org.stripesframework.web.controller.multipart.CommonsMultipartWrapper",
-                                                            "org.stripesframework.web.controller.multipart.CosMultipartWrapper" };
+   public static final String[] BUNDLED_IMPLEMENTATIONS = { "org.stripesframework.web.controller.multipart.CommonsMultipartWrapper" };
 
    /** Key used to lookup the name of the maximum post size. */
    public static final String MAX_POST = "FileUpload.MaximumPostSize";

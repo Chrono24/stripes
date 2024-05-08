@@ -183,15 +183,8 @@
 				<optional>true</optional>
 			</dependency>
 			<dependency>
-				<groupId>servlets.com</groupId>
-				<artifactId>cos</artifactId>
-				<version>05Nov2002</version>
-				<scope>provided</scope>
-				<optional>true</optional>
-			</dependency>
-			<dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-fileupload2</artifactId>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-fileupload2-jakarta-servlet6</artifactId>
 				<version>2.0.0-M2</version>
 				<scope>provided</scope>
 				<optional>true</optional>

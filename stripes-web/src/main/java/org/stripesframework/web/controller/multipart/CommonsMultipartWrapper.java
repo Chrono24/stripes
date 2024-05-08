@@ -17,6 +17,7 @@ package org.stripesframework.web.controller.multipart;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -25,16 +26,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import jakarta.servlet.http.HttpServletRequest;
-
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileUploadBase;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
-
+import org.apache.commons.fileupload2.core.DiskFileItem;
+import org.apache.commons.fileupload2.core.DiskFileItemFactory;
+import org.apache.commons.fileupload2.core.FileUploadByteCountLimitException;
+import org.apache.commons.fileupload2.core.FileUploadException;
+import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletFileUpload;
 import org.stripesframework.web.action.FileBean;
 import org.stripesframework.web.controller.FileUploadLimitExceededException;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 
 /**
@@ -57,41 +57,40 @@ public class CommonsMultipartWrapper implements MultipartWrapper {
       FileUploadException.class.getName();
    }
 
-   private final Map<String, FileItem> _files      = new HashMap<>();
-   private final Map<String, String[]> _parameters = new HashMap<>();
-   private       String                _charset;
+   private final Map<String, DiskFileItem> _files      = new HashMap<>();
+   private final Map<String, String[]>     _parameters = new HashMap<>();
+   private       String                    _charset;
 
    /**
     * Pseudo-constructor that allows the class to perform any initialization necessary.
     *
     * @param request     an HttpServletRequest that has a content-type of multipart.
-    * @param tempDir a File representing the temporary directory that can be used to store
-    *        file parts as they are uploaded if this is desirable
+    * @param tempDir     a File representing the temporary directory that can be used to store
+    *                    file parts as they are uploaded if this is desirable
     * @param maxPostSize the size in bytes beyond which the request should not be read, and a
     *                    FileUploadLimitExceeded exception should be thrown
-    * @throws IOException if a problem occurs processing the request of storing temporary
-    *                    files
+    * @throws IOException                      if a problem occurs processing the request of storing temporary
+    *                                          files
     * @throws FileUploadLimitExceededException if the POST content is longer than the
-    *                     maxPostSize supplied.
+    *                                          maxPostSize supplied.
     */
    @Override
    public void build( HttpServletRequest request, File tempDir, long maxPostSize ) throws IOException, FileUploadLimitExceededException {
       try {
          _charset = request.getCharacterEncoding();
-         DiskFileItemFactory factory = new DiskFileItemFactory();
-         factory.setRepository(tempDir);
-         ServletFileUpload upload = new ServletFileUpload(factory);
+         DiskFileItemFactory factory = DiskFileItemFactory.builder().setPath(tempDir.toPath()).get();
+         JakartaServletFileUpload<DiskFileItem, DiskFileItemFactory> upload = new JakartaServletFileUpload<>(factory);
          upload.setSizeMax(maxPostSize);
          Object maxFormKeys = request.getAttribute("maxFormKeys");
-         upload.setFileCountMax(maxFormKeys != null ? (Long) maxFormKeys : 1000);
-         List<FileItem> items = upload.parseRequest(request);
+         upload.setFileCountMax(maxFormKeys != null ? (Long)maxFormKeys : 1000);
+         List<DiskFileItem> items = upload.parseRequest(request);
          Map<String, List<String>> params = new HashMap<>();
 
-         for ( FileItem item : items ) {
+         for ( DiskFileItem item : items ) {
             // If it's a form field, add the string value to the list
             if ( item.isFormField() ) {
                List<String> values = params.computeIfAbsent(item.getFieldName(), k -> new ArrayList<>());
-               values.add(_charset == null ? item.getString() : item.getString(_charset));
+               values.add(_charset == null ? item.getString() : item.getString(Charset.forName(_charset)));
             }
             // Else store the file param
             else {
@@ -105,8 +104,8 @@ public class CommonsMultipartWrapper implements MultipartWrapper {
             _parameters.put(entry.getKey(), values.toArray(new String[0]));
          }
       }
-      catch ( FileUploadBase.SizeLimitExceededException slee ) {
-         throw new FileUploadLimitExceededException(maxPostSize, slee.getActualSize());
+      catch ( FileUploadByteCountLimitException fuse ) {
+         throw new FileUploadLimitExceededException(maxPostSize, fuse.getActualSize());
       }
       catch ( FileUploadException fue ) {
          throw new IOException("Could not parse and cache file upload data.", fue);
@@ -134,8 +133,8 @@ public class CommonsMultipartWrapper implements MultipartWrapper {
     */
    @Override
    public FileBean getFileParameterValue( String name ) {
-      final FileItem item = _files.get(name);
-      if ( item == null || ((item.getName() == null || item.getName().length() == 0) && item.getSize() == 0) ) {
+      final DiskFileItem item = _files.get(name);
+      if ( item == null || ((item.getName() == null || item.getName().isEmpty()) && item.getSize() == 0) ) {
          return null;
       } else {
          // Attempt to ensure the file name is just the basename with no path included
@@ -156,7 +155,7 @@ public class CommonsMultipartWrapper implements MultipartWrapper {
          return new FileBean(null, item.getContentType(), filename, _charset) {
 
             @Override
-            public void delete() { item.delete(); }
+            public void delete() throws IOException {item.delete();}
 
             @Override
             public InputStream getInputStream() throws IOException {
@@ -164,12 +163,12 @@ public class CommonsMultipartWrapper implements MultipartWrapper {
             }
 
             @Override
-            public long getSize() { return item.getSize(); }
+            public long getSize() {return item.getSize();}
 
             @Override
             public void save( File toFile ) throws IOException {
                try {
-                  item.write(toFile);
+                  item.write(toFile.toPath());
                   delete();
                }
                catch ( Exception e ) {
@@ -208,20 +207,28 @@ public class CommonsMultipartWrapper implements MultipartWrapper {
       return _parameters.get(name);
    }
 
-   /** Little helper class to create an enumeration as per the interface. */
+   /**
+    * Little helper class to create an enumeration as per the interface.
+    */
    private static class IteratorEnumeration implements Enumeration<String> {
 
       Iterator<String> _iterator;
 
-      /** Constructs an enumeration that consumes from the underlying iterator. */
-      IteratorEnumeration( Iterator<String> iterator ) { _iterator = iterator; }
+      /**
+       * Constructs an enumeration that consumes from the underlying iterator.
+       */
+      IteratorEnumeration( Iterator<String> iterator ) {_iterator = iterator;}
 
-      /** Returns true if more elements can be consumed, false otherwise. */
+      /**
+       * Returns true if more elements can be consumed, false otherwise.
+       */
       @Override
-      public boolean hasMoreElements() { return _iterator.hasNext(); }
+      public boolean hasMoreElements() {return _iterator.hasNext();}
 
-      /** Gets the next element out of the iterator. */
+      /**
+       * Gets the next element out of the iterator.
+       */
       @Override
-      public String nextElement() { return _iterator.next(); }
+      public String nextElement() {return _iterator.next();}
    }
 }
