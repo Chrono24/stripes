@@ -61,6 +61,9 @@ import java.lang.annotation.Target;
 @Documented
 public @interface UrlBinding {
 
+   /** Additional web-app relative URLs that the ActionBean will respond to. */
+   String[] alternates() default {};
+
    /** The web-app relative URL that the ActionBean will respond to. */
    String value();
 }
