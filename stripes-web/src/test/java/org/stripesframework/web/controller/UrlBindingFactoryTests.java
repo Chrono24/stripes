@@ -24,6 +24,16 @@ public class UrlBindingFactoryTests {
 
    private static UrlBindingFactory urlBindingFactory;
 
+   public static UrlBinding parsePrimaryUrlBinding( Class<? extends ActionBean> beanType ) {
+      // check that class is annotated
+      org.stripesframework.web.action.UrlBinding annotation = beanType.getAnnotation(org.stripesframework.web.action.UrlBinding.class);
+      if ( annotation == null ) {
+         return null;
+      } else {
+         return UrlBindingFactory.parseUrlBinding(beanType, annotation.value());
+      }
+   }
+
    @BeforeAll
    @SuppressWarnings("unchecked")
    public static void setupClass() {
@@ -36,11 +46,7 @@ public class UrlBindingFactoryTests {
 
       UrlBindingFactory factory = new UrlBindingFactory();
       for ( Class<? extends ActionBean> clazz : classes ) {
-         factory.addBinding(clazz, UrlBindingFactory.parsePrimaryUrlBinding(clazz));
-         List<UrlBinding> bindings = UrlBindingFactory.parseAdditionalUrlBindings(clazz);
-         for ( UrlBinding binding : bindings ) {
-            factory.addBinding(clazz, binding);
-         }
+         factory.addUrlBindings(clazz);
       }
 
       urlBindingFactory = factory;
@@ -49,8 +55,8 @@ public class UrlBindingFactoryTests {
    @Test
    public void testConflictDetectionIndependentOfClassLoadingOrder_failsRegardlessOfOrder() {
       UrlBindingFactory factory = new UrlBindingFactory();
-      factory.addBinding(FooActionBean.class, UrlBindingFactory.parsePrimaryUrlBinding(FooActionBean.class));
-      factory.addBinding(FooActionBean2.class, UrlBindingFactory.parsePrimaryUrlBinding(FooActionBean.class));
+      factory.addBinding(FooActionBean.class, parsePrimaryUrlBinding(FooActionBean.class));
+      factory.addBinding(FooActionBean2.class, parsePrimaryUrlBinding(FooActionBean.class));
 
       Throwable throwable = catchThrowable(() -> factory.getBindingPrototype("/foo"));
 
@@ -60,18 +66,14 @@ public class UrlBindingFactoryTests {
    @Test
    public void testConflictDetectionIndependentOfClassLoadingOrder_works() {
       UrlBindingFactory factory = new UrlBindingFactory();
-      factory.addBinding(FooActionBean.class, UrlBindingFactory.parsePrimaryUrlBinding(FooActionBean.class));
-      factory.addBinding(FooActionBean2.class, UrlBindingFactory.parsePrimaryUrlBinding(FooActionBean2.class));
-      factory.addBinding(FooActionBean3.class, UrlBindingFactory.parsePrimaryUrlBinding(FooActionBean3.class));
-      factory.addBinding(FooActionBean4.class, UrlBindingFactory.parsePrimaryUrlBinding(FooActionBean4.class));
-      factory.addBinding(FooActionBean5.class, UrlBindingFactory.parsePrimaryUrlBinding(FooActionBean5.class));
-      factory.addBinding(FooActionBean6.class, UrlBindingFactory.parsePrimaryUrlBinding(FooActionBean6.class));
-      factory.addBinding(FooActionBean7.class, UrlBindingFactory.parsePrimaryUrlBinding(FooActionBean7.class));
-      factory.addBinding(FooActionBean8.class, UrlBindingFactory.parsePrimaryUrlBinding(FooActionBean8.class));
-      List<UrlBinding> bindings = UrlBindingFactory.parseAdditionalUrlBindings(FooActionBean8.class);
-      for ( UrlBinding binding : bindings ) {
-         factory.addBinding(FooActionBean8.class, binding);
-      }
+      factory.addUrlBindings(FooActionBean.class);
+      factory.addUrlBindings(FooActionBean2.class);
+      factory.addUrlBindings(FooActionBean3.class);
+      factory.addUrlBindings(FooActionBean4.class);
+      factory.addUrlBindings(FooActionBean5.class);
+      factory.addUrlBindings(FooActionBean6.class);
+      factory.addUrlBindings(FooActionBean7.class);
+      factory.addUrlBindings(FooActionBean8.class);
 
       UrlBinding prototype = factory.getBindingPrototype("/foo");
 
@@ -82,18 +84,14 @@ public class UrlBindingFactoryTests {
    @Test
    public void testConflictDetectionIndependentOfClassLoadingOrder_worksWithDifferentOrder() {
       UrlBindingFactory factory = new UrlBindingFactory();
-      List<UrlBinding> bindings = UrlBindingFactory.parseAdditionalUrlBindings(FooActionBean8.class);
-      for ( UrlBinding binding : bindings ) {
-         factory.addBinding(FooActionBean8.class, binding);
-      }
-      factory.addBinding(FooActionBean8.class, UrlBindingFactory.parsePrimaryUrlBinding(FooActionBean8.class));
-      factory.addBinding(FooActionBean7.class, UrlBindingFactory.parsePrimaryUrlBinding(FooActionBean7.class));
-      factory.addBinding(FooActionBean6.class, UrlBindingFactory.parsePrimaryUrlBinding(FooActionBean6.class));
-      factory.addBinding(FooActionBean5.class, UrlBindingFactory.parsePrimaryUrlBinding(FooActionBean5.class));
-      factory.addBinding(FooActionBean4.class, UrlBindingFactory.parsePrimaryUrlBinding(FooActionBean4.class));
-      factory.addBinding(FooActionBean3.class, UrlBindingFactory.parsePrimaryUrlBinding(FooActionBean3.class));
-      factory.addBinding(FooActionBean2.class, UrlBindingFactory.parsePrimaryUrlBinding(FooActionBean2.class));
-      factory.addBinding(FooActionBean.class, UrlBindingFactory.parsePrimaryUrlBinding(FooActionBean.class));
+      factory.addUrlBindings(FooActionBean8.class);
+      factory.addUrlBindings(FooActionBean7.class);
+      factory.addUrlBindings(FooActionBean6.class);
+      factory.addUrlBindings(FooActionBean5.class);
+      factory.addUrlBindings(FooActionBean4.class);
+      factory.addUrlBindings(FooActionBean3.class);
+      factory.addUrlBindings(FooActionBean2.class);
+      factory.addUrlBindings(FooActionBean.class);
 
       UrlBinding prototype = factory.getBindingPrototype("/foo");
 
@@ -111,7 +109,7 @@ public class UrlBindingFactoryTests {
       for ( Class<? extends ActionBean> clazz : classes ) {
          org.stripesframework.web.action.UrlBinding annotation = clazz.getAnnotation(org.stripesframework.web.action.UrlBinding.class);
 
-         Throwable throwable = catchThrowable(() -> UrlBindingFactory.parsePrimaryUrlBinding(clazz));
+         Throwable throwable = catchThrowable(() -> UrlBindingFactory.parseUrlBinding(clazz, annotation.value()));
 
          assertThat(throwable).describedAs("Expected failure for parsing " + annotation.value()).isInstanceOf(ParseException.class);
       }
@@ -128,7 +126,7 @@ public class UrlBindingFactoryTests {
       for ( Class<? extends ActionBean> clazz : classes ) {
          org.stripesframework.web.action.UrlBinding annotation = clazz.getAnnotation(org.stripesframework.web.action.UrlBinding.class);
 
-         UrlBinding binding = UrlBindingFactory.parsePrimaryUrlBinding(clazz);
+         UrlBinding binding = UrlBindingFactory.parseUrlBinding(clazz, annotation.value());
 
          assertThat(binding).isNotNull();
          assertThat(binding.toString()).isEqualTo(removeEscapes(annotation.value()), "Parsed expression is not the same as original expression");
@@ -232,7 +230,7 @@ public class UrlBindingFactoryTests {
          org.stripesframework.web.action.UrlBinding annotation = clazz.getAnnotation(org.stripesframework.web.action.UrlBinding.class);
          String value = annotation.value();
 
-         UrlBinding binding = UrlBindingFactory.parsePrimaryUrlBinding(clazz);
+         UrlBinding binding = UrlBindingFactory.parseUrlBinding(clazz, annotation.value());
          assertThat(binding).isNotNull();
          assertThat(binding.getParameters()).hasSize(1);
 

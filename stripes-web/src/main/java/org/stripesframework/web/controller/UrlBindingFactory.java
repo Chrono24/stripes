@@ -61,52 +61,6 @@ public class UrlBindingFactory {
    private static final Log log = Log.getInstance(UrlBindingFactory.class);
 
    /**
-    * Look for a binding pattern for the given {@link ActionBean} class, specified by the
-    * {@link org.stripesframework.web.action.UrlBinding} annotation. If the annotation is found,
-    * create and return a {@link UrlBinding} object for the class. Otherwise, return null.
-    *
-    * @param beanType The {@link ActionBean} type whose binding is to be parsed
-    * @return A {@link UrlBinding} if one is specified, or null if not.
-    * @throws ParseException If the pattern cannot be parsed
-    */
-   public static UrlBinding parsePrimaryUrlBinding(Class<? extends ActionBean> beanType ) {
-      // check that class is annotated
-      org.stripesframework.web.action.UrlBinding annotation = beanType.getAnnotation(org.stripesframework.web.action.UrlBinding.class);
-      if ( annotation == null ) {
-         return null;
-      } else {
-         return parseUrlBinding(beanType, annotation.value());
-      }
-   }
-
-   /**
-    * Look for a additional binding patterns for the given {@link ActionBean} class, specified by the
-    * {@link org.stripesframework.web.action.UrlBinding} annotation.
-    *
-    * @param beanType The {@link ActionBean} type whose binding is to be parsed
-    * @return A list of {@link UrlBinding}
-    * @throws ParseException If the pattern cannot be parsed
-    */
-   public static List<UrlBinding> parseAdditionalUrlBindings(Class<? extends ActionBean> beanType ) {
-      // check that class is annotated
-      org.stripesframework.web.action.UrlBinding annotation = beanType.getAnnotation(org.stripesframework.web.action.UrlBinding.class);
-      List<UrlBinding> bindings = new ArrayList<>();
-
-      if ( annotation == null ) {
-         return bindings;
-      }
-
-      for (String alternate: annotation.alternates()) {
-         UrlBinding urlBinding = parseUrlBinding(beanType, alternate);
-         if (urlBinding != null) {
-            bindings.add(urlBinding);
-         }
-      }
-
-      return bindings;
-   }
-
-   /**
     * Parse the binding pattern and create a {@link UrlBinding} object for the {@link ActionBean}
     * class. If pattern is null, then return null.
     *
@@ -407,17 +361,7 @@ public class UrlBindingFactory {
          return primaryBinding;
       }
 
-      primaryBinding = parsePrimaryUrlBinding(type);
-      if ( primaryBinding != null ) {
-         addBinding(type, primaryBinding);
-      }
-
-      List<UrlBinding> urlBindings = parseAdditionalUrlBindings(type);
-      for (UrlBinding urlBinding : urlBindings) {
-         addBinding(type, urlBinding);
-      }
-
-      return primaryBinding;
+      return addUrlBindings(type);
    }
 
    /**
@@ -610,6 +554,37 @@ public class UrlBindingFactory {
    @Override
    public String toString() {
       return String.valueOf(_classCache);
+   }
+
+   /**
+    * Look for a binding pattern for the given {@link ActionBean} class, specified by the
+    * {@link org.stripesframework.web.action.UrlBinding} annotation. If the annotation is found,
+    * create and return a {@link UrlBinding} object for the class. Otherwise, return null.
+    *
+    * @param beanType The {@link ActionBean} type whose binding is to be parsed
+    * @return A {@link UrlBinding} if one is specified, or null if not.
+    * @throws ParseException If the pattern cannot be parsed
+    */
+   protected UrlBinding addUrlBindings( Class<? extends ActionBean> beanType ) {
+      // check that class is annotated
+      org.stripesframework.web.action.UrlBinding annotation = beanType.getAnnotation(org.stripesframework.web.action.UrlBinding.class);
+      if ( annotation == null ) {
+         return null;
+      }
+
+      UrlBinding primaryBinding = parseUrlBinding(beanType, annotation.value());
+      if ( primaryBinding != null ) {
+         addBinding(beanType, primaryBinding);
+      }
+
+      for ( String alternate : annotation.alternates() ) {
+         UrlBinding urlBinding = parseUrlBinding(beanType, alternate);
+         if ( urlBinding != null ) {
+            addBinding(beanType, urlBinding);
+         }
+      }
+
+      return primaryBinding;
    }
 
    /**
