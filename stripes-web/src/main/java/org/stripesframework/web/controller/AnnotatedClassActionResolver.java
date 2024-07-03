@@ -386,10 +386,11 @@ public class AnnotatedClassActionResolver implements ActionResolver {
          return;
       }
 
+      getUrlBindingFactory().removeBinding(clazz);
       // make sure mapping exists in cache
       UrlBinding proto = getUrlBindingFactory().getBindingPrototype(clazz);
       if ( proto == null ) {
-         getUrlBindingFactory().addBinding(clazz, new UrlBinding(clazz, binding));
+         getUrlBindingFactory().addBinding(clazz, new UrlBinding(clazz, binding), true);
       }
 
       // Construct the mapping of event->method for the class
@@ -471,7 +472,7 @@ public class AnnotatedClassActionResolver implements ActionResolver {
    }
 
    /** Provides subclasses with access to the configuration object. */
-   protected Configuration getConfiguration() { return _configuration; }
+   protected Configuration getConfiguration() {return _configuration;}
 
    /**
     * Looks to see if there is a single non-empty parameter value for the parameter name

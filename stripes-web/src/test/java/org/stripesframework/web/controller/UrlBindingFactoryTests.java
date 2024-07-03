@@ -55,8 +55,8 @@ public class UrlBindingFactoryTests {
    @Test
    public void testConflictDetectionIndependentOfClassLoadingOrder_failsRegardlessOfOrder() {
       UrlBindingFactory factory = new UrlBindingFactory();
-      factory.addBinding(FooActionBean.class, parsePrimaryUrlBinding(FooActionBean.class));
-      factory.addBinding(FooActionBean2.class, parsePrimaryUrlBinding(FooActionBean.class));
+      factory.addBinding(FooActionBean.class, parsePrimaryUrlBinding(FooActionBean.class), true);
+      factory.addBinding(FooActionBean2.class, parsePrimaryUrlBinding(FooActionBean.class), true);
 
       Throwable throwable = catchThrowable(() -> factory.getBindingPrototype("/foo"));
 
