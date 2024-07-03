@@ -69,7 +69,7 @@ public class UrlBindingFactory {
     * @return A {@link UrlBinding} if one is specified, or null if not.
     * @throws ParseException If the pattern cannot be parsed
     */
-   public static UrlBinding parseUrlBinding( Class<? extends ActionBean> beanType ) {
+   public static UrlBinding parsePrimaryUrlBinding(Class<? extends ActionBean> beanType ) {
       // check that class is annotated
       org.stripesframework.web.action.UrlBinding annotation = beanType.getAnnotation(org.stripesframework.web.action.UrlBinding.class);
       if ( annotation == null ) {
@@ -77,6 +77,33 @@ public class UrlBindingFactory {
       } else {
          return parseUrlBinding(beanType, annotation.value());
       }
+   }
+
+   /**
+    * Look for a additional binding patterns for the given {@link ActionBean} class, specified by the
+    * {@link org.stripesframework.web.action.UrlBinding} annotation.
+    *
+    * @param beanType The {@link ActionBean} type whose binding is to be parsed
+    * @return A list of {@link UrlBinding}
+    * @throws ParseException If the pattern cannot be parsed
+    */
+   public static List<UrlBinding> parseAdditionalUrlBindings(Class<? extends ActionBean> beanType ) {
+      // check that class is annotated
+      org.stripesframework.web.action.UrlBinding annotation = beanType.getAnnotation(org.stripesframework.web.action.UrlBinding.class);
+      List<UrlBinding> bindings = new ArrayList<>();
+
+      if ( annotation == null ) {
+         return bindings;
+      }
+
+      for (String alternate: annotation.alternates()) {
+         UrlBinding urlBinding = parseUrlBinding(beanType, alternate);
+         if (urlBinding != null) {
+            bindings.add(urlBinding);
+         }
+      }
+
+      return bindings;
    }
 
    /**
@@ -255,24 +282,6 @@ public class UrlBindingFactory {
     * @param binding the URL binding
     */
    public void addBinding( Class<? extends ActionBean> beanType, UrlBinding binding ) {
-      /*
-       * Search for a class that has already been added with the same name as the class being
-       * added now. If one is found then remove its information first and then proceed with adding
-       * it. I know this is not technically correct because two classes from two different class
-       * loaders can have the same name, but this feature is valuable for extensions that reload
-       * classes and I consider it highly unlikely to be a problem in practice.
-       */
-      Class<? extends ActionBean> existing = null;
-      for ( Class<? extends ActionBean> c : _classCache.keySet() ) {
-         if ( c.getName().equals(beanType.getName()) ) {
-            existing = c;
-            break;
-         }
-      }
-      if ( existing != null ) {
-         removeBinding(existing);
-      }
-
       // And now we can safely add the class
       for ( String path : getCachedPaths(binding) ) {
          cachePath(path, binding);
@@ -393,16 +402,22 @@ public class UrlBindingFactory {
     * @return a binding object if one is defined or null if not
     */
    public UrlBinding getBindingPrototype( Class<? extends ActionBean> type ) {
-      UrlBinding binding = _classCache.get(type);
-      if ( binding != null ) {
-         return binding;
+      UrlBinding primaryBinding = _classCache.get(type);
+      if ( primaryBinding != null ) {
+         return primaryBinding;
       }
 
-      binding = parseUrlBinding(type);
-      if ( binding != null ) {
-         addBinding(type, binding);
+      primaryBinding = parsePrimaryUrlBinding(type);
+      if ( primaryBinding != null ) {
+         addBinding(type, primaryBinding);
       }
-      return binding;
+
+      List<UrlBinding> urlBindings = parseAdditionalUrlBindings(type);
+      for (UrlBinding urlBinding : urlBindings) {
+         addBinding(type, urlBinding);
+      }
+
+      return primaryBinding;
    }
 
    /**
