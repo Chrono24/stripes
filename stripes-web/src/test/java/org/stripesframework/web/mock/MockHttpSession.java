@@ -20,8 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSessionContext;
 
 
 /**
@@ -47,10 +48,20 @@ public class MockHttpSession implements HttpSession {
    @Override
    public Object getAttribute( String key ) { return _attributes.get(key); }
 
+   @Override
+   public Object getValue( String s ) {
+      return null;
+   }
+
    /** Returns an enumeration of all the attribute names in the session. */
    @Override
    public Enumeration<String> getAttributeNames() {
       return Collections.enumeration(_attributes.keySet());
+   }
+
+   @Override
+   public String[] getValueNames() {
+      return new String[0];
    }
 
    /** Returns the time in milliseconds when the session was created. */
@@ -69,23 +80,14 @@ public class MockHttpSession implements HttpSession {
    @Override
    public int getMaxInactiveInterval() { return Integer.MAX_VALUE; }
 
+   @Override
+   public HttpSessionContext getSessionContext() {
+      return null;
+   }
+
    /** Provides access to the servlet context within which the session exists. */
    @Override
    public ServletContext getServletContext() { return _context; }
-
-   /** Deprecated method always returns null. */
-   @Override
-   public javax.servlet.http.HttpSessionContext getSessionContext() { return null; }
-
-   /** Deprecated method. Use getAttribute() instead. */
-   @Override
-   public Object getValue( String key ) { return getAttribute(key); }
-
-   /** Returns a String[] of all the attribute names in session. Deprecated. */
-   @Override
-   public String[] getValueNames() {
-      return _attributes.keySet().toArray(new String[_attributes.size()]);
-   }
 
    /** Clears the set of attributes, but has no other effect. */
    @Override
@@ -95,28 +97,26 @@ public class MockHttpSession implements HttpSession {
    @Override
    public boolean isNew() { return false; }
 
-   /** Stores the value in session, replacing any existing value with the same key. */
-   @Override
-   public void putValue( String key, Object value ) {
-      setAttribute(key, value);
-   }
-
    /** Removes any value stored in session with the key supplied. */
    @Override
    public void removeAttribute( String key ) {
       _attributes.remove(key);
    }
 
-   /** Removes any value stored in session with the key supplied. */
    @Override
-   public void removeValue( String key ) {
-      removeAttribute(key);
+   public void removeValue( String s ) {
+
    }
 
    /** Stores the value in session, replacing any existing value with the same key. */
    @Override
    public void setAttribute( String key, Object value ) {
       _attributes.put(key, value);
+   }
+
+   @Override
+   public void putValue( String s, Object o ) {
+
    }
 
    /** Has no effect. */

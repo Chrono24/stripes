@@ -16,7 +16,7 @@ package org.stripesframework.web.controller.multipart;
 
 import java.io.IOException;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.stripesframework.web.config.ConfigurableComponent;
 import org.stripesframework.web.controller.FileUploadLimitExceededException;

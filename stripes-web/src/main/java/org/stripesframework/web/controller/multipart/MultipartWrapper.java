@@ -18,7 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Enumeration;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.stripesframework.web.action.FileBean;
 import org.stripesframework.web.controller.FileUploadLimitExceededException;

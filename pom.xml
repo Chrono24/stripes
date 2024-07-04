@@ -8,7 +8,7 @@
 	</parent>
 	<groupId>org.stripesframework</groupId>
 	<artifactId>stripes-parent</artifactId>
-	<version>2.0.0-EAP-7</version>
+	<version>3.0.0-EAP-1</version>
 	<packaging>pom</packaging>
 
 	<modules>
@@ -63,7 +63,7 @@
 	</distributionManagement>
 
 	<properties>
-		<spring.version>5.0.8.RELEASE</spring.version>
+		<spring.version>6.0.19</spring.version>
 		<junit.jupiter.version>5.7.0</junit.jupiter.version>
 		<jacoco.version>0.8.5</jacoco.version>
 	</properties>
@@ -71,27 +71,27 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>javax.servlet</groupId>
-				<artifactId>javax.servlet-api</artifactId>
-				<version>3.1.0</version>
+				<groupId>jakarta.servlet</groupId>
+				<artifactId>jakarta.servlet-api</artifactId>
+				<version>5.0.0</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
-				<groupId>javax.servlet.jsp</groupId>
-				<artifactId>jsp-api</artifactId>
-				<version>2.2</version>
+				<groupId>jakarta.servlet.jsp</groupId>
+				<artifactId>jakarta.servlet.jsp-api</artifactId>
+				<version>3.1.1</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
-				<groupId>javax.el</groupId>
-				<artifactId>el-api</artifactId>
-				<version>2.2</version>
+				<groupId>jakarta.el</groupId>
+				<artifactId>jakarta.el-api</artifactId>
+				<version>5.0.0</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
-				<groupId>javax.servlet</groupId>
+				<groupId>jakarta.servlet</groupId>
 				<artifactId>jstl</artifactId>
-				<version>1.2</version>
+				<version>3.0.0</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
@@ -101,14 +101,14 @@
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
-				<groupId>javax.mail</groupId>
-				<artifactId>mail</artifactId>
-				<version>1.4.7</version>
+				<groupId>com.sun.mail</groupId>
+				<artifactId>jakarta.mail</artifactId>
+				<version>2.0.1</version>
 				<scope>provided</scope>
 				<optional>true</optional>
 				<exclusions>
 					<exclusion>
-						<groupId>javax.activation</groupId>
+						<groupId>jakarta.activation</groupId>
 						<artifactId>activation</artifactId>
 					</exclusion>
 				</exclusions>
@@ -183,16 +183,9 @@
 				<optional>true</optional>
 			</dependency>
 			<dependency>
-				<groupId>servlets.com</groupId>
-				<artifactId>cos</artifactId>
-				<version>05Nov2002</version>
-				<scope>provided</scope>
-				<optional>true</optional>
-			</dependency>
-			<dependency>
-				<groupId>commons-fileupload</groupId>
-				<artifactId>commons-fileupload</artifactId>
-				<version>1.5</version>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-fileupload2-jakarta-servlet6</artifactId>
+				<version>2.0.0-M2</version>
 				<scope>provided</scope>
 				<optional>true</optional>
 			</dependency>

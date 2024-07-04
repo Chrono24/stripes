@@ -16,7 +16,7 @@ package org.stripesframework.jsp.tag.layout;
 
 import java.util.Map.Entry;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.stripesframework.web.controller.StripesConstants;
 import org.stripesframework.jsp.tag.StripesTagSupport;

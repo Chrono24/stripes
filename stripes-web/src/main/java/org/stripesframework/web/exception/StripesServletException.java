@@ -14,7 +14,7 @@
  */
 package org.stripesframework.web.exception;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 
 
 /**

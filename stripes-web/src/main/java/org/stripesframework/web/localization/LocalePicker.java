@@ -16,7 +16,7 @@ package org.stripesframework.web.localization;
 
 import java.util.Locale;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.stripesframework.web.config.ConfigurableComponent;
 

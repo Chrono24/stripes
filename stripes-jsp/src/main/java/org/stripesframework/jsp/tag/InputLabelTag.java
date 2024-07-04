@@ -16,8 +16,8 @@ package org.stripesframework.jsp.tag;
 
 import java.io.IOException;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.BodyTag;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.tagext.BodyTag;
 
 import org.stripesframework.jsp.exception.StripesJspException;
 import org.stripesframework.web.localization.LocalizationUtility;

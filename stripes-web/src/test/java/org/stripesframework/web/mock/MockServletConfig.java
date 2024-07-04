@@ -14,7 +14,7 @@
  */
 package org.stripesframework.web.mock;
 
-import javax.servlet.ServletConfig;
+import jakarta.servlet.ServletConfig;
 
 
 /**

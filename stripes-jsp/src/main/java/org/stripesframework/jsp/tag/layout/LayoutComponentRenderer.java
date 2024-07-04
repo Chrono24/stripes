@@ -17,8 +17,8 @@ package org.stripesframework.jsp.tag.layout;
 import java.io.IOException;
 import java.util.LinkedList;
 
-import javax.servlet.ServletException;
-import javax.servlet.jsp.PageContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.jsp.PageContext;
 
 import org.stripesframework.web.controller.StripesConstants;
 import org.stripesframework.web.util.Log;

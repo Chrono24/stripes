@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.stripesframework</groupId>
 		<artifactId>stripes-parent</artifactId>
-		<version>2.0.0-EAP-7</version>
+		<version>3.0.0-EAP-1</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>stripes-spring</artifactId>
@@ -36,8 +36,8 @@
 			<artifactId>assertj-core</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
