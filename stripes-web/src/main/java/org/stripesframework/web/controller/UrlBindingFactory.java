@@ -61,25 +61,6 @@ public class UrlBindingFactory {
    private static final Log log = Log.getInstance(UrlBindingFactory.class);
 
    /**
-    * Look for a binding pattern for the given {@link ActionBean} class, specified by the
-    * {@link org.stripesframework.web.action.UrlBinding} annotation. If the annotation is found,
-    * create and return a {@link UrlBinding} object for the class. Otherwise, return null.
-    *
-    * @param beanType The {@link ActionBean} type whose binding is to be parsed
-    * @return A {@link UrlBinding} if one is specified, or null if not.
-    * @throws ParseException If the pattern cannot be parsed
-    */
-   public static UrlBinding parseUrlBinding( Class<? extends ActionBean> beanType ) {
-      // check that class is annotated
-      org.stripesframework.web.action.UrlBinding annotation = beanType.getAnnotation(org.stripesframework.web.action.UrlBinding.class);
-      if ( annotation == null ) {
-         return null;
-      } else {
-         return parseUrlBinding(beanType, annotation.value());
-      }
-   }
-
-   /**
     * Parse the binding pattern and create a {@link UrlBinding} object for the {@link ActionBean}
     * class. If pattern is null, then return null.
     *
@@ -233,13 +214,15 @@ public class UrlBindingFactory {
    }
 
    /** Maps {@link ActionBean} classes to {@link UrlBinding}s */
-   private final Map<Class<? extends ActionBean>, UrlBinding> _classCache    = new HashMap<>();
+   private final Map<Class<? extends ActionBean>, UrlBinding>       _classPrimaryBindingCache = new HashMap<>();
+   /** Maps {@link ActionBean} classes to {@link UrlBinding}s */
+   private final Map<Class<? extends ActionBean>, List<UrlBinding>> _classBindingCache        = new HashMap<>();
    /** Maps simple paths to {@link UrlBinding}s */
-   private final Map<String, UrlBinding>                      _pathCache     = new HashMap<>();
+   private final Map<String, UrlBinding>                            _pathCache                = new HashMap<>();
    /** Keeps a list of all the paths that could not be cached due to conflicts between URL bindings */
-   private final Map<String, List<UrlBinding>>                _pathConflicts = new HashMap<>();
+   private final Map<String, List<UrlBinding>>                      _pathConflicts            = new HashMap<>();
    /** Holds the set of paths that are cached, sorted from longest to shortest */
-   private final Map<String, Set<UrlBinding>>                 _prefixCache   = new TreeMap<>(new Comparator<>() {
+   private final Map<String, Set<UrlBinding>>                       _prefixCache              = new TreeMap<>(new Comparator<>() {
 
       @Override
       public int compare( String a, String b ) {
@@ -252,27 +235,10 @@ public class UrlBindingFactory {
     * Map an {@link ActionBean} to a URL.
     *
     * @param beanType the {@link ActionBean} class
-    * @param binding the URL binding
+    * @param binding  the URL binding
+    * @param isPrimary
     */
-   public void addBinding( Class<? extends ActionBean> beanType, UrlBinding binding ) {
-      /*
-       * Search for a class that has already been added with the same name as the class being
-       * added now. If one is found then remove its information first and then proceed with adding
-       * it. I know this is not technically correct because two classes from two different class
-       * loaders can have the same name, but this feature is valuable for extensions that reload
-       * classes and I consider it highly unlikely to be a problem in practice.
-       */
-      Class<? extends ActionBean> existing = null;
-      for ( Class<? extends ActionBean> c : _classCache.keySet() ) {
-         if ( c.getName().equals(beanType.getName()) ) {
-            existing = c;
-            break;
-         }
-      }
-      if ( existing != null ) {
-         removeBinding(existing);
-      }
-
+   public void addBinding( Class<? extends ActionBean> beanType, UrlBinding binding, boolean isPrimary ) {
       // And now we can safely add the class
       for ( String path : getCachedPaths(binding) ) {
          cachePath(path, binding);
@@ -280,14 +246,18 @@ public class UrlBindingFactory {
       for ( String prefix : getCachedPrefixes(binding) ) {
          cachePrefix(prefix, binding);
       }
-      _classCache.put(beanType, binding);
+
+      _classBindingCache.computeIfAbsent(beanType, k -> new ArrayList<>()).add(binding);
+      if ( isPrimary ) {
+         _classPrimaryBindingCache.put(beanType, binding);
+      }
    }
 
    /**
     * Get all the classes implementing {@link ActionBean}
     */
    public Collection<Class<? extends ActionBean>> getActionBeanClasses() {
-      return Collections.unmodifiableSet(_classCache.keySet());
+      return Collections.unmodifiableSet(_classPrimaryBindingCache.keySet());
    }
 
    /**
@@ -393,16 +363,12 @@ public class UrlBindingFactory {
     * @return a binding object if one is defined or null if not
     */
    public UrlBinding getBindingPrototype( Class<? extends ActionBean> type ) {
-      UrlBinding binding = _classCache.get(type);
-      if ( binding != null ) {
-         return binding;
+      UrlBinding primaryBinding = _classPrimaryBindingCache.get(type);
+      if ( primaryBinding != null ) {
+         return primaryBinding;
       }
 
-      binding = parseUrlBinding(type);
-      if ( binding != null ) {
-         addBinding(type, binding);
-      }
-      return binding;
+      return addUrlBindings(type);
    }
 
    /**
@@ -539,62 +505,97 @@ public class UrlBindingFactory {
     * @param beanType the {@link ActionBean} class
     */
    public synchronized void removeBinding( Class<? extends ActionBean> beanType ) {
-      UrlBinding binding = _classCache.get(beanType);
-      if ( binding == null ) {
+      List<UrlBinding> urlBindings = _classBindingCache.get(beanType);
+      if ( urlBindings == null ) {
          return;
       }
 
-      Set<UrlBinding> resolvedConflicts = null;
-      for ( String path : getCachedPaths(binding) ) {
-         log.debug("Clearing cached path ", path, " for ", binding);
-         _pathCache.remove(path);
+      for ( UrlBinding binding : urlBindings ) {
+         Set<UrlBinding> resolvedConflicts = null;
+         for ( String path : getCachedPaths(binding) ) {
+            log.debug("Clearing cached path ", path, " for ", binding);
+            _pathCache.remove(path);
 
-         List<UrlBinding> conflicts = _pathConflicts.get(path);
-         if ( conflicts != null ) {
-            log.debug("Removing ", binding, " from conflicts list ", conflicts);
-            conflicts.remove(binding);
+            List<UrlBinding> conflicts = _pathConflicts.get(path);
+            if ( conflicts != null ) {
+               log.debug("Removing ", binding, " from conflicts list ", conflicts);
+               conflicts.remove(binding);
 
-            if ( conflicts.size() == 1 ) {
-               if ( resolvedConflicts == null ) {
-                  resolvedConflicts = new LinkedHashSet<>();
+               if ( conflicts.size() == 1 ) {
+                  if ( resolvedConflicts == null ) {
+                     resolvedConflicts = new LinkedHashSet<>();
+                  }
+
+                  // this cannot work since conflicts.get(0) returns an UrlBinding but PathCache is a Map<String, UrlBinding>
+                  resolvedConflicts.add(_pathCache.get(conflicts.get(0)));
+                  conflicts.clear();
                }
 
-               resolvedConflicts.add(_pathCache.get(conflicts.get(0)));
-               conflicts.clear();
+               if ( conflicts.isEmpty() ) {
+                  _pathConflicts.remove(path);
+               }
             }
+         }
 
-            if ( conflicts.isEmpty() ) {
-               _pathConflicts.remove(path);
+         for ( String prefix : getCachedPrefixes(binding) ) {
+            Set<UrlBinding> bindings = _prefixCache.get(prefix);
+            if ( bindings != null ) {
+               log.debug("Clearing cached prefix ", prefix, " for ", binding);
+               bindings.remove(binding);
+               if ( bindings.isEmpty() ) {
+                  _prefixCache.remove(prefix);
+               }
+            }
+         }
+
+         if ( resolvedConflicts != null ) {
+            log.debug("Resolved conflicts with ", resolvedConflicts);
+
+            for ( UrlBinding conflict : resolvedConflicts ) {
+               removeBinding(conflict.getBeanType());
+               addBinding(conflict.getBeanType(), conflict, true);
             }
          }
       }
 
-      for ( String prefix : getCachedPrefixes(binding) ) {
-         Set<UrlBinding> bindings = _prefixCache.get(prefix);
-         if ( bindings != null ) {
-            log.debug("Clearing cached prefix ", prefix, " for ", binding);
-            bindings.remove(binding);
-            if ( bindings.isEmpty() ) {
-               _prefixCache.remove(prefix);
-            }
-         }
-      }
-
-      _classCache.remove(beanType);
-
-      if ( resolvedConflicts != null ) {
-         log.debug("Resolved conflicts with ", resolvedConflicts);
-
-         for ( UrlBinding conflict : resolvedConflicts ) {
-            removeBinding(conflict.getBeanType());
-            addBinding(conflict.getBeanType(), conflict);
-         }
-      }
+      _classPrimaryBindingCache.remove(beanType);
+      _classBindingCache.remove(beanType);
    }
 
    @Override
    public String toString() {
-      return String.valueOf(_classCache);
+      return String.valueOf(_classPrimaryBindingCache);
+   }
+
+   /**
+    * Look for a binding pattern for the given {@link ActionBean} class, specified by the
+    * {@link org.stripesframework.web.action.UrlBinding} annotation. If the annotation is found,
+    * create and return a {@link UrlBinding} object for the class. Otherwise, return null.
+    *
+    * @param beanType The {@link ActionBean} type whose binding is to be parsed
+    * @return A {@link UrlBinding} if one is specified, or null if not.
+    * @throws ParseException If the pattern cannot be parsed
+    */
+   protected UrlBinding addUrlBindings( Class<? extends ActionBean> beanType ) {
+      // check that class is annotated
+      org.stripesframework.web.action.UrlBinding annotation = beanType.getAnnotation(org.stripesframework.web.action.UrlBinding.class);
+      if ( annotation == null ) {
+         return null;
+      }
+
+      UrlBinding primaryBinding = parseUrlBinding(beanType, annotation.value());
+      if ( primaryBinding != null ) {
+         addBinding(beanType, primaryBinding, true);
+      }
+
+      for ( String alternate : annotation.alternates() ) {
+         UrlBinding urlBinding = parseUrlBinding(beanType, alternate);
+         if ( urlBinding != null ) {
+            addBinding(beanType, urlBinding, false);
+         }
+      }
+
+      return primaryBinding;
    }
 
    /**
