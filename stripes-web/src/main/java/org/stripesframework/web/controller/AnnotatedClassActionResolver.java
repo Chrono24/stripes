@@ -381,12 +381,14 @@ public class AnnotatedClassActionResolver implements ActionResolver {
          return;
       }
 
+
+      getUrlBindingFactory().removeBinding(clazz);
+
       String binding = getUrlBinding(clazz);
       if ( binding == null ) {
          return;
       }
 
-      getUrlBindingFactory().removeBinding(clazz);
       // make sure mapping exists in cache
       UrlBinding proto = getUrlBindingFactory().getBindingPrototype(clazz);
       if ( proto == null ) {
