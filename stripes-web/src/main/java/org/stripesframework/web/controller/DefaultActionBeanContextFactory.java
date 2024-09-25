@@ -14,9 +14,9 @@
  */
 package org.stripesframework.web.controller;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.stripesframework.web.action.ActionBeanContext;
 import org.stripesframework.web.config.Configuration;

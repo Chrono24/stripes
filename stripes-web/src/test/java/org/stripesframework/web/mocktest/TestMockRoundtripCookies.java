@@ -2,7 +2,7 @@ package org.stripesframework.web.mocktest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import javax.servlet.http.Cookie;
+import jakarta.servlet.http.Cookie;
 
 import org.junit.jupiter.api.Test;
 import org.stripesframework.web.StripesTestFixture;

@@ -14,7 +14,7 @@
  */
 package org.stripesframework.web.util;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.stripesframework.web.controller.StripesConstants;
 

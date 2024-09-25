@@ -19,9 +19,9 @@ import static org.stripesframework.web.controller.StripesConstants.URL_KEY_FIELD
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.TryCatchFinally;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.tagext.TryCatchFinally;
 
 import org.stripesframework.web.action.ActionBean;
 import org.stripesframework.web.controller.ActionResolver;

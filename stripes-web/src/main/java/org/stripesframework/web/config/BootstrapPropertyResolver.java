@@ -22,7 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.FilterConfig;
+import jakarta.servlet.FilterConfig;
 
 import org.stripesframework.web.exception.StripesRuntimeException;
 import org.stripesframework.web.util.Log;

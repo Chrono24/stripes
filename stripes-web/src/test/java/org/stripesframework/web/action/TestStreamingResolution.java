@@ -21,8 +21,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 
-import javax.mail.internet.ContentDisposition;
-import javax.mail.internet.ParseException;
+import jakarta.mail.internet.ContentDisposition;
+import jakarta.mail.internet.ParseException;
 
 import org.junit.jupiter.api.Test;
 import org.stripesframework.web.mock.MockHttpServletResponse;

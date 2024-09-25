@@ -18,10 +18,10 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponseWrapper;
 
 import org.stripesframework.web.controller.FlashScope;
 import org.stripesframework.web.controller.StripesConstants;

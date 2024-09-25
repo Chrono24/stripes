@@ -17,8 +17,8 @@ package org.stripesframework.jsp.tag;
 import java.io.IOException;
 import java.util.Locale;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspWriter;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspWriter;
 
 import org.stripesframework.web.util.Log;
 import org.stripesframework.web.validation.ValidationError;

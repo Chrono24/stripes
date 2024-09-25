@@ -17,8 +17,8 @@ package org.stripesframework.jsp.tag;
 import java.lang.reflect.Array;
 import java.util.Collection;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.tagext.BodyTag;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.tagext.BodyTag;
 
 
 /**

@@ -14,7 +14,7 @@
  */
 package org.stripesframework.jsp.tag;
 
-import javax.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspException;
 
 
 /**

@@ -14,7 +14,7 @@
  */
 package org.stripesframework.spring;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
 import org.stripesframework.web.config.Configuration;
 

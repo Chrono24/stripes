@@ -24,9 +24,9 @@ import java.util.Locale;
 import java.util.Random;
 import java.util.Stack;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspWriter;
-import javax.servlet.jsp.tagext.TryCatchFinally;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspWriter;
+import jakarta.servlet.jsp.tagext.TryCatchFinally;
 
 import org.stripesframework.jsp.config.JspConfiguration;
 import org.stripesframework.jsp.exception.StripesJspException;
