@@ -9,7 +9,7 @@ import org.stripesframework.web.action.ActionBeanContext;
 
 /**
  * Used as the {@link java.lang.reflect.InvocationHandler} for a dynamic proxy that replaces the
- * {@link javax.servlet.http.HttpServletResponse} on {@link
+ * {@link jakarta.servlet.http.HttpServletResponse} on {@link
  * ActionBeanContext}s in the flash scope after the current request
  * cycle has completed.
  *

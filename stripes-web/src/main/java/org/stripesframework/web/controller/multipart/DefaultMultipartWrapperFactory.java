@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.stripesframework.web.config.Configuration;
@@ -93,7 +94,7 @@ public class DefaultMultipartWrapperFactory implements MultipartWrapperFactory {
       }
 
       // Figure out where the temp directory is, and store that info
-      File tempDir = (File)config.getServletContext().getAttribute("javax.servlet.context.tempdir");
+      File tempDir = (File)config.getServletContext().getAttribute(ServletContext.TEMPDIR);
       if ( tempDir != null ) {
          _temporaryDirectory = tempDir;
       } else {

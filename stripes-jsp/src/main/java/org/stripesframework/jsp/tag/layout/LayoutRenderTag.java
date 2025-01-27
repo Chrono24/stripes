@@ -196,9 +196,9 @@ public class LayoutRenderTag extends LayoutTag implements BodyTag, DynamicAttrib
 
    /**
     * Initialize fields before execution begins. Typically, this would be done by overriding
-    * {@link #setPageContext(javax.servlet.jsp.PageContext)}, but that isn't possible in this case
+    * {@link #setPageContext(jakarta.servlet.jsp.PageContext)}, but that isn't possible in this case
     * because some of the logic depends on {@link #setName(String)} having been called, which does
-    * not happen until after {@link #setPageContext(javax.servlet.jsp.PageContext)} has been
+    * not happen until after {@link #setPageContext(jakarta.servlet.jsp.PageContext)} has been
     * called.
     */
    protected void initialize() {
