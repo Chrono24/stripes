@@ -51,7 +51,7 @@ public class InputButtonSupportTag extends InputTagSupport implements BodyTag {
     * Looks up the appropriate value to use for the submit button and then writes the tag
     * out to the page.
     * @return EVAL_PAGE in all cases.
-    * @throws javax.servlet.jsp.JspException if output cannot be written.
+    * @throws jakarta.servlet.jsp.JspException if output cannot be written.
     */
    @Override
    public int doEndInputTag() throws JspException {
