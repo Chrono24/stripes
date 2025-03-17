@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
+import java.util.Collection;
 import java.util.UUID;
 
 import jakarta.mail.internet.ContentDisposition;
@@ -76,11 +76,11 @@ public class TestStreamingResolution {
    }
 
    private ContentDisposition getContentDisposition( MockHttpServletResponse response ) throws ParseException {
-      final List<Object> list = response.getHeaderMap().get("Content-Disposition");
+      final Collection<String> list = response.getHeaders("Content-Disposition");
       if ( list == null || list.isEmpty() ) {
          return null;
       } else {
-         return new ContentDisposition(list.get(0).toString());
+         return new ContentDisposition(list.iterator().next());
       }
    }
 }

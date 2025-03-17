@@ -21,7 +21,7 @@ public class RedirectResolutionTest extends FilterEnabledTestBase {
       resolution.execute(buildMockServletRequest(), response);
 
       assertThat(response.getStatus()).isEqualTo(HttpServletResponse.SC_MOVED_PERMANENTLY);
-      assertThat(response.getHeaderMap().get("Location").iterator().next()).isEqualTo("https://www.stripesframework.org");
+      assertThat(response.getHeader("Location")).isEqualTo("https://www.stripesframework.org");
    }
 
    @Test
@@ -32,7 +32,7 @@ public class RedirectResolutionTest extends FilterEnabledTestBase {
       resolution.execute(buildMockServletRequest(), response);
 
       assertThat(response.getStatus()).isEqualTo(HttpServletResponse.SC_MOVED_PERMANENTLY);
-      assertThat(response.getHeaderMap().get("Location").iterator().next()).isEqualTo("https://www.stripesframework.org?test=test");
+      assertThat(response.getHeader("Location")).isEqualTo("https://www.stripesframework.org?test=test");
    }
 
    @Test
