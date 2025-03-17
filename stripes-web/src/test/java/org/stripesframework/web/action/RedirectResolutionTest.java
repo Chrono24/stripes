@@ -4,19 +4,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Locale;
 
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.junit.jupiter.api.Test;
 import org.stripesframework.web.FilterEnabledTestBase;
 import org.stripesframework.web.mock.MockHttpServletRequest;
 import org.stripesframework.web.mock.MockHttpServletResponse;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 
 public class RedirectResolutionTest extends FilterEnabledTestBase {
 
    @Test
-   public void testPermanantRedirect() throws Exception {
-      RedirectResolution resolution = new RedirectResolution("https://www.stripesframework.org", false).setPermanent(true);
+   public void testPermanentRedirect() throws Exception {
+      RedirectResolution resolution = new RedirectResolution("https://www.stripesframework.org", false).setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
       MockHttpServletResponse response = new MockHttpServletResponse();
       resolution.execute(buildMockServletRequest(), response);
 
@@ -25,8 +25,9 @@ public class RedirectResolutionTest extends FilterEnabledTestBase {
    }
 
    @Test
-   public void testPermanantRedirectWithParameters() throws Exception {
-      RedirectResolution resolution = new RedirectResolution("https://www.stripesframework.org", false).setPermanent(true).addParameter("test", "test");
+   public void testPermanentRedirectWithParameters() throws Exception {
+      RedirectResolution resolution = new RedirectResolution("https://www.stripesframework.org", false).setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY)
+            .addParameter("test", "test");
       MockHttpServletResponse response = new MockHttpServletResponse();
       resolution.execute(buildMockServletRequest(), response);
 
