@@ -18,14 +18,14 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.stripesframework.web.controller.FlashScope;
+import org.stripesframework.web.controller.StripesConstants;
+import org.stripesframework.web.util.Log;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
-
-import org.stripesframework.web.controller.FlashScope;
-import org.stripesframework.web.controller.StripesConstants;
-import org.stripesframework.web.util.Log;
 
 
 /**
@@ -34,7 +34,7 @@ import org.stripesframework.web.util.Log;
  * any URL anywhere on the web - though it is more commonly used to send the user to a location
  * within the same application.<p>
  *
- * <p>By default the RedirectResolution will prepend the context path of the web application to
+ * <p>By default, the RedirectResolution will prepend the context path of the web application to
  * any URL before redirecting the request. To prevent the context path from being prepended
  * use the constructor: {@code RedirectResolution(String,boolean)}.</p>
  *
@@ -44,9 +44,8 @@ import org.stripesframework.web.util.Log;
  * request parameters to be included into the URL.</p>
  *
  * <p>
- * The redirect type can be switched from a 302 temporary redirect (default) to a 301 permanent
- * redirect using the setPermanent method.
- * </p>
+ * The redirect status code can be switched from a 302 temporary redirect (default) to any 3XX redirect
+ * using the setStatus method.</p>
  *
  * @see ForwardResolution
  * @author Tim Fennell
@@ -58,7 +57,7 @@ public class RedirectResolution extends OnwardResolution<RedirectResolution> {
    private boolean                _prependContext = true;
    private boolean                _includeRequestParameters;
    private Collection<ActionBean> _beans; // used to flash action beans
-   private boolean                _permanent      = false;
+   private int                    _status         = 302;
 
    /**
     * Simple constructor that takes the URL to which to forward the user. Defaults to
@@ -114,22 +113,19 @@ public class RedirectResolution extends OnwardResolution<RedirectResolution> {
    @Override
    @SuppressWarnings("unchecked")
    public void execute( HttpServletRequest request, HttpServletResponse response ) throws ServletException, IOException {
+      response.setStatus(_status);
+      response = new HttpServletResponseWrapper(response) {
 
-      if ( _permanent ) {
-         response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
-         response = new HttpServletResponseWrapper(response) {
+         @Override
+         public void sendRedirect( String location ) {
+            setHeader("Location", location);
+         }
 
-            @Override
-            public void sendRedirect( String location ) {
-               setHeader("Location", location);
-            }
+         @Override
+         public void setStatus( int sc ) {
+         }
+      };
 
-            @Override
-            public void setStatus( int sc ) {
-            }
-
-         };
-      }
       if ( _includeRequestParameters ) {
          addParameters(request.getParameterMap());
       }
@@ -205,9 +201,24 @@ public class RedirectResolution extends OnwardResolution<RedirectResolution> {
       return super.setAnchor(anchor);
    }
 
-   /** Sets the redirect type to permanent (301) instead of temporary (302). */
+   /**
+    * Sets the redirect type to permanent (301) instead of temporary (302).
+    *
+    * @deprecated Use {@link #setStatus(int)} instead.
+    */
+   @Deprecated
    public RedirectResolution setPermanent( boolean permanent ) {
-      _permanent = permanent;
+      return setStatus(permanent ? 301 : 302);
+   }
+
+   /** Sets the redirect status, e.g. to permanent (301) instead of the default temporary (302). */
+   public RedirectResolution setStatus( int status ) {
+      if ( status < 300 || status >= 400 ) {
+         throw new IllegalArgumentException("Status must be in range [300, 399]");
+      }
+
+      _status = status;
+
       return this;
    }
 }
