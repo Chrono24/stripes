@@ -8,7 +8,7 @@
 	</parent>
 	<groupId>org.stripesframework</groupId>
 	<artifactId>stripes-parent</artifactId>
-	<version>3.0.0-EAP-2</version>
+	<version>3.0.0-EAP-3</version>
 	<packaging>pom</packaging>
 
 	<modules>
