@@ -72,27 +72,27 @@ public class MockHttpServletResponse implements HttpServletResponse {
    /** Adds the specified value for the named header (does not remove/replace existing values). */
    @Override
    public void addDateHeader( String name, long value ) {
-      List<Object> values = _headers.computeIfAbsent(name, k -> new ArrayList<>());
+      List<Object> values = _headers.computeIfAbsent(name.toLowerCase(), k -> new ArrayList<>());
       values.add(value);
    }
 
    /** Adds the specified value for the named header (does not remove/replace existing values). */
    @Override
    public void addHeader( String name, String value ) {
-      List<Object> values = _headers.computeIfAbsent(name, k -> new ArrayList<>());
+      List<Object> values = _headers.computeIfAbsent(name.toLowerCase(), k -> new ArrayList<>());
       values.add(value);
    }
 
    /** Adds the specified value for the named header (does not remove/replace existing values). */
    @Override
    public void addIntHeader( String name, int value ) {
-      List<Object> values = _headers.computeIfAbsent(name, k -> new ArrayList<>());
+      List<Object> values = _headers.computeIfAbsent(name.toLowerCase(), k -> new ArrayList<>());
       values.add(value);
    }
 
    /** Returns true if the specified header was placed in the response. */
    @Override
-   public boolean containsHeader( String name ) { return _headers.containsKey(name); }
+   public boolean containsHeader( String name ) { return _headers.containsKey(name.toLowerCase()); }
 
    /** Returns the URL unchanged. */
    @Override
@@ -137,7 +137,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
    @Override
    public String getHeader( String name ) {
-      List<Object> list = _headers.get(name);
+      List<Object> list = _headers.get(name.toLowerCase());
       if ( list != null && !list.isEmpty() ) {
          return list.get(0).toString();
       }
@@ -159,7 +159,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
    @Override
    public Collection<String> getHeaders( String name ) {
-      List<Object> headers = _headers.get(name);
+      List<Object> headers = _headers.get(name.toLowerCase());
       if ( headers == null ) {
          return Collections.emptyList();
       }
@@ -194,7 +194,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
     * If a call was made to sendRedirect() this method will return the URL that was supplied.
     * Otherwise it will return null.
     */
-   public String getRedirectUrl() { return _redirectUrl; }
+   public String getRedirectUrl() { return getHeader("location"); }
 
    /** Gets the status (or error) code if one was set. Defaults to 200 (HTTP OK). */
    @Override
@@ -272,21 +272,21 @@ public class MockHttpServletResponse implements HttpServletResponse {
    /** Stores the value in a Long and saves it as a header. */
    @Override
    public void setDateHeader( String name, long value ) {
-      _headers.remove(name);
+      _headers.remove(name.toLowerCase());
       addDateHeader(name, value);
    }
 
    /** Sets the value of the specified header to the single value provided. */
    @Override
    public void setHeader( String name, String value ) {
-      _headers.remove(name);
+      _headers.remove(name.toLowerCase());
       addHeader(name, value);
    }
 
    /** Stores the value in an Integer and saves it as a header. */
    @Override
    public void setIntHeader( String name, int value ) {
-      _headers.remove(name);
+      _headers.remove(name.toLowerCase());
       addIntHeader(name, value);
    }
 
