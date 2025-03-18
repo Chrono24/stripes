@@ -92,48 +92,70 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
    /** Returns true if the specified header was placed in the response. */
    @Override
-   public boolean containsHeader( String name ) { return _headers.containsKey(name.toLowerCase()); }
+   public boolean containsHeader( String name ) {
+      return _headers.containsKey(name.toLowerCase());
+   }
 
    /** Returns the URL unchanged. */
    @Override
-   public String encodeRedirectURL( String url ) { return url; }
+   public String encodeRedirectURL( String url ) {
+      return url;
+   }
 
    /** Returns the URL unchanged. */
    @Override
-   public String encodeRedirectUrl( String url ) { return url; }
+   public String encodeRedirectUrl( String url ) {
+      return url;
+   }
 
    /** Returns the URL unchanged. */
    @Override
-   public String encodeURL( String url ) { return url; }
+   public String encodeURL( String url ) {
+      return url;
+   }
 
    /** Returns the URL unchanged. */
    @Override
-   public String encodeUrl( String url ) { return url; }
+   public String encodeUrl( String url ) {
+      return url;
+   }
 
    /** Has no effect. */
    @Override
-   public void flushBuffer() throws IOException { }
+   public void flushBuffer() throws IOException {}
 
    /** Always returns 0. */
    @Override
-   public int getBufferSize() { return 0; }
+   public int getBufferSize() {
+      return 0;
+   }
 
    /** Gets the character encoding (defaults to UTF-8). */
    @Override
-   public String getCharacterEncoding() { return _characterEncoding; }
+   public String getCharacterEncoding() {
+      return _characterEncoding;
+   }
 
    /** Returns the content length if one was set on the response by calling setContentLength(). */
-   public int getContentLength() { return _contentLength; }
+   public int getContentLength() {
+      return _contentLength;
+   }
 
    /** Gets the content type for the response. Defaults to text/html. */
    @Override
-   public String getContentType() { return _contentType; }
+   public String getContentType() {
+      return _contentType;
+   }
 
    /** Gets the set of cookies stored in the response. */
-   public Cookie[] getCookies() { return _cookies.toArray(new Cookie[0]); }
+   public Cookie[] getCookies() {
+      return _cookies.toArray(new Cookie[0]);
+   }
 
    /** Gets the error message if one was set with setStatus() or sendError(). */
-   public String getErrorMessage() { return _errorMessage; }
+   public String getErrorMessage() {
+      return _errorMessage;
+   }
 
    @Override
    public String getHeader( String name ) {
@@ -150,11 +172,13 @@ public class MockHttpServletResponse implements HttpServletResponse {
     * be either Strings (if setHeader() was used), Integers (if setIntHeader() was used) or
     * Longs (if setDateHeader() was used).
     */
-   public Map<String, List<Object>> getHeaderMap() { return _headers; }
+   public Map<String, List<Object>> getHeaderMap() {
+      return Collections.unmodifiableMap(_headers);
+   }
 
    @Override
    public Collection<String> getHeaderNames() {
-      return _headers.keySet();
+      return Collections.unmodifiableSet(_headers.keySet());
    }
 
    @Override
@@ -168,7 +192,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
    /** Gets the response locale. Default to the system default locale. */
    @Override
-   public Locale getLocale() { return _locale; }
+   public Locale getLocale() {
+      return _locale;
+   }
 
    /** Gets the output that was written to the output stream, as a byte[]. */
    public byte[] getOutputBytes() {
@@ -182,7 +208,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
     * getOutputString().
     */
    @Override
-   public ServletOutputStream getOutputStream() throws IOException { return _out; }
+   public ServletOutputStream getOutputStream() throws IOException {
+      return _out;
+   }
 
    /** Gets the output that was written to the output stream, as a character String. */
    public String getOutputString() {
@@ -194,11 +222,15 @@ public class MockHttpServletResponse implements HttpServletResponse {
     * If a call was made to sendRedirect() this method will return the URL that was supplied.
     * Otherwise it will return null.
     */
-   public String getRedirectUrl() { return getHeader("location"); }
+   public String getRedirectUrl() {
+      return getHeader("location");
+   }
 
    /** Gets the status (or error) code if one was set. Defaults to 200 (HTTP OK). */
    @Override
-   public int getStatus() { return _status; }
+   public int getStatus() {
+      return _status;
+   }
 
    /**
     * Returns a reference to a PrintWriter to be used for character output. The output is captured
@@ -206,11 +238,15 @@ public class MockHttpServletResponse implements HttpServletResponse {
     * getOutputString().
     */
    @Override
-   public PrintWriter getWriter() throws IOException { return _writer; }
+   public PrintWriter getWriter() throws IOException {
+      return _writer;
+   }
 
    /** Always returns true. */
    @Override
-   public boolean isCommitted() { return true; }
+   public boolean isCommitted() {
+      return true;
+   }
 
    /** Always throws an IllegalStateException. */
    @Override
@@ -233,7 +269,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
    /** Sets that status code to the error code provided. */
    @Override
-   public void sendError( int status ) throws IOException { _status = status; }
+   public void sendError( int status ) throws IOException {
+      _status = status;
+   }
 
    /**
     * Simply sets the status code and stores the URL that was supplied, so that it can be examined
@@ -247,15 +285,19 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
    /** Has no effect. */
    @Override
-   public void setBufferSize( int i ) { }
+   public void setBufferSize( int i ) {}
 
    /** Sets the character encoding on the request. */
    @Override
-   public void setCharacterEncoding( String encoding ) { _characterEncoding = encoding; }
+   public void setCharacterEncoding( String encoding ) {
+      _characterEncoding = encoding;
+   }
 
    /** Sets a custom content length on the response. */
    @Override
-   public void setContentLength( int contentLength ) { _contentLength = contentLength; }
+   public void setContentLength( int contentLength ) {
+      _contentLength = contentLength;
+   }
 
    @Override
    public void setContentLengthLong( long contentLength ) {
@@ -266,7 +308,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
    @Override
    public void setContentType( String contentType ) {
       _contentType = contentType;
-      getHeaderMap().put("Content-type", Collections.singletonList(contentType));
+      setHeader("content-type", contentType);
    }
 
    /** Stores the value in a Long and saves it as a header. */
@@ -292,11 +334,15 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
    /** Sets the response locale to the one specified. */
    @Override
-   public void setLocale( Locale locale ) { _locale = locale; }
+   public void setLocale( Locale locale ) {
+      _locale = locale;
+   }
 
    /** Sets the HTTP Status code of the response. */
    @Override
-   public void setStatus( int statusCode ) { _status = statusCode; }
+   public void setStatus( int statusCode ) {
+      _status = statusCode;
+   }
 
    /** Saves the HTTP status code and the message provided. */
    @Override
