@@ -44,8 +44,8 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class MockHttpServletResponse implements HttpServletResponse {
 
-   private final MockServletOutputStream   _out               = new MockServletOutputStream();
-   private final PrintWriter               _writer            = new PrintWriter(_out, true);
+   private       MockServletOutputStream   _out               = new MockServletOutputStream();
+   private       PrintWriter               _writer            = new PrintWriter(_out, true);
    private       Locale                    _locale            = Locale.getDefault();
    private final Map<String, List<Object>> _headers           = new HashMap<>();
    private final List<Cookie>              _cookies           = new ArrayList<>();
@@ -257,7 +257,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
    /** Always throws IllegalStateException. */
    @Override
    public void resetBuffer() {
-      throw new IllegalStateException("reset() is not supported");
+      _out = new MockServletOutputStream();
+      _writer = new PrintWriter(_out, true);
    }
 
    /** Sets the status code and saves the message so it can be retrieved later. */
