@@ -25,7 +25,6 @@ import org.stripesframework.web.util.Log;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpServletResponseWrapper;
 
 
 /**
@@ -114,17 +113,6 @@ public class RedirectResolution extends OnwardResolution<RedirectResolution> {
    @SuppressWarnings("unchecked")
    public void execute( HttpServletRequest request, HttpServletResponse response ) throws ServletException, IOException {
       response.setStatus(_status);
-      response = new HttpServletResponseWrapper(response) {
-
-         @Override
-         public void sendRedirect( String location ) {
-            setHeader("Location", location);
-         }
-
-         @Override
-         public void setStatus( int sc ) {
-         }
-      };
 
       if ( _includeRequestParameters ) {
          addParameters(request.getParameterMap());
@@ -156,7 +144,10 @@ public class RedirectResolution extends OnwardResolution<RedirectResolution> {
       url = response.encodeRedirectURL(url);
       log.trace("Redirecting ", _beans == null ? "" : "(w/flashed bean) ", "to URL: ", url);
 
-      response.sendRedirect(url);
+      response.resetBuffer();
+      response.setStatus(_status);
+      response.setHeader("location", url);
+      response.getOutputStream().close();
    }
 
    /**
