@@ -124,9 +124,17 @@ public class DefaultActionBeanPropertyBinder implements ActionBeanPropertyBinder
 
                // Determine the target type
                ValidationMetadata validationInfo = validationInfos.get(name.getStrippedName());
+
+               String fullPropertyName;
+               if ( validationInfo != null && validationInfo.rootBinding() ) {
+                  fullPropertyName = validationInfo.bindingPrefix() + pname;
+               } else {
+                  fullPropertyName = pname;
+               }
+
                PropertyExpressionEvaluation eval;
                try {
-                  eval = new PropertyExpressionEvaluation(PropertyExpression.getExpression(pname), bean);
+                  eval = new PropertyExpressionEvaluation(PropertyExpression.getExpression(fullPropertyName), bean);
                }
                catch ( Exception e ) {
                   if ( pname.equals(context.getEventName()) ) {

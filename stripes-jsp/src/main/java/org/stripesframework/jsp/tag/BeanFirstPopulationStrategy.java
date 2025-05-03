@@ -14,12 +14,16 @@
  */
 package org.stripesframework.jsp.tag;
 
-import org.stripesframework.web.action.ActionBean;
-import org.stripesframework.web.controller.StripesConstants;
+import java.util.Map;
+
 import org.stripesframework.jsp.exception.StripesJspException;
+import org.stripesframework.web.action.ActionBean;
+import org.stripesframework.web.controller.ParameterName;
+import org.stripesframework.web.controller.StripesConstants;
 import org.stripesframework.web.util.Log;
 import org.stripesframework.web.util.bean.BeanUtil;
 import org.stripesframework.web.util.bean.ExpressionException;
+import org.stripesframework.web.validation.ValidationMetadata;
 
 
 /**
@@ -61,7 +65,19 @@ public class BeanFirstPopulationStrategy extends DefaultPopulationStrategy {
          boolean kaboom = false;
          if ( bean != null ) {
             try {
-               value = BeanUtil.getPropertyValue(tag.getName(), bean);
+               String propertyName = tag.getName();
+
+               Map<String, ValidationMetadata> validationInfos = getConfiguration().getValidationMetadataProvider().getValidationMetadata(bean.getClass());
+               ValidationMetadata validationInfo = validationInfos.get(new ParameterName(propertyName).getStrippedName());
+
+               String fullPropertyName;
+               if ( validationInfo != null && validationInfo.rootBinding() ) {
+                  fullPropertyName = validationInfo.bindingPrefix() + propertyName;
+               } else {
+                  fullPropertyName = propertyName;
+               }
+
+               value = BeanUtil.getPropertyValue(fullPropertyName, bean);
             }
             catch ( ExpressionException ee ) {
                if ( !StripesConstants.SPECIAL_URL_KEYS.contains(tag.getName()) ) {
