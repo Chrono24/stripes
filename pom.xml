@@ -43,6 +43,15 @@
 		<developerConnection>scm:git:https://github.com/Chrono24/stripes.git</developerConnection>
 	</scm>
 
+	<developers>
+		<developer>
+			<name>Chrono24 GmbH</name>
+			<email>info@chrono24.com</email>
+			<organization>Chrono24 GmbH</organization>
+			<organizationUrl>https://github.com/Chrono24</organizationUrl>
+		</developer>
+	</developers>
+
 	<issueManagement>
 		<system>JIRA</system>
 		<url>https://github.com/chrono24/stripes/issues</url>
