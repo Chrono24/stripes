@@ -68,8 +68,6 @@ public class DefaultLocalePicker implements LocalePicker {
 
    /**
     * Attempts to read the
-    * @param configuration
-    * @throws Exception
     */
    @Override
    public void init( Configuration configuration ) throws Exception {
@@ -92,11 +90,11 @@ public class DefaultLocalePicker implements LocalePicker {
             Locale locale = null;
 
             if ( parts.length == 1 ) {
-               locale = new Locale(parts[0].trim().toLowerCase());
+               locale = Locale.of(parts[0].trim().toLowerCase());
             } else if ( parts.length == 2 ) {
-               locale = new Locale(parts[0].trim().toLowerCase(), parts[1].trim().toUpperCase());
+               locale = Locale.of(parts[0].trim().toLowerCase(), parts[1].trim().toUpperCase());
             } else if ( parts.length == 3 ) {
-               locale = new Locale(parts[0].trim().toLowerCase(), parts[1].trim().toUpperCase(), parts[2].trim());
+               locale = Locale.of(parts[0].trim().toLowerCase(), parts[1].trim().toUpperCase(), parts[2].trim());
             } else {
                log.error("Configuration property ", LOCALE_LIST, " contained a locale value ", "that split into more than three parts! The parts were: ",
                      parts);
@@ -185,7 +183,7 @@ public class DefaultLocalePicker implements LocalePicker {
       } else if ( oneWayMatch != null ) {
          return oneWayMatch;
       } else {
-         return _locales.get(0);
+         return _locales.getFirst();
       }
    }
 }

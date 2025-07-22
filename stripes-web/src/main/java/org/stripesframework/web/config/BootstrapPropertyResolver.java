@@ -15,14 +15,11 @@
 package org.stripesframework.web.config;
 
 import java.lang.reflect.Modifier;
-import java.security.AccessControlException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
-import jakarta.servlet.FilterConfig;
 
 import org.stripesframework.web.exception.StripesRuntimeException;
 import org.stripesframework.web.util.Log;
@@ -30,6 +27,8 @@ import org.stripesframework.web.util.ReflectUtil;
 import org.stripesframework.web.util.ResolverUtil;
 import org.stripesframework.web.util.StringUtil;
 import org.stripesframework.web.vfs.VFS;
+
+import jakarta.servlet.FilterConfig;
 
 
 /**
@@ -189,31 +188,14 @@ public class BootstrapPropertyResolver {
     * @return String the value of the configuration item or null
     */
    public String getProperty( String key ) {
-      String value = null;
+      String value = _filterConfig.getInitParameter(key);
 
-      try {
-         value = _filterConfig.getInitParameter(key);
-      }
-      catch ( AccessControlException e ) {
-         log.debug("Security manager prevented " + getClass().getName() + " from reading filter init-param" + key);
+      if ( value == null ) {
+         value = _filterConfig.getServletContext().getInitParameter(key);
       }
 
       if ( value == null ) {
-         try {
-            value = _filterConfig.getServletContext().getInitParameter(key);
-         }
-         catch ( AccessControlException e ) {
-            log.debug("Security manager prevented " + getClass().getName() + " from reading servlet context init-param" + key);
-         }
-      }
-
-      if ( value == null ) {
-         try {
-            value = System.getProperty(key);
-         }
-         catch ( AccessControlException e ) {
-            log.debug("Security manager prevented " + getClass().getName() + " from reading system property " + key);
-         }
+         value = System.getProperty(key);
       }
 
       return value;

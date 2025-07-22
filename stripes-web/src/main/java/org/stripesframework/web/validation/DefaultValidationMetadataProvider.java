@@ -290,14 +290,14 @@ public class DefaultValidationMetadataProvider implements ValidationMetadataProv
    protected void logDebugMessageForConfiguredValidations( Class<?> beanType, Map<String, ValidationMetadata> meta ) {
       StringBuilder builder = new StringBuilder(128);
       for ( Map.Entry<String, ValidationMetadata> entry : meta.entrySet() ) {
-         if ( builder.length() > 0 ) {
+         if ( !builder.isEmpty() ) {
             builder.append(", ");
          }
          builder.append(entry.getKey());
          builder.append("->");
          builder.append(entry.getValue());
       }
-      log.debug("Loaded validations for ActionBean ", beanType.getSimpleName(), ": ", builder.length() > 0 ? builder : "<none>");
+      log.debug("Loaded validations for ActionBean ", beanType.getSimpleName(), ": ", !builder.isEmpty() ? builder : "<none>");
    }
 
    /**
