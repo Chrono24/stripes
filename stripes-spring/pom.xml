@@ -2,16 +2,19 @@
 <!-- Stripes core. Produces the stripes.jar needed in users webapps. -->
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
 	<parent>
 		<groupId>org.stripesframework</groupId>
 		<artifactId>stripes-parent</artifactId>
 		<version>3.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
+
 	<artifactId>stripes-spring</artifactId>
 	<packaging>jar</packaging>
 
-	<description>Stripes Spring integration.</description>
+	<name>Stripes Spring Integration</name>
+	<description>Stripes Spring Integration</description>
 
 	<dependencies>
 
