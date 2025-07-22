@@ -77,7 +77,7 @@ public class DefaultLocalePicker implements LocalePicker {
 
       String configuredLocales = configuration.getBootstrapPropertyResolver().getProperty(LOCALE_LIST);
 
-      if ( configuredLocales == null || configuredLocales.equals("") ) {
+      if ( configuredLocales == null || configuredLocales.isEmpty() ) {
          log.info("No locale list specified, defaulting to single locale: ", Locale.getDefault());
          _locales.add(Locale.getDefault());
       } else {
@@ -148,7 +148,6 @@ public class DefaultLocalePicker implements LocalePicker {
     * @return a Locale to use in processing the request
     */
    @Override
-   @SuppressWarnings("unchecked")
    public Locale pickLocale( HttpServletRequest request ) {
       Locale oneWayMatch = null;
       Locale twoWayMatch = null;
