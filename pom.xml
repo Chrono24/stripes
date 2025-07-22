@@ -53,12 +53,12 @@
 	</developers>
 
 	<issueManagement>
-		<system>JIRA</system>
+		<system>GitHub Issues</system>
 		<url>https://github.com/chrono24/stripes/issues</url>
 	</issueManagement>
 
 	<ciManagement>
-		<system>Jenkins</system>
+		<system>GitHub Actions</system>
 		<url>https://github.com/chrono24/stripes/actions</url>
 	</ciManagement>
 
