@@ -26,6 +26,8 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESedeKeySpec;
 import javax.crypto.spec.IvParameterSpec;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.config.Configuration;
 import org.stripesframework.web.controller.StripesFilter;
 import org.stripesframework.web.exception.StripesRuntimeException;
@@ -62,7 +64,7 @@ import org.stripesframework.web.exception.StripesRuntimeException;
  */
 public class CryptoUtil {
 
-   private static final Log log = Log.getInstance(CryptoUtil.class);
+   private static final Logger log = LoggerFactory.getLogger(CryptoUtil.class);
 
    /** The algorithm that is used to encrypt values. */
    protected static final String ALGORITHM             = "DESede";
@@ -105,12 +107,12 @@ public class CryptoUtil {
       // First un-base64 the String
       byte[] bytes = Base64.decode(input, BASE64_OPTIONS);
       if ( bytes == null || bytes.length < 1 ) {
-         log.warn("Input is not Base64 encoded: ", input);
+         log.warn("Input is not Base64 encoded: {}", input);
          return null;
       }
 
       if ( bytes.length < CIPHER_BLOCK_LENGTH * 2 + CIPHER_HMAC_LENGTH ) {
-         log.warn("Input is too short: ", input);
+         log.warn("Input is too short: {}", input);
          return null;
       }
 
@@ -129,7 +131,7 @@ public class CryptoUtil {
          hmac(key, bytes, 0, bytes.length - CIPHER_HMAC_LENGTH, mac, 0);
       }
       catch ( Exception e1 ) {
-         log.warn("Unexpected error performing hmac on: ", input);
+         log.warn("Unexpected error performing hmac on: {}", input);
          return null;
       }
 
@@ -138,11 +140,11 @@ public class CryptoUtil {
          validCiphertext = hmacEquals(key, bytes, bytes.length - CIPHER_HMAC_LENGTH, mac, 0);
       }
       catch ( Exception e1 ) {
-         log.warn("Unexpected error validating hmac of: ", input);
+         log.warn("Unexpected error validating hmac of: {}", input);
          return null;
       }
       if ( !validCiphertext ) {
-         log.warn("Input was not encrypted with the current encryption key (bad HMAC): ", input);
+         log.warn("Input was not encrypted with the current encryption key (bad HMAC): {}", input);
          return null;
       }
 
@@ -160,11 +162,11 @@ public class CryptoUtil {
          output = cipher.doFinal(bytes, CIPHER_BLOCK_LENGTH, bytes.length - CIPHER_HMAC_LENGTH - CIPHER_BLOCK_LENGTH);
       }
       catch ( IllegalBlockSizeException e ) {
-         log.warn("Unexpected IllegalBlockSizeException on: ", input);
+         log.warn("Unexpected IllegalBlockSizeException on: {}", input);
          return null;
       }
       catch ( BadPaddingException e ) {
-         log.warn("Unexpected BadPaddingException on: ", input);
+         log.warn("Unexpected BadPaddingException on: {}", input);
          return null;
       }
 

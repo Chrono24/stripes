@@ -30,10 +30,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.config.Configuration;
 import org.stripesframework.web.controller.ParameterName;
 import org.stripesframework.web.exception.StripesRuntimeException;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.util.ReflectUtil;
 
 
@@ -49,7 +50,7 @@ import org.stripesframework.web.util.ReflectUtil;
  */
 public class DefaultValidationMetadataProvider implements ValidationMetadataProvider {
 
-   private static final Log log = Log.getInstance(DefaultValidationMetadataProvider.class);
+   private static final Logger log = LoggerFactory.getLogger(DefaultValidationMetadataProvider.class);
 
    private Configuration _configuration;
 
@@ -215,11 +216,11 @@ public class DefaultValidationMetadataProvider implements ValidationMetadataProv
          }
       }
       catch ( RuntimeException e ) {
-         log.error(e, "Failure checking @Validate annotations ", getClass().getName());
+         log.error("Failure checking @Validate annotations {}", getClass().getName(), e);
          throw e;
       }
       catch ( Exception e ) {
-         log.error(e, "Failure checking @Validate annotations ", getClass().getName());
+         log.error("Failure checking @Validate annotations {}", getClass().getName(), e);
          StripesRuntimeException sre = new StripesRuntimeException(e.getMessage(), e);
          sre.setStackTrace(e.getStackTrace());
          throw sre;
@@ -258,7 +259,7 @@ public class DefaultValidationMetadataProvider implements ValidationMetadataProv
             if ( simple.field() == null || "".equals(simple.field()) ) {
                meta.put(propertyName, new ValidationMetadata(propertyName, simple));
             } else {
-               log.warn("Field name present in @Validate but should be omitted: ", clazz, ", property ", propertyName, ", given field name ", simple.field());
+               log.warn("Field name present in @Validate but should be omitted: {}, property {}, given field name {}", clazz, propertyName, simple.field());
             }
          }
 
@@ -270,11 +271,11 @@ public class DefaultValidationMetadataProvider implements ValidationMetadataProv
                   if ( validate.field() != null && !"".equals(validate.field()) ) {
                      String fullName = propertyName + '.' + validate.field();
                      if ( meta.containsKey(fullName) ) {
-                        log.warn("More than one nested @Validate with same field name: " + validate.field() + " on property " + propertyName);
+                        log.warn("More than one nested @Validate with same field name: {} on property {}", validate.field(), propertyName);
                      }
                      meta.put(fullName, new ValidationMetadata(fullName, validate));
                   } else {
-                     log.warn("Field name missing from nested @Validate: ", clazz, ", property ", propertyName);
+                     log.warn("Field name missing from nested @Validate: {}, property {}", clazz, propertyName);
                   }
                }
             }
@@ -297,7 +298,7 @@ public class DefaultValidationMetadataProvider implements ValidationMetadataProv
          builder.append("->");
          builder.append(entry.getValue());
       }
-      log.debug("Loaded validations for ActionBean ", beanType.getSimpleName(), ": ", !builder.isEmpty() ? builder : "<none>");
+      log.debug("Loaded validations for ActionBean {}: {}", beanType.getSimpleName(), !builder.isEmpty() ? builder : "<none>");
    }
 
    /**

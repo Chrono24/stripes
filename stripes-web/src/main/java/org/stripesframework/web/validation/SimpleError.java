@@ -17,10 +17,11 @@ package org.stripesframework.web.validation;
 import java.util.Locale;
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.action.ActionBean;
 import org.stripesframework.web.action.SimpleMessage;
 import org.stripesframework.web.localization.LocalizationUtility;
-import org.stripesframework.web.util.Log;
 
 
 /**
@@ -58,7 +59,7 @@ public class SimpleError extends SimpleMessage implements ValidationError {
 
    private static final long serialVersionUID = 1L;
 
-   private static final Log log = Log.getInstance(SimpleError.class);
+   private static final Logger log = LoggerFactory.getLogger(SimpleError.class);
 
    /**
     * Helper method that is used to widen the replacement parameter array to make
@@ -192,7 +193,7 @@ public class SimpleError extends SimpleMessage implements ValidationError {
     * for message template parameter replacement.
     */
    protected void resolveFieldName( Locale locale ) {
-      log.debug("Looking up localized field name with messageKey: ", _fieldNameKey);
+      log.debug("Looking up localized field name with messageKey: {}", _fieldNameKey);
 
       if ( _fieldNameKey == null ) {
          getReplacementParameters()[0] = "FIELD NAME NOT SUPPLIED IN CODE";

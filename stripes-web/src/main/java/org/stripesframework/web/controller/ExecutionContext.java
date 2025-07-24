@@ -18,10 +18,11 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.action.ActionBean;
 import org.stripesframework.web.action.ActionBeanContext;
 import org.stripesframework.web.action.Resolution;
-import org.stripesframework.web.util.Log;
 
 
 /**
@@ -38,7 +39,7 @@ import org.stripesframework.web.util.Log;
  */
 public class ExecutionContext {
 
-   private static final Log log = Log.getInstance(ExecutionContext.class);
+   private static final Logger log = LoggerFactory.getLogger(ExecutionContext.class);
 
    private static final ThreadLocal<ExecutionContext> currentContext = new ThreadLocal<>();
 
@@ -115,7 +116,7 @@ public class ExecutionContext {
     */
    public Resolution proceed() throws Exception {
       if ( _iterator == null ) {
-         log.debug("Transitioning to lifecycle stage ", _lifecycleStage);
+         log.debug("Transitioning to lifecycle stage {}", _lifecycleStage);
          _iterator = _interceptors.iterator();
       }
 

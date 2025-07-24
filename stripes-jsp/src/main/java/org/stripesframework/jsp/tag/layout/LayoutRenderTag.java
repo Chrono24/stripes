@@ -22,9 +22,10 @@ import jakarta.servlet.jsp.tagext.BodyTag;
 import jakarta.servlet.jsp.tagext.DynamicAttributes;
 import jakarta.servlet.jsp.tagext.Tag;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.jsp.exception.StripesJspException;
 import org.stripesframework.web.exception.StripesRuntimeException;
-import org.stripesframework.web.util.Log;
 
 
 /**
@@ -37,7 +38,7 @@ import org.stripesframework.web.util.Log;
  */
 public class LayoutRenderTag extends LayoutTag implements BodyTag, DynamicAttributes {
 
-   private static final Log log = Log.getInstance(LayoutRenderTag.class);
+   private static final Logger log = LoggerFactory.getLogger(LayoutRenderTag.class);
 
    private String              _name;
    private LayoutContext       _context;
@@ -66,13 +67,13 @@ public class LayoutRenderTag extends LayoutTag implements BodyTag, DynamicAttrib
    public int doEndTag() throws JspException {
       try {
          if ( _contextIsNew ) {
-            log.debug("End layout init in ", _context.getRenderPage());
+            log.debug("End layout init in {}", _context.getRenderPage());
 
             try {
-               log.debug("Start layout exec in ", _context.getDefinitionPage());
+               log.debug("Start layout exec in {}", _context.getDefinitionPage());
                _context.getOut().setSilent(true, _pageContext);
                _context.doInclude(_pageContext, getName());
-               log.debug("End layout exec in ", _context.getDefinitionPage());
+               log.debug("End layout exec in {}", _context.getDefinitionPage());
             }
             catch ( Exception e ) {
                throw new StripesJspException("An exception was raised while invoking a layout. The layout used was " + "'" + getName()
@@ -94,7 +95,7 @@ public class LayoutRenderTag extends LayoutTag implements BodyTag, DynamicAttrib
          }
 
          if ( _context.isComponentRenderPhase() ) {
-            log.debug("End component render phase for ", _context.getComponent(), " in ", _context.getRenderPage());
+            log.debug("End component render phase for {} in {}", _context.getComponent(), _context.getRenderPage());
             cleanUpComponentRenderers();
          }
 
@@ -136,12 +137,12 @@ public class LayoutRenderTag extends LayoutTag implements BodyTag, DynamicAttrib
    public int doStartTag() throws JspException {
       try {
          if ( _contextIsNew ) {
-            log.debug("Start layout init in ", _context.getRenderPage());
+            log.debug("Start layout init in {}", _context.getRenderPage());
             pushPageContextAttributes(_context.getParameters());
          }
 
          if ( _context.isComponentRenderPhase() ) {
-            log.debug("Start component render phase for ", _context.getComponent(), " in ", _context.getRenderPage());
+            log.debug("Start component render phase for {} in {}", _context.getComponent(), _context.getRenderPage());
             exportComponentRenderers();
          }
 

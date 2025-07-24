@@ -25,6 +25,8 @@ import java.util.Set;
 
 import jakarta.servlet.ServletContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.action.HandlesEvent;
 import org.stripesframework.web.action.UrlBinding;
 import org.stripesframework.web.action.ActionBean;
@@ -34,7 +36,6 @@ import org.stripesframework.web.action.Resolution;
 import org.stripesframework.web.config.Configuration;
 import org.stripesframework.web.exception.StripesServletException;
 import org.stripesframework.web.util.Literal;
-import org.stripesframework.web.util.Log;
 
 
 /**
@@ -116,7 +117,7 @@ public class NameBasedActionResolver extends AnnotatedClassActionResolver {
    public static final List<String> DEFAULT_ACTION_BEAN_SUFFIXES = Collections.unmodifiableList(Literal.list("Bean", "Action"));
 
    /** Log instance used to log information from this class. */
-   private static final Log log = Log.getInstance(NameBasedActionResolver.class);
+   private static final Logger log = LoggerFactory.getLogger(NameBasedActionResolver.class);
 
    /**
     * <p>Overridden to trap the exception that is thrown when a URL cannot be mapped to an
@@ -223,8 +224,8 @@ public class NameBasedActionResolver extends AnnotatedClassActionResolver {
             if ( name.endsWith(suffix) ) {
                name = name.substring(0, name.length() - suffix.length());
                if ( generatedAliases.contains(name) ) {
-                  log.warn("Found multiple action beans with same bean name ", name,
-                        ". You will need to " + "reference these action beans by their fully qualified names");
+                  log.warn("Found multiple action beans with same bean name {}. You will need to reference these action beans by their fully qualified names",
+                        name);
                   duplicateAliases.add(name);
                   continue;
                }
@@ -415,7 +416,7 @@ public class NameBasedActionResolver extends AnnotatedClassActionResolver {
       Resolution view = findView(urlBinding);
 
       if ( view != null ) {
-         log.debug("Could not find an ActionBean bound to '", urlBinding, "', but found a view ", "at '", view, "'. Forwarding the user there instead.");
+         log.debug("Could not find an ActionBean bound to '{}', but found a view at '{}'. Forwarding the user there instead.", urlBinding, view);
          bean = new DefaultViewActionBean(view);
       }
 

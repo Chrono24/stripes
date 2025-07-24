@@ -18,10 +18,11 @@ import java.io.IOException;
 
 import jakarta.servlet.jsp.JspException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.controller.StripesFilter;
 import org.stripesframework.web.format.Formatter;
 import org.stripesframework.web.format.FormatterFactory;
-import org.stripesframework.web.util.Log;
 
 
 /**
@@ -35,7 +36,7 @@ import org.stripesframework.web.util.Log;
  */
 public class FormatTag extends VarTagSupport {
 
-   private static final Log log = Log.getInstance(FormatTag.class);
+   private static final Logger log = LoggerFactory.getLogger(FormatTag.class);
 
    private Object _value;
    private String _formatType;
@@ -126,7 +127,7 @@ public class FormatTag extends VarTagSupport {
       }
       catch ( IOException e ) {
          JspException jspe = new JspException("IOException encountered while writing formatted value '" + formatted + " to the JspWriter.", e);
-         log.warn(jspe);
+         log.warn(jspe.getMessage(), jspe);
          throw jspe;
       }
    }

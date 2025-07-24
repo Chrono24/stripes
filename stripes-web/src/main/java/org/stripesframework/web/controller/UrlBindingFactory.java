@@ -30,10 +30,11 @@ import java.util.TreeSet;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.action.ActionBean;
 import org.stripesframework.web.exception.UrlBindingConflictException;
 import org.stripesframework.web.util.HttpUtil;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.util.bean.ParseException;
 
 
@@ -58,7 +59,7 @@ import org.stripesframework.web.util.bean.ParseException;
  */
 public class UrlBindingFactory {
 
-   private static final Log log = Log.getInstance(UrlBindingFactory.class);
+   private static final Logger log = LoggerFactory.getLogger(UrlBindingFactory.class);
 
    /**
     * Parse the binding pattern and create a {@link UrlBinding} object for the {@link ActionBean}
@@ -384,7 +385,7 @@ public class UrlBindingFactory {
       // Look for an exact match to the URI first
       UrlBinding prototype = _pathCache.get(uri);
       if ( prototype != null ) {
-         log.debug("Matched ", uri, " to ", prototype);
+         log.debug("Matched {} to {}", uri, prototype);
          return prototype;
       } else if ( _pathConflicts.containsKey(uri) ) {
          List<String> strings = new ArrayList<>();
@@ -405,10 +406,10 @@ public class UrlBindingFactory {
 
       // If none matched or exactly one matched then return now
       if ( candidates == null ) {
-         log.debug("No URL binding matches ", uri);
+         log.debug("No URL binding matches {}", uri);
          return null;
       } else if ( candidates.size() == 1 ) {
-         log.debug("Matched ", uri, " to ", candidates);
+         log.debug("Matched {} to {}", uri, candidates);
          return candidates.iterator().next();
       }
 
@@ -464,7 +465,7 @@ public class UrlBindingFactory {
          }
       }
 
-      log.debug("Matched @", maxIndex, " ", uri, " to ", prototype == null ? conflicts : prototype);
+      log.debug("Matched @{} {} to {}", maxIndex, uri, prototype == null ? conflicts : prototype);
       if ( prototype == null ) {
          throw new UrlBindingConflictException(uri, conflicts);
       }
@@ -513,12 +514,12 @@ public class UrlBindingFactory {
       for ( UrlBinding binding : urlBindings ) {
          Set<UrlBinding> resolvedConflicts = null;
          for ( String path : getCachedPaths(binding) ) {
-            log.debug("Clearing cached path ", path, " for ", binding);
+            log.debug("Clearing cached path {} for {}", path, binding);
             _pathCache.remove(path);
 
             List<UrlBinding> conflicts = _pathConflicts.get(path);
             if ( conflicts != null ) {
-               log.debug("Removing ", binding, " from conflicts list ", conflicts);
+               log.debug("Removing {} from conflicts list {}", binding, conflicts);
                conflicts.remove(binding);
 
                if ( conflicts.size() == 1 ) {
@@ -540,7 +541,7 @@ public class UrlBindingFactory {
          for ( String prefix : getCachedPrefixes(binding) ) {
             Set<UrlBinding> bindings = _prefixCache.get(prefix);
             if ( bindings != null ) {
-               log.debug("Clearing cached prefix ", prefix, " for ", binding);
+               log.debug("Clearing cached prefix {} for {}", prefix, binding);
                bindings.remove(binding);
                if ( bindings.isEmpty() ) {
                   _prefixCache.remove(prefix);
@@ -549,7 +550,7 @@ public class UrlBindingFactory {
          }
 
          if ( resolvedConflicts != null ) {
-            log.debug("Resolved conflicts with ", resolvedConflicts);
+            log.debug("Resolved conflicts with {}", resolvedConflicts);
 
             for ( UrlBinding conflict : resolvedConflicts ) {
                removeBinding(conflict.getBeanType());
@@ -637,13 +638,13 @@ public class UrlBindingFactory {
 
          // Replace the path cache entry if necessary and log a warning
          if ( statik == null ) {
-            log.debug("The path ", path, " for ", binding.getBeanType().getName(), " @ ", binding, " conflicts with ", conflicts);
+            log.debug("The path {} for {} @ {} conflicts with {}", path, binding.getBeanType().getName(), binding, conflicts);
          } else {
-            log.debug("For path ", path, ", static binding ", statik, " supersedes conflicting bindings ", conflicts);
+            log.debug("For path {}, static binding {} supersedes conflicting bindings {}", path, statik, conflicts);
             _pathCache.put(path, statik);
          }
       } else {
-         log.debug("Wiring path ", path, " to ", binding.getBeanType().getName(), " @ ", binding);
+         log.debug("Wiring path {} to {} @ {}", path, binding.getBeanType().getName(), binding);
          _pathCache.put(path, binding);
       }
    }
@@ -655,7 +656,7 @@ public class UrlBindingFactory {
     * @param binding The binding to map to the prefix
     */
    protected void cachePrefix( String prefix, UrlBinding binding ) {
-      log.debug("Wiring prefix ", prefix, "* to ", binding.getBeanType().getName(), " @ ", binding);
+      log.debug("Wiring prefix {}* to {} @ {}", prefix, binding.getBeanType().getName(), binding);
 
       // Look up existing set of bindings to which the prefix maps
       Set<UrlBinding> bindings = _prefixCache.get(prefix);

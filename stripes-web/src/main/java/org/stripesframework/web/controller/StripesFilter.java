@@ -33,13 +33,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.config.BootstrapPropertyResolver;
 import org.stripesframework.web.config.Configuration;
 import org.stripesframework.web.config.RuntimeConfiguration;
 import org.stripesframework.web.exception.StripesRuntimeException;
 import org.stripesframework.web.exception.StripesServletException;
 import org.stripesframework.web.util.HttpUtil;
-import org.stripesframework.web.util.Log;
 
 
 /**
@@ -57,14 +58,14 @@ public class StripesFilter implements Filter {
    public static final String CONFIG_CLASS = "Configuration.Class";
 
    /** Log used throughout the class. */
-   private static final Log                               log                = Log.getInstance(StripesFilter.class);
+   private static final Logger                     log                = LoggerFactory.getLogger(StripesFilter.class);
    /**
     * A place to stash the Configuration object so that other classes in Stripes can access it
     * without resorting to ferrying it, or the request, to every class that needs access to the
     * Configuration.  Doing this allows multiple Stripes Configurations to exist in a single
     * Classloader since the Configuration is not located statically.
     */
-   private static final ThreadLocal<Configuration>        configurationStash = new ThreadLocal<>();
+   private static final ThreadLocal<Configuration> configurationStash = new ThreadLocal<>();
    /**
     * A set of weak references to all the Configuration objects that this class has ever
     * seen. Uses weak references to allow garbage collection to reap these objects if this
@@ -112,7 +113,7 @@ public class StripesFilter implements Filter {
                + "the appropriate Configuration object cannot be located. Please take a look "
                + "at the exact URL in your browser's address bar and ensure that any "
                + "requests to that URL will be filtered through the StripesFilter according " + "to the filter mappings in your web.xml.");
-         log.error(sre);  // log through an exception so that users get a stracktrace
+         log.error(sre.getMessage(), sre);  // log through an exception so that users get a stracktrace
       }
 
       return configuration;
@@ -144,7 +145,7 @@ public class StripesFilter implements Filter {
          return configuration;
       }
       catch ( Exception e ) {
-         log.fatal(e, "Could not instantiate specified Configuration. Class name specified was ", "[", clazz.getName(), "].");
+         log.error("Could not instantiate specified Configuration. Class name specified was [{}].", clazz.getName(), e);
          throw new StripesServletException("Could not instantiate specified Configuration. " + "Class name specified was [" + clazz.getName() + "].", e);
       }
    }
@@ -158,7 +159,6 @@ public class StripesFilter implements Filter {
    @Override
    public void destroy() {
       servletContext.removeAttribute(StripesFilter.class.getName());
-      Log.cleanup();
       Introspector.flushCaches(); // Not 100% sure this is necessary, but it doesn't  hurt
       StripesFilter.configurations.clear();
    }
@@ -183,7 +183,7 @@ public class StripesFilter implements Filter {
       // Wrap pretty much everything in a try/catch so that we can funnel even the most
       // bizarre or unexpected exceptions into the exception handler
       try {
-         log.trace("Intercepting request to URL: ", HttpUtil.getRequestedPath(httpRequest));
+         log.trace("Intercepting request to URL: {}", HttpUtil.getRequestedPath(httpRequest));
 
          if ( initial ) {
             // Pop the configuration into thread local
@@ -194,14 +194,14 @@ public class StripesFilter implements Filter {
             // locale dependent, but the encoding *must* be set on the request before any
             // parameters or parts are accessed, and wrapping the request accesses stuff.
             Locale locale = configuration.getLocalePicker().pickLocale(httpRequest);
-            log.debug("LocalePicker selected locale: ", locale);
+            log.debug("LocalePicker selected locale: {}", locale);
 
             String encoding = configuration.getLocalePicker().pickCharacterEncoding(httpRequest, locale);
             if ( encoding != null ) {
                httpRequest.setCharacterEncoding(encoding);
-               log.debug("LocalePicker selected character encoding: ", encoding);
+               log.debug("LocalePicker selected character encoding: {}", encoding);
             } else {
-               log.debug("LocalePicker did not pick a character encoding, using default: ", httpRequest.getCharacterEncoding());
+               log.debug("LocalePicker did not pick a character encoding, using default: {}", httpRequest.getCharacterEncoding());
             }
 
             StripesRequestWrapper request = wrapRequest(httpRequest);
@@ -265,7 +265,7 @@ public class StripesFilter implements Filter {
       servletContext.setAttribute(StripesFilter.class.getName(), this);
 
       Package pkg = getClass().getPackage();
-      log.info("Stripes Initialization Complete. Version: ", pkg.getSpecificationVersion(), ", Build: ", pkg.getImplementationVersion());
+      log.info("Stripes Initialization Complete. Version: {}, Build: {}", pkg.getSpecificationVersion(), pkg.getImplementationVersion());
    }
 
    /**

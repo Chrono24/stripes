@@ -23,10 +23,11 @@ import jakarta.servlet.jsp.JspException;
 import jakarta.servlet.jsp.PageContext;
 import jakarta.servlet.jsp.tagext.Tag;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.action.ActionBean;
 import org.stripesframework.web.controller.StripesConstants;
 import org.stripesframework.web.controller.StripesFilter;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.util.ReflectUtil;
 
 
@@ -38,7 +39,7 @@ import org.stripesframework.web.util.ReflectUtil;
  */
 public abstract class StripesTagSupport implements Tag {
 
-   private static final Log log = Log.getInstance(StripesTagSupport.class);
+   private static final Logger log = LoggerFactory.getLogger(StripesTagSupport.class);
 
    /** Storage for a PageContext during evaluation. */
    protected PageContext _pageContext;
@@ -150,13 +151,13 @@ public abstract class StripesTagSupport implements Tag {
             result = ReflectUtil.findClass((String)nameOrClass);
          }
          catch ( ClassNotFoundException cnfe ) {
-            log.error(cnfe, "Could not find class of type: ", nameOrClass);
+            log.error("Could not find class of type: {}", nameOrClass, cnfe);
             return null;
          }
       } else if ( nameOrClass instanceof Class ) {
          result = (Class)nameOrClass;
       } else {
-         log.error("The value supplied to getActionBeanType() was neither a String nor a " + "Class. Cannot infer ActionBean type from value: " + nameOrClass);
+         log.error("The value supplied to getActionBeanType() was neither a String nor a Class. Cannot infer ActionBean type from value: {}", nameOrClass);
          return null;
       }
 
@@ -164,7 +165,7 @@ public abstract class StripesTagSupport implements Tag {
       if ( ActionBean.class.isAssignableFrom(result) ) {
          return result;
       } else {
-         log.error("Class '", result.getName(), "' specified in tag does not implement ", "ActionBean.");
+         log.error("Class '{}' specified in tag does not implement ActionBean.", result.getName());
          return null;
       }
    }

@@ -8,13 +8,14 @@ import java.util.Collection;
 import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.StripesTestFixture;
-import org.stripesframework.web.util.Log;
 
 
 public class DefaultTypeConverterFactoryTest {
 
-   private static final Log log = Log.getInstance(DefaultTypeConverterFactoryTest.class);
+   private static final Logger log = LoggerFactory.getLogger(DefaultTypeConverterFactoryTest.class);
 
    @Test
    public void testCharTypeConverter() throws Exception {
@@ -45,7 +46,7 @@ public class DefaultTypeConverterFactoryTest {
    }
 
    protected void checkTypeConverter( TypeConverterFactory factory, Class<?> targetType, Class<?> expect ) throws Exception {
-      log.debug("Checking type converter for ", targetType.getSimpleName(), " is ", expect == null ? "null" : ATC.class.getSimpleName());
+      log.debug("Checking type converter for {} is {}", targetType.getSimpleName(), expect == null ? "null" : ATC.class.getSimpleName());
       TypeConverter<?> tc = factory.getTypeConverter(targetType, null);
       if ( expect != null ) {
          assertThat(tc).isNotNull();

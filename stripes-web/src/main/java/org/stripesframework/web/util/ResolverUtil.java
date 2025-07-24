@@ -20,6 +20,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.vfs.VFS;
 
 
@@ -51,14 +53,14 @@ import org.stripesframework.web.vfs.VFS;
  *resolver.find(new CustomTest(), pkg1);
  *resolver.find(new CustomTest(), pkg2);
  *Collection&lt;ActionBean&gt; beans = resolver.getClasses();
- *</pre> 
+ *</pre>
  *
  * @author Tim Fennell
  */
 public class ResolverUtil<T> {
 
    /** An instance of Log to use for logging in this class. */
-   private static final Log log = Log.getInstance(ResolverUtil.class);
+   private static final Logger log = LoggerFactory.getLogger(ResolverUtil.class);
 
    /** The set of matches being accumulated. */
    private final Set<Class<? extends T>> _matches = new HashSet<>();
@@ -91,7 +93,7 @@ public class ResolverUtil<T> {
          }
       }
       catch ( IOException ioe ) {
-         log.warn("Could not read package: ", packageName, " -- ", ioe);
+         log.warn("Could not read package: {}", packageName, ioe);
       }
 
       return this;
@@ -179,7 +181,7 @@ public class ResolverUtil<T> {
       try {
          String externalName = fqn.substring(0, fqn.indexOf('.')).replace('/', '.');
          ClassLoader loader = getClassLoader();
-         log.trace("Checking to see if class ", externalName, " matches criteria [", test, "]");
+         log.trace("Checking to see if class {} matches criteria [{}]", externalName, test);
 
          Class<?> type = loader.loadClass(externalName);
          if ( test.matches(type) ) {
@@ -187,7 +189,7 @@ public class ResolverUtil<T> {
          }
       }
       catch ( Throwable t ) {
-         log.warn("Could not examine class '", fqn, "'", " due to a ", t.getClass().getName(), " with message: ", t.getMessage());
+         log.warn("Could not examine class '{}' due to a {} with message: {}", fqn, t.getClass().getName(), t.getMessage());
       }
    }
 

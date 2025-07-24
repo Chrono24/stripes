@@ -14,10 +14,11 @@
  */
 package org.stripesframework.jsp.tag;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.action.ActionBean;
 import org.stripesframework.web.controller.StripesConstants;
 import org.stripesframework.jsp.exception.StripesJspException;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.util.bean.BeanUtil;
 import org.stripesframework.web.util.bean.ExpressionException;
 
@@ -38,7 +39,7 @@ import org.stripesframework.web.util.bean.ExpressionException;
  */
 public class BeanFirstPopulationStrategy extends DefaultPopulationStrategy {
 
-   private static final Log log = Log.getInstance(BeanFirstPopulationStrategy.class);
+   private static final Logger log = LoggerFactory.getLogger(BeanFirstPopulationStrategy.class);
 
    /**
     * Implementation of the interface method that will follow the search described in the class
@@ -65,7 +66,7 @@ public class BeanFirstPopulationStrategy extends DefaultPopulationStrategy {
             }
             catch ( ExpressionException ee ) {
                if ( !StripesConstants.SPECIAL_URL_KEYS.contains(tag.getName()) ) {
-                  log.info("Could not find property [", tag.getName(), "] on ActionBean.", ee);
+                  log.info("Could not find property [{}] on ActionBean.", tag.getName(), ee);
                }
                kaboom = true;
             }

@@ -20,7 +20,8 @@ import java.util.Locale;
 import jakarta.servlet.jsp.JspException;
 import jakarta.servlet.jsp.JspWriter;
 
-import org.stripesframework.web.util.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.validation.ValidationError;
 
 
@@ -34,7 +35,7 @@ import org.stripesframework.web.validation.ValidationError;
  */
 public class IndividualErrorTag extends HtmlTagSupport {
 
-   private static final Log log = Log.getInstance(IndividualErrorTag.class);
+   private static final Logger log = LoggerFactory.getLogger(IndividualErrorTag.class);
 
    /**
     * Outputs the error for the current iteration of the parent ErrorsTag.
@@ -56,7 +57,7 @@ public class IndividualErrorTag extends HtmlTagSupport {
          }
          catch ( IOException ioe ) {
             JspException jspe = new JspException("IOException encountered while writing " + "error tag to the JspWriter.", ioe);
-            log.warn(jspe);
+            log.warn(jspe.getMessage(), jspe);
             throw jspe;
          }
       }

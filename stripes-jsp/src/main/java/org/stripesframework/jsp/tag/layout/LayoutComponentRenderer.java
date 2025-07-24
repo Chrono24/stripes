@@ -20,8 +20,9 @@ import java.util.LinkedList;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.jsp.PageContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.controller.StripesConstants;
-import org.stripesframework.web.util.Log;
 
 
 /**
@@ -45,7 +46,7 @@ import org.stripesframework.web.util.Log;
  */
 public class LayoutComponentRenderer {
 
-   private static final Log log = Log.getInstance(LayoutComponentRenderer.class);
+   private static final Logger log = LoggerFactory.getLogger(LayoutComponentRenderer.class);
 
    private LinkedList<PageContext> _pageContext;
    private String                  _component;
@@ -95,7 +96,7 @@ public class LayoutComponentRenderer {
    public String toString() {
       final PageContext pageContext = getPageContext();
       if ( pageContext == null ) {
-         log.error("Failed to render component \"", _component, "\" without a page context!");
+         log.error("Failed to render component \"{}\" without a page context!", _component);
          return "[Failed to render component \"" + _component + "\" without a page context!]";
       }
 
@@ -103,16 +104,16 @@ public class LayoutComponentRenderer {
       String contents;
       context.getOut().openBuffer(pageContext);
       try {
-         log.debug("Start stringify \"", _component, "\" in ", context.getRenderPage(), " -> ", context.getDefinitionPage());
+         log.debug("Start stringify \"{}\" in {} -> {}", _component, context.getRenderPage(), context.getDefinitionPage());
          write();
       }
       catch ( Exception e ) {
-         log.error(e, "Unhandled exception trying to render component \"", _component, "\" to a string in context ", context.getRenderPage(), //
-               " -> ", context.getDefinitionPage());
+         log.error("Unhandled exception trying to render component \"{}\" to a string in context {} -> {}", _component, context.getRenderPage(),
+               context.getDefinitionPage(), e);
          return "[Failed to render \"" + _component + "\". See log for details.]";
       }
       finally {
-         log.debug("End stringify \"", _component, "\" in ", context.getRenderPage(), " -> ", context.getDefinitionPage());
+         log.debug("End stringify \"{}\" in {} -> {}", _component, context.getRenderPage(), context.getDefinitionPage());
          contents = context.getOut().closeBuffer(pageContext);
       }
 
@@ -130,21 +131,21 @@ public class LayoutComponentRenderer {
    public boolean write() throws ServletException, IOException {
       final PageContext pageContext = getPageContext();
       if ( pageContext == null ) {
-         log.error("Failed to render component \"", _component, "\" without a page context!");
+         log.error("Failed to render component \"{}\" without a page context!", _component);
          return false;
       }
 
       // Grab some values from the current context so they can be restored when we're done
       final LayoutContext savedContext = _context;
       final LayoutContext currentContext = LayoutContext.lookup(pageContext);
-      log.debug("Render component \"", _component, "\" in ", getCurrentPage());
+      log.debug("Render component \"{}\" in {}", _component, getCurrentPage());
 
       // Descend the stack from here, trying each context where the component is registered
       for ( LayoutContext context = savedContext == null ? currentContext : savedContext.getPrevious(); context != null; context = context.getPrevious() ) {
 
          // Skip contexts where the desired component is not registered.
          if ( !context.getComponents().containsKey(_component) ) {
-            log.trace("Not rendering \"", _component, "\" in context ", context.getRenderPage(), " -> ", context.getDefinitionPage());
+            log.trace("Not rendering \"{}\" in context {} -> {}", _component, context.getRenderPage(), context.getDefinitionPage());
             continue;
          }
           _context = context;
@@ -162,11 +163,11 @@ public class LayoutComponentRenderer {
             context.setComponent(_component);
             context.getOut().setSilent(true, pageContext);
 
-            log.debug("Start execute \"", _component, "\" in ", currentContext.getRenderPage(), " -> ", currentContext.getDefinitionPage(), " from ",
-                  context.getRenderPage(), " -> ", context.getDefinitionPage());
+            log.debug("Start execute \"{}\" in {} -> {} from {} -> {}", _component, currentContext.getRenderPage(), currentContext.getDefinitionPage(),
+                  context.getRenderPage(), context.getDefinitionPage());
             context.doInclude(pageContext, context.getRenderPage());
-            log.debug("End execute \"", _component, "\" in ", currentContext.getRenderPage(), " -> ", currentContext.getDefinitionPage(), " from ",
-                  context.getRenderPage(), " -> ", context.getDefinitionPage());
+            log.debug("End execute \"{}\" in {} -> {} from {} -> {}", _component, currentContext.getRenderPage(), currentContext.getDefinitionPage(),
+                  context.getRenderPage(), context.getDefinitionPage());
 
             // If the component name has been cleared then the component rendered
             if ( context.getComponent() == null ) {
@@ -185,7 +186,7 @@ public class LayoutComponentRenderer {
          }
       }
 
-      log.debug("Component \"", _component, "\" evaluated to empty string in context ", currentContext.getRenderPage(), " -> ",
+      log.debug("Component \"{}\" evaluated to empty string in context {} -> {}", _component, currentContext.getRenderPage(),
             currentContext.getDefinitionPage());
       return false;
    }

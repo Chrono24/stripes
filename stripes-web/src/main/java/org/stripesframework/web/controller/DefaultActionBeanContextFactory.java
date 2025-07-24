@@ -18,10 +18,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.action.ActionBeanContext;
 import org.stripesframework.web.config.Configuration;
 import org.stripesframework.web.exception.StripesServletException;
-import org.stripesframework.web.util.Log;
 
 
 /**
@@ -35,7 +36,7 @@ import org.stripesframework.web.util.Log;
  */
 public class DefaultActionBeanContextFactory implements ActionBeanContextFactory {
 
-   private static final Log log = Log.getInstance(DefaultActionBeanContextFactory.class);
+   private static final Logger log = LoggerFactory.getLogger(DefaultActionBeanContextFactory.class);
 
    /** The name of the configuration property used for the context class name. */
    public static final String CONTEXT_CLASS_NAME = "ActionBeanContext.Class";
@@ -69,7 +70,8 @@ public class DefaultActionBeanContextFactory implements ActionBeanContextFactory
       if ( clazz == null ) {
          clazz = ActionBeanContext.class;
       } else {
-         log.info(DefaultActionBeanContextFactory.class.getSimpleName(), " will use ", ActionBeanContext.class.getSimpleName(), " subclass ", clazz.getName());
+         log.info("{} will use {} subclass {}", DefaultActionBeanContextFactory.class.getSimpleName(), ActionBeanContext.class.getSimpleName(),
+               clazz.getName());
       }
       _contextClass = clazz;
    }

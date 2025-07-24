@@ -29,6 +29,8 @@ import java.util.WeakHashMap;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.action.ActionBean;
 import org.stripesframework.web.action.ActionBeanContext;
 import org.stripesframework.web.action.DontBind;
@@ -38,7 +40,6 @@ import org.stripesframework.web.config.Configuration;
 import org.stripesframework.web.exception.StripesServletException;
 import org.stripesframework.web.util.CollectionUtil;
 import org.stripesframework.web.util.HtmlUtil;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.validation.ValidationError;
 import org.stripesframework.web.validation.ValidationErrorHandler;
 import org.stripesframework.web.validation.ValidationErrors;
@@ -54,7 +55,7 @@ import org.stripesframework.web.validation.ValidationState;
  */
 public class DispatcherHelper {
 
-   private static final Log log = Log.getInstance(DispatcherHelper.class);
+   private static final Logger log = LoggerFactory.getLogger(DispatcherHelper.class);
 
    /**
     * A Map that is used to cache the validation method that are discovered for each
@@ -209,14 +210,12 @@ public class DispatcherHelper {
       });
 
       if ( retval != null ) {
-         log.warn("An interceptor wrapping LifecycleStage.ResolutionExecution returned ",
-               "a Resolution. This almost certainly did NOT have the desired effect. ", "At this LifecycleStage interceptors are running *around* the actual ",
-               "execution of the Resolution, and so returning an alternate Resolution ",
-               "has the effect of stopping the original Resolution from being executed ",
-               "while NOT causing the alternate Resolution to get executed. Interceptor ",
-               "code running before the Resolution is executed (i.e. before calling ", "ExecutionContext.proceed()) can alter the Resolution by calling ",
-               "ExecutionContext.setResolution() instead. Code running after the Resolution ",
-               "has been executed can no longer alter what Resolution is executed for ", "what are hopefully obvious reasons!");
+         log.warn("An interceptor wrapping LifecycleStage.ResolutionExecution returned a Resolution. This almost certainly did NOT have the desired effect. "
+                     + "At this LifecycleStage interceptors are running *around* the actual execution of the Resolution, and so returning an alternate Resolution "
+                     + "has the effect of stopping the original Resolution from being executed while NOT causing the alternate Resolution to get executed. Interceptor "
+                     + "code running before the Resolution is executed (i.e. before calling ExecutionContext.proceed()) can alter the Resolution by calling "
+                     + "ExecutionContext.setResolution() instead. "
+                     + "Code running after the Resolution has been executed can no longer alter what Resolution is executed for what are hopefully obvious reasons!");
       }
    }
 
@@ -390,8 +389,8 @@ public class DispatcherHelper {
                ctx.setResolutionFromHandler(true);
                return (Resolution)returnValue;
             } else if ( returnValue != null ) {
-               log.warn("Expected handler method ", handler.getName(), " on class ", bean.getClass().getSimpleName(), " to return a Resolution. Instead it ",
-                     "returned: ", returnValue);
+               log.warn("Expected handler method {} on class {} to return a Resolution. Instead it returned: {}", handler.getName(),
+                     bean.getClass().getSimpleName(), returnValue);
             }
 
             return null;
@@ -422,7 +421,7 @@ public class DispatcherHelper {
          }
       }
 
-      log.debug(buf);
+      log.debug(buf.toString());
    }
 
    /**
@@ -509,7 +508,7 @@ public class DispatcherHelper {
                      "No handler method found for request with  ActionBean [" + bean.getClass().getName() + "] and eventName [ " + eventName + "]");
             }
 
-            log.debug("Resolved event: ", context.getEventName(), "; will invoke: ", bean.getClass().getSimpleName(), ".", handler.getName(), "()");
+            log.debug("Resolved event: {}; will invoke: {}.{}()", context.getEventName(), bean.getClass().getSimpleName(), handler.getName());
 
             ctx.setHandler(handler);
             return null;

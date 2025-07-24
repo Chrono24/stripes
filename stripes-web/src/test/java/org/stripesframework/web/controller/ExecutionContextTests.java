@@ -6,8 +6,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-
-import org.stripesframework.web.util.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -17,7 +17,7 @@ import org.stripesframework.web.util.Log;
  */
 public class ExecutionContextTests {
 
-   private static final Log log = Log.getInstance(ExecutionContextTests.class);
+   private static final Logger log = LoggerFactory.getLogger(ExecutionContextTests.class);
 
    @Test
    public void testCurrentContext() throws Exception {
@@ -25,7 +25,7 @@ public class ExecutionContextTests {
       final ExecutionContext ctx = new ExecutionContext();
 
       for ( LifecycleStage stage : LifecycleStage.values() ) {
-         log.debug("Setting lifecycle stage: " + stage);
+         log.debug("Setting lifecycle stage: {}", stage);
          ctx.setLifecycleStage(stage);
 
          List<Interceptor> interceptors = Collections.emptyList();

@@ -29,11 +29,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.action.RedirectResolution;
 import org.stripesframework.web.action.ActionBean;
 import org.stripesframework.web.action.ActionBeanContext;
 import org.stripesframework.web.exception.StripesRuntimeException;
-import org.stripesframework.web.util.Log;
 
 
 /**
@@ -90,7 +91,7 @@ public class FlashScope extends HashMap<String, Object> {
    /** The default timeout for a flash scope. */
    public static final int DEFAULT_TIMEOUT_IN_SECONDS = 120;
 
-   private static final Log log = Log.getInstance(FlashScope.class);
+   private static final Logger log = LoggerFactory.getLogger(FlashScope.class);
 
    private static final Random random = new Random();
 
@@ -216,8 +217,9 @@ public class FlashScope extends HashMap<String, Object> {
       catch ( IllegalStateException ise ) {
          // If the session has been invalidated we'll get this exception, but there's no
          // way to know this without try and getting the exception :(
-         log.warn("An IllegalStateException got thrown trying to create a flash scope. ", "This happens when add something to flash scope for the first time ",
-               "causes creation of the HttpSession, but for some other reason the ", "response is already committed!");
+         log.warn("An IllegalStateException got thrown trying to create a flash scope. "
+               + "This happens when add something to flash scope for the first time causes creation of the HttpSession, but for some other reason the "
+               + "response is already committed!");
          return null;
       }
    }

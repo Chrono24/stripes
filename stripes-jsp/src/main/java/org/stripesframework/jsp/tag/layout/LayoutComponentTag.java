@@ -20,9 +20,10 @@ import java.util.regex.Pattern;
 import jakarta.servlet.jsp.JspException;
 import jakarta.servlet.jsp.PageContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.jsp.exception.StripesJspException;
 import org.stripesframework.web.exception.StripesRuntimeException;
-import org.stripesframework.web.util.Log;
 
 
 /**
@@ -34,7 +35,7 @@ import org.stripesframework.web.util.Log;
  */
 public class LayoutComponentTag extends LayoutTag {
 
-   private static final Log log = Log.getInstance(LayoutComponentTag.class);
+   private static final Logger log = LoggerFactory.getLogger(LayoutComponentTag.class);
 
    /** Regular expression that matches valid Java identifiers. */
    private static final Pattern javaIdentifierPattern = Pattern.compile("\\p{javaJavaIdentifierStart}\\p{javaJavaIdentifierPart}*");
@@ -105,31 +106,31 @@ public class LayoutComponentTag extends LayoutTag {
          if ( _context.isComponentRenderPhase() ) {
             if ( isChildOfRender() ) {
                if ( isCurrentComponent() ) {
-                  log.debug("Render ", getName(), " in ", _context.getRenderPage());
+                  log.debug("Render {} in {}", getName(), _context.getRenderPage());
                   _context.getOut().setSilent(false, _pageContext);
                   return EVAL_BODY_INCLUDE;
                } else if ( _context.getComponentPath().isPathComponent(this) ) {
-                  log.debug("Silently execute '", getName(), "' in ", _context.getRenderPage());
+                  log.debug("Silently execute '{}' in {}", getName(), _context.getRenderPage());
                   _context.getOut().setSilent(true, _pageContext);
                   return EVAL_BODY_INCLUDE;
                } else {
-                  log.debug("No-op for ", getName(), " in ", _context.getRenderPage());
+                  log.debug("No-op for {} in {}", getName(), _context.getRenderPage());
                }
             } else if ( isChildOfDefinition() ) {
-               log.debug("No-op for ", getName(), " in ", _context.getDefinitionPage());
+               log.debug("No-op for {} in {}", getName(), _context.getDefinitionPage());
             } else if ( isChildOfComponent() ) {
                // Use a layout component renderer to do the heavy lifting
-               log.debug("Invoke component renderer for nested render of \"", getName(), "\"");
+               log.debug("Invoke component renderer for nested render of \"{}\"", getName());
                LayoutComponentRenderer renderer = (LayoutComponentRenderer)_pageContext.getAttribute(getName());
                if ( renderer == null ) {
-                  log.debug("No component renderer in page context for '" + getName() + "'");
+                  log.debug("No component renderer in page context for '{}'", getName());
                }
                boolean rendered = renderer != null && renderer.write();
 
                // If the component did not render then we need to output the default contents
                // from the layout definition.
                if ( !rendered ) {
-                  log.debug("Component was not present in ", _context.getRenderPage(), " so using default content from ", _context.getDefinitionPage());
+                  log.debug("Component was not present in {} so using default content from {}", _context.getRenderPage(), _context.getDefinitionPage());
 
                   _context.getOut().setSilent(false, _pageContext);
                   return EVAL_BODY_INCLUDE;
@@ -138,12 +139,12 @@ public class LayoutComponentTag extends LayoutTag {
          } else {
             if ( isChildOfRender() ) {
                if ( !javaIdentifierPattern.matcher(getName()).matches() ) {
-                  log.warn("The layout-component name '", getName(), "' is not a valid Java identifier. While this may work, it can ",
-                        "cause bugs that are difficult to track down. Please consider ", "using valid Java identifiers for component names ",
-                        "(no hyphens, no spaces, etc.)");
+                  log.warn(
+                        "The layout-component name '{}' is not a valid Java identifier. While this may work, it can cause bugs that are difficult to track down. Please consider using valid Java identifiers for component names (no hyphens, no spaces, etc.)",
+                        getName());
                }
 
-               log.debug("Register component ", getName(), " with ", _context.getRenderPage());
+               log.debug("Register component {} with {}", getName(), _context.getRenderPage());
 
                // Look for an existing renderer for a component with the same name
                LayoutComponentRenderer renderer = null;
@@ -159,17 +160,17 @@ public class LayoutComponentTag extends LayoutTag {
                _context.getComponents().put(getName(), renderer);
             } else if ( isChildOfDefinition() ) {
                // Use a layout component renderer to do the heavy lifting
-               log.debug("Invoke component renderer for direct render of \"", getName(), "\"");
+               log.debug("Invoke component renderer for direct render of \"{}\"", getName());
                LayoutComponentRenderer renderer = (LayoutComponentRenderer)_pageContext.getAttribute(getName());
                if ( renderer == null ) {
-                  log.debug("No component renderer in page context for '" + getName() + "'");
+                  log.debug("No component renderer in page context for '{}'", getName());
                }
                boolean rendered = renderer != null && renderer.write();
 
                // If the component did not render then we need to output the default contents
                // from the layout definition.
                if ( !rendered ) {
-                  log.debug("Component was not present in ", _context.getRenderPage(), " so using default content from ", _context.getDefinitionPage());
+                  log.debug("Component was not present in {} so using default content from {}", _context.getRenderPage(), _context.getDefinitionPage());
 
                   _componentRenderPhase = _context.isComponentRenderPhase();
                   _context.setComponentRenderPhase(true);
@@ -191,8 +192,8 @@ public class LayoutComponentTag extends LayoutTag {
          return SKIP_BODY;
       }
       catch ( Exception e ) {
-         log.error(e, "Unhandled exception trying to render component \"", getName(), "\" to a string in context ", _context.getRenderPage(), " -> ",
-               _context.getDefinitionPage());
+         log.error("Unhandled exception trying to render component \"{}\" to a string in context {} -> {}", getName(), _context.getRenderPage(),
+               _context.getDefinitionPage(), e);
 
          if ( e instanceof RuntimeException ) {
             throw (RuntimeException)e;
@@ -241,7 +242,7 @@ public class LayoutComponentTag extends LayoutTag {
          throw new StripesRuntimeException("A component tag named \"" + getName() + "\" in " + getCurrentPagePath() + " was unable to find a layout context.");
       }
 
-      log.trace("Component ", getName() + " has context ", _context.getRenderPage(), " -> ", _context.getDefinitionPage());
+      log.trace("Component {} has context {} -> {}", getName(), _context.getRenderPage(), _context.getDefinitionPage());
 
       _silent = _context.getOut().isSilent();
    }

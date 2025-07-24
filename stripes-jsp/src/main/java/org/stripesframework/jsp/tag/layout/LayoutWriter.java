@@ -22,8 +22,9 @@ import java.util.LinkedList;
 import jakarta.servlet.jsp.JspWriter;
 import jakarta.servlet.jsp.PageContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.exception.StripesRuntimeException;
-import org.stripesframework.web.util.Log;
 
 
 /**
@@ -38,7 +39,7 @@ import org.stripesframework.web.util.Log;
  */
 public class LayoutWriter extends Writer {
 
-   private static final Log log = Log.getInstance(LayoutWriter.class);
+   private static final Logger log = LoggerFactory.getLogger(LayoutWriter.class);
 
    /** The control character that, when encountered in the output stream, toggles the silent state. */
    private static final char TOGGLE = 0;
@@ -53,7 +54,6 @@ public class LayoutWriter extends Writer {
     * @param out The JSP writer to which output will be written.
     */
    public LayoutWriter( JspWriter out ) {
-      log.debug("Create layout writer wrapped around ", out);
       _writers.addFirst(out);
    }
 
@@ -88,7 +88,7 @@ public class LayoutWriter extends Writer {
       if ( getOut() instanceof StringWriter ) {
          tryFlush(pageContext);
          String contents = ((StringWriter)_writers.poll()).toString();
-         log.trace("Closed buffer: \"", contents, "\"");
+         log.trace("Closed buffer: \"{}\"", contents);
          return contents;
       } else {
          throw new StripesRuntimeException("Attempt to close a buffer without having first called openBuffer(..)!");
@@ -127,7 +127,7 @@ public class LayoutWriter extends Writer {
       if ( silent != _silent ) {
          pageContext.getOut().write(TOGGLE);
          _silent = silent;
-         log.trace("Output is ", (silent ? "DISABLED" : "ENABLED"));
+         log.trace("Output is {}", silent ? "DISABLED" : "ENABLED");
       }
    }
 
@@ -167,7 +167,7 @@ public class LayoutWriter extends Writer {
       }
       catch ( IOException e ) {
          // This seems to happen once at the beginning and once at the end. Don't know why.
-         log.debug("Failed to flush buffer: ", e.getMessage());
+         log.debug("Failed to flush buffer: {}", e.getMessage());
       }
    }
 }

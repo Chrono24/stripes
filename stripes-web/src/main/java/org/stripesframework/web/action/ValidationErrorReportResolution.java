@@ -23,10 +23,11 @@ import java.util.ResourceBundle;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.controller.StripesFilter;
 import org.stripesframework.web.exception.SourcePageNotFoundException;
 import org.stripesframework.web.util.HtmlUtil;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.validation.ValidationError;
 
 
@@ -45,7 +46,7 @@ public class ValidationErrorReportResolution implements Resolution {
    /** The footer that will be emitted if no footer is defined in the resource bundle. */
    public static final String DEFAULT_FOOTER = "</ul>";
 
-   private static final Log log = Log.getInstance(ValidationErrorReportResolution.class);
+   private static final Logger log = LoggerFactory.getLogger(ValidationErrorReportResolution.class);
 
    private final ActionBeanContext _context;
 
@@ -58,7 +59,7 @@ public class ValidationErrorReportResolution implements Resolution {
    public void execute( HttpServletRequest request, HttpServletResponse response ) throws Exception {
       // log an exception for the stack trace
       SourcePageNotFoundException exception = new SourcePageNotFoundException(getContext());
-      log.error(exception);
+      log.error("Source page not found", exception);
 
       // start the HTML error report
       response.setContentType("text/html");
@@ -118,9 +119,9 @@ public class ValidationErrorReportResolution implements Resolution {
          bundle = StripesFilter.getConfiguration().getLocalizationBundleFactory().getErrorMessageBundle(locale);
       }
       catch ( MissingResourceException mre ) {
-         log.warn(getClass().getName(), " could not find the error messages resource bundle. ",
-               "As a result default headers/footers etc. will be used. Check that ", "you have a StripesResources.properties in your classpath (unless ",
-               "of course you have configured a different bundle).");
+         log.warn("{} could not find the error messages resource bundle. As a result default headers/footers etc. will be used. "
+                     + "Check that you have a StripesResources.properties in your classpath (unless of course you have configured a different bundle).",
+               getClass().getName());
       }
 
       // Fetch the header and footer

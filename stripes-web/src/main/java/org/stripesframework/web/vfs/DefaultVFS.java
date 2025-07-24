@@ -29,7 +29,8 @@ import java.util.Objects;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
-import org.stripesframework.web.util.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.util.StringUtil;
 
 
@@ -40,7 +41,7 @@ import org.stripesframework.web.util.StringUtil;
  */
 public class DefaultVFS extends VFS {
 
-   private static final Log log = Log.getInstance(DefaultVFS.class);
+   private static final Logger log = LoggerFactory.getLogger(DefaultVFS.class);
 
    /** The magic header that indicates a JAR (ZIP) file. */
    private static final byte[] JAR_MAGIC = { 'P', 'K', 3, 4 };
@@ -61,7 +62,7 @@ public class DefaultVFS extends VFS {
          URL jarUrl = findJarForResource(url);
          if ( jarUrl != null ) {
             is = jarUrl.openStream();
-            log.debug("Listing ", url);
+            log.debug("Listing {}", url);
             resources = listResources(new JarInputStream(is), path);
          } else {
             List<String> children = new ArrayList<>();
@@ -71,9 +72,9 @@ public class DefaultVFS extends VFS {
                   // referenced by the URL isn't actually a JAR
                   is = url.openStream();
                   JarInputStream jarInput = new JarInputStream(is);
-                  log.debug("Listing ", url);
+                  log.debug("Listing {}", url);
                   for ( JarEntry entry; (entry = jarInput.getNextJarEntry()) != null; ) {
-                     log.trace("Jar entry: ", entry.getName());
+                     log.trace("Jar entry: {}", entry.getName());
                      children.add(entry.getName());
                   }
                } else {
@@ -89,7 +90,7 @@ public class DefaultVFS extends VFS {
                   BufferedReader reader = new BufferedReader(new InputStreamReader(is));
                   List<String> lines = new ArrayList<>();
                   for ( String line; (line = reader.readLine()) != null; ) {
-                     log.trace("Reader entry: ", line);
+                     log.trace("Reader entry: {}", line);
                      lines.add(line);
                      if ( getResources(path + "/" + line).isEmpty() ) {
                         lines.clear();
@@ -98,7 +99,7 @@ public class DefaultVFS extends VFS {
                   }
 
                   if ( !lines.isEmpty() ) {
-                     log.debug("Listing ", url);
+                     log.debug("Listing {}", url);
                      children.addAll(lines);
                   }
                }
@@ -111,9 +112,9 @@ public class DefaultVFS extends VFS {
                 */
                if ( "file".equals(url.getProtocol()) ) {
                   File file = new File(url.getFile());
-                  log.trace("Listing directory ", file.getAbsolutePath());
+                  log.trace("Listing directory {}", file.getAbsolutePath());
                   if ( file.isDirectory() ) {
-                     log.debug("Listing ", url);
+                     log.debug("Listing {}", url);
                      children = Arrays.asList(Objects.requireNonNull(file.list()));
                   }
                } else {
@@ -161,13 +162,13 @@ public class DefaultVFS extends VFS {
     * @return The URL of the JAR file, if one is found. Null if not.
     */
    protected URL findJarForResource( URL url ) {
-      log.trace("Find JAR URL: ", url);
+      log.trace("Find JAR URL: {}", url);
 
       // If the file part of the URL is itself a URL, then that URL probably points to the JAR
       try {
          for ( ; ; ) {
             url = new URL(url.getFile());
-            log.trace("Inner URL: ", url);
+            log.trace("Inner URL: {}", url);
          }
       }
       catch ( MalformedURLException e ) {
@@ -179,9 +180,9 @@ public class DefaultVFS extends VFS {
       int index = jarUrl.lastIndexOf(".jar");
       if ( index >= 0 ) {
          jarUrl.setLength(index + 4);
-         log.trace("Extracted JAR URL: ", jarUrl);
+         log.trace("Extracted JAR URL: {}", jarUrl);
       } else {
-         log.trace("Not a JAR: ", jarUrl);
+         log.trace("Not a JAR: {}", jarUrl);
          return null;
       }
 
@@ -192,7 +193,7 @@ public class DefaultVFS extends VFS {
             return testUrl;
          } else {
             // WebLogic fix: check if the URL's file exists in the filesystem.
-            log.trace("Not a JAR: ", jarUrl);
+            log.trace("Not a JAR: {}", jarUrl);
             jarUrl.replace(0, jarUrl.length(), testUrl.getFile());
             File file = new File(jarUrl.toString());
 
@@ -202,7 +203,7 @@ public class DefaultVFS extends VFS {
             }
 
             if ( file.exists() ) {
-               log.trace("Trying real file: ", file.getAbsolutePath());
+               log.trace("Trying real file: {}", file.getAbsolutePath());
                testUrl = file.toURI().toURL();
                if ( isJar(testUrl) ) {
                   return testUrl;
@@ -211,10 +212,10 @@ public class DefaultVFS extends VFS {
          }
       }
       catch ( MalformedURLException e ) {
-         log.warn("Invalid JAR URL: ", jarUrl);
+         log.warn("Invalid JAR URL: {}", jarUrl);
       }
 
-      log.trace("Not a JAR: ", jarUrl);
+      log.trace("Not a JAR: {}", jarUrl);
       return null;
    }
 
@@ -249,7 +250,7 @@ public class DefaultVFS extends VFS {
       try (InputStream is = url.openStream()) {
          int bytesRead = is.read(buffer, 0, JAR_MAGIC.length);
          if ( bytesRead == JAR_MAGIC.length && Arrays.equals(buffer, JAR_MAGIC) ) {
-            log.debug("Found JAR: ", url);
+            log.debug("Found JAR: {}", url);
             return true;
          }
       }
@@ -290,7 +291,7 @@ public class DefaultVFS extends VFS {
 
             // Check file name
             if ( name.startsWith(path) ) {
-               log.trace("Found resource: ", name);
+               log.trace("Found resource: {}", name);
                resources.add(name.substring(1)); // Trim leading slash
             }
          }

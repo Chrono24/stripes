@@ -14,13 +14,14 @@
  */
 package org.stripesframework.jsp.tag;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.action.ActionBean;
 import org.stripesframework.web.config.Configuration;
 import org.stripesframework.web.controller.ParameterName;
 import org.stripesframework.web.controller.StripesConstants;
 import org.stripesframework.jsp.exception.StripesJspException;
 import org.stripesframework.web.util.CryptoUtil;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.util.bean.BeanUtil;
 import org.stripesframework.web.util.bean.ExpressionException;
 import org.stripesframework.web.validation.ValidationErrors;
@@ -41,7 +42,7 @@ import org.stripesframework.web.validation.ValidationMetadata;
 public class DefaultPopulationStrategy implements PopulationStrategy {
 
    /** Log used to log any errors that occur. */
-   private static final Log log = Log.getInstance(DefaultPopulationStrategy.class);
+   private static final Logger log = LoggerFactory.getLogger(DefaultPopulationStrategy.class);
 
    /** Configuration object handed to the class at init time. */
    private Configuration _config;
@@ -100,7 +101,7 @@ public class DefaultPopulationStrategy implements PopulationStrategy {
          }
          catch ( ExpressionException ee ) {
             if ( !StripesConstants.SPECIAL_URL_KEYS.contains(tag.getName()) ) {
-               log.info("Could not find property [", tag.getName(), "] on ActionBean.", ee);
+               log.info("Could not find property [{}] on ActionBean.", tag.getName(), ee);
             }
          }
       }

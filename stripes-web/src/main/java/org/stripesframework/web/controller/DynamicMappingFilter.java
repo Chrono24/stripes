@@ -54,11 +54,12 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.action.ActionBean;
 import org.stripesframework.web.config.Configuration;
 import org.stripesframework.web.exception.StripesServletException;
 import org.stripesframework.web.util.HttpUtil;
-import org.stripesframework.web.util.Log;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -158,7 +159,7 @@ public class DynamicMappingFilter implements Filter {
    /** The size of the buffer used by {@link TempBufferWriter} before it overflows. */
    private static       int    includeBufferSize          = 1024;
 
-   private static final Log log = Log.getInstance(DynamicMappingFilter.class);
+   private static final Logger log = LoggerFactory.getLogger(DynamicMappingFilter.class);
 
    private FilterConfig      _filterConfig;
    private ServletContext    _servletContext;
@@ -266,12 +267,12 @@ public class DynamicMappingFilter implements Filter {
          String value = config.getInitParameter(INCLUDE_BUFFER_SIZE_PARAM);
          if ( value != null ) {
             includeBufferSize = Integer.valueOf(value.trim());
-            log.info(getClass().getSimpleName(), " include buffer size is ", includeBufferSize);
+            log.info("{} include buffer size is {}", getClass().getSimpleName(), includeBufferSize);
          }
       }
       catch ( Exception e ) {
-         log.warn(e, "Could not interpret '", config.getInitParameter(INCLUDE_BUFFER_SIZE_PARAM), "' as a number for init-param '", INCLUDE_BUFFER_SIZE_PARAM,
-               "'. Using default value ", includeBufferSize, ".");
+         log.warn("Could not interpret '{}' as a number for init-param '" + INCLUDE_BUFFER_SIZE_PARAM + "'. Using default value {}.",
+               config.getInitParameter(INCLUDE_BUFFER_SIZE_PARAM), includeBufferSize, e);
       }
 
       _filterConfig = config;
@@ -333,10 +334,10 @@ public class DynamicMappingFilter implements Filter {
          cxn.setRequestProperty(REQ_HEADER_INIT_FLAG, "true");
 
          // Log the HTTP status
-         log.debug(cxn.getResponseCode(), " ", cxn.getResponseMessage(), " (", cxn.getContentLength(), " bytes) from ", url);
+         log.debug("{} {} ({} bytes) from {}", cxn.getResponseCode(), cxn.getResponseMessage(), cxn.getContentLength(), url);
       }
       catch ( Exception e ) {
-         log.debug(e, "Request failed trying to force initialization of StripesFilter");
+         log.debug("Request failed trying to force initialization of StripesFilter", e);
       }
       finally {
          try {
@@ -430,7 +431,7 @@ public class DynamicMappingFilter implements Filter {
          }
       }
 
-      log.debug("Filter ", filterName, " maps to ", patterns);
+      log.debug("Filter {} maps to {}", filterName, patterns);
       return patterns;
    }
 
@@ -478,16 +479,16 @@ public class DynamicMappingFilter implements Filter {
                msg = "StripesFilter is declared multiple times in web.xml; refusing to use either one. ";
             }
 
-            log.info(msg, "Initializing with \"", _filterConfig.getFilterName(), "\" configuration.");
+            log.info("{}Initializing with \"{}\" configuration.", msg, _filterConfig.getFilterName());
             createStripesFilter(_filterConfig);
          } else {
             Node filterNode = filterNodes.item(0);
             final String name = eval("filter-name", filterNode, XPathConstants.STRING);
-            log.debug("Found StripesFilter declared as ", name, " in web.xml");
+            log.debug("Found StripesFilter declared as {} in web.xml", name);
 
             List<String> patterns = getFilterUrlPatterns(filterNode);
             if ( patterns.isEmpty() ) {
-               log.info("StripesFilter is declared but not mapped in web.xml. ", "Initializing with \"", name, "\" configuration from web.xml.");
+               log.info("StripesFilter is declared but not mapped in web.xml. Initializing with \"{}\" configuration from web.xml.", name);
 
                final Map<String, String> parameters = getFilterParameters(filterNode);
                createStripesFilter(new FilterConfig() {
@@ -601,14 +602,14 @@ public class DynamicMappingFilter implements Filter {
       Iterator<String> iterator = uris.iterator();
       while ( getStripesFilter() == null && iterator.hasNext() ) {
          String uri = iterator.next();
-         log.info("Try to force initialization of StripesFilter with forward to ", uri);
+         log.info("Try to force initialization of StripesFilter with forward to {}", uri);
          try {
             _initializing = true;
             RequestDispatcher dispatcher = _servletContext.getRequestDispatcher(uri);
             dispatcher.forward(req, rsp);
          }
          catch ( Exception e ) {
-            log.debug(e, "Ignored exception during forward");
+            log.debug("Ignored exception during forward", e);
          }
          finally {
             _initializing = false;
@@ -620,14 +621,14 @@ public class DynamicMappingFilter implements Filter {
       iterator = uris.iterator();
       while ( getStripesFilter() == null && iterator.hasNext() ) {
          String uri = iterator.next();
-         log.info("Try to force initialization of StripesFilter with include of ", uri);
+         log.info("Try to force initialization of StripesFilter with include of {}", uri);
          try {
             _initializing = true;
             RequestDispatcher dispatcher = _servletContext.getRequestDispatcher(uri);
             dispatcher.forward(req, rsp);
          }
          catch ( Exception e ) {
-            log.debug(e, "Ignored exception during forward");
+            log.debug("Ignored exception during forward", e);
          }
          finally {
             _initializing = false;
@@ -640,11 +641,11 @@ public class DynamicMappingFilter implements Filter {
       while ( getStripesFilter() == null && iterator.hasNext() ) {
          try {
             String uri = iterator.next();
-            log.info("Try to force initialization of StripesFilter with request to ", uri);
+            log.info("Try to force initialization of StripesFilter with request to {}", uri);
             requestRemotely(request, uri);
          }
          catch ( Exception e ) {
-            log.debug(e, "Ignored exception during request");
+            log.debug("Ignored exception during request", e);
          }
       }
    }

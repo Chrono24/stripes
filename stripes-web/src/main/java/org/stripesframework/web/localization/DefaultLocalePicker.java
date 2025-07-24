@@ -16,6 +16,7 @@ package org.stripesframework.web.localization;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -24,8 +25,9 @@ import java.util.Map;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.config.Configuration;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.util.StringUtil;
 
 
@@ -55,7 +57,7 @@ public class DefaultLocalePicker implements LocalePicker {
    public static final String LOCALE_LIST = "LocalePicker.Locales";
 
    /** Log instance for use within the class. */
-   private static final Log log = Log.getInstance(DefaultLocalePicker.class);
+   private static final Logger log = LoggerFactory.getLogger(DefaultLocalePicker.class);
 
    /** Stores a reference to the configuration passed in at initialization. */
    protected Configuration _configuration;
@@ -76,7 +78,7 @@ public class DefaultLocalePicker implements LocalePicker {
       String configuredLocales = configuration.getBootstrapPropertyResolver().getProperty(LOCALE_LIST);
 
       if ( configuredLocales == null || configuredLocales.isEmpty() ) {
-         log.info("No locale list specified, defaulting to single locale: ", Locale.getDefault());
+         log.info("No locale list specified, defaulting to single locale: {}", Locale.getDefault());
          _locales.add(Locale.getDefault());
       } else {
          // Split apart the Locales on commas, and then parse the local strings into their bits
@@ -96,8 +98,7 @@ public class DefaultLocalePicker implements LocalePicker {
             } else if ( parts.length == 3 ) {
                locale = Locale.of(parts[0].trim().toLowerCase(), parts[1].trim().toUpperCase(), parts[2].trim());
             } else {
-               log.error("Configuration property ", LOCALE_LIST, " contained a locale value ", "that split into more than three parts! The parts were: ",
-                     parts);
+               log.error("Configuration property {} contained a locale value that split into more than three parts! The parts were: {}", LOCALE_LIST, Arrays.toString(parts));
             }
 
             _locales.add(locale);
@@ -109,14 +110,13 @@ public class DefaultLocalePicker implements LocalePicker {
                if ( Charset.isSupported(encoding) ) {
                   _encodings.put(locale, halves[1]);
                } else {
-                  log.error("Configuration property ", LOCALE_LIST, " contained a locale value ",
-                        "with an unsupported character encoding. The offending entry is: ", localeString);
+                  log.error("Configuration property {} contained a locale value with an unsupported character encoding. The offending entry is: {}", LOCALE_LIST, localeString);
                }
             }
          }
 
-         log.debug("Configured DefaultLocalePicker with locales: ", _locales);
-         log.debug("Configured DefaultLocalePicker with encodings: ", _encodings);
+         log.debug("Configured DefaultLocalePicker with locales: {}", _locales);
+         log.debug("Configured DefaultLocalePicker with encodings: {}", _encodings);
       }
    }
 

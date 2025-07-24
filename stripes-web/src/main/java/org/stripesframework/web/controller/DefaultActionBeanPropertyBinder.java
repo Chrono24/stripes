@@ -31,6 +31,8 @@ import java.util.TreeMap;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.action.ActionBean;
 import org.stripesframework.web.action.ActionBeanContext;
 import org.stripesframework.web.action.FileBean;
@@ -40,7 +42,6 @@ import org.stripesframework.web.exception.StripesRuntimeException;
 import org.stripesframework.web.util.CollectionUtil;
 import org.stripesframework.web.util.CryptoUtil;
 import org.stripesframework.web.util.HtmlUtil;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.util.bean.BeanUtil;
 import org.stripesframework.web.util.bean.ExpressionException;
 import org.stripesframework.web.util.bean.NoSuchPropertyException;
@@ -72,7 +73,7 @@ import org.stripesframework.web.validation.ValidationMetadata;
  */
 public class DefaultActionBeanPropertyBinder implements ActionBeanPropertyBinder {
 
-   private static final Log log = Log.getInstance(DefaultActionBeanPropertyBinder.class);
+   private static final Logger log = LoggerFactory.getLogger(DefaultActionBeanPropertyBinder.class);
 
    /** Configuration instance passed in at initialization time. */
    private Configuration _configuration;
@@ -120,7 +121,7 @@ public class DefaultActionBeanPropertyBinder implements ActionBeanPropertyBinder
          try {
             String pname = name.getName(); // exact name of the param in the request
             if ( !StripesConstants.SPECIAL_URL_KEYS.contains(pname) && !fieldErrors.containsKey(pname) ) {
-               log.trace("Running binding for property with name: ", name);
+               log.trace("Running binding for property with name: {}", name);
 
                // Determine the target type
                ValidationMetadata validationInfo = validationInfos.get(name.getStrippedName());
@@ -145,8 +146,8 @@ public class DefaultActionBeanPropertyBinder implements ActionBeanPropertyBinder
 
                if ( type == null && (validationInfo == null || validationInfo.converter() == null) ) {
                   if ( !pname.equals(context.getEventName()) ) {
-                     log.trace("Could not find type for property '", name.getName(), "' of '", bean.getClass().getSimpleName(), "' probably because it's not ",
-                           "a property of the bean.  Skipping binding.");
+                     log.trace("Could not find type for property '{}' of '{}' probably because it's not a property of the bean.  Skipping binding.",
+                           name.getName(), bean.getClass().getSimpleName());
                   }
                   continue;
                }
@@ -196,14 +197,14 @@ public class DefaultActionBeanPropertyBinder implements ActionBeanPropertyBinder
          while ( fileParameterNames.hasMoreElements() ) {
             String fileParameterName = fileParameterNames.nextElement();
             FileBean fileBean = request.getFileParameterValue(fileParameterName);
-            log.trace("Attempting to bind file parameter with name [", fileParameterName, "] and value: ", fileBean);
+            log.trace("Attempting to bind file parameter with name [{}] and value: {}", fileParameterName, fileBean);
 
             if ( fileBean != null ) {
                try {
                   bind(bean, fileParameterName, fileBean);
                }
                catch ( Exception e ) {
-                  log.debug(e, "Could not bind file property with name [", fileParameterName, "] and value: ", fileBean);
+                  log.debug("Could not bind file property with name [{}] and value: {}", fileParameterName, fileBean, e);
                }
             }
          }
@@ -436,8 +437,8 @@ public class DefaultActionBeanPropertyBinder implements ActionBeanPropertyBinder
          returnType = scalarType;
       }
 
-      log.debug("Converting ", values.length, " value(s) using ",
-            (converter != null ? "converter " + converter.getClass().getName() : "Constructor(String) if available"));
+      log.debug("Converting {} value(s) using {}", values.length,
+            converter != null ? "converter " + converter.getClass().getName() : "Constructor(String) if available");
 
       for ( String value : values ) {
          if ( validationInfo != null && validationInfo.encrypted() ) {
@@ -454,8 +455,9 @@ public class DefaultActionBeanPropertyBinder implements ActionBeanPropertyBinder
                      retval = getConfiguration().getObjectFactory().constructor(returnType, String.class).newInstance(value);
                   }
                   catch ( StripesRuntimeException e ) {
-                     log.debug("Could not find a way to convert the parameter ", propertyName.getName(), " to a ", returnType.getSimpleName(),
-                           ". No TypeConverter could be ", "found and the class does not ", "have a constructor that takes a ", "single String parameter.");
+                     log.debug("Could not find a way to convert the parameter {} to a {}. "
+                                 + "No TypeConverter could be found and the class does not have a constructor that takes a single String parameter.",
+                           propertyName.getName(), returnType.getSimpleName());
                   }
                }
 
@@ -471,7 +473,7 @@ public class DefaultActionBeanPropertyBinder implements ActionBeanPropertyBinder
                }
             }
             catch ( Exception e ) {
-               log.warn(e, "Looks like type converter ", converter, " threw an exception.");
+               log.warn("Looks like type converter {} threw an exception.", converter, e);
             }
          }
       }
@@ -631,9 +633,9 @@ public class DefaultActionBeanPropertyBinder implements ActionBeanPropertyBinder
       if ( e instanceof NoSuchPropertyException ) {
          NoSuchPropertyException nspe = (NoSuchPropertyException)e;
          // No stack trace if it's a no such property exception
-         log.debug("Could not bind property with name [", name, "] to bean of type: ", bean.getClass().getSimpleName(), " : ", nspe.getMessage());
+         log.debug("Could not bind property with name [{}] to bean of type: {} : {}", name, bean.getClass().getSimpleName(), nspe.getMessage());
       } else {
-         log.debug(e, "Could not bind property with name [", name, "] to bean of type: ", bean.getClass().getSimpleName());
+         log.debug("Could not bind property with name [{}] to bean of type: {}", name, bean.getClass().getSimpleName(), e);
       }
    }
 
@@ -683,7 +685,7 @@ public class DefaultActionBeanPropertyBinder implements ActionBeanPropertyBinder
     */
    protected void validateRequiredFields( Map<ParameterName, String[]> parameters, ActionBean bean, ValidationErrors errors ) {
 
-      log.debug("Running required field validation on bean class ", bean.getClass().getName());
+      log.debug("Running required field validation on bean class {}", bean.getClass().getName());
 
       // Assemble a set of names that we know have indexed parameters, so we won't check
       // for required-ness the regular way
@@ -725,7 +727,7 @@ public class DefaultActionBeanPropertyBinder implements ActionBeanPropertyBinder
                      }
                   }
 
-                  log.debug("Checking required field: ", propertyName, ", with values: ", values);
+                  log.debug("Checking required field: {}, with values: {}", propertyName, values);
                   checkSingleRequiredField(propertyName, propertyName, values, stripesReq, errors);
                }
             }

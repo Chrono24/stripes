@@ -26,6 +26,8 @@ import java.util.Set;
 
 import jakarta.servlet.ServletContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.controller.ActionBeanContextFactory;
 import org.stripesframework.web.controller.ActionBeanPropertyBinder;
 import org.stripesframework.web.controller.ActionResolver;
@@ -51,7 +53,6 @@ import org.stripesframework.web.localization.DefaultLocalePicker;
 import org.stripesframework.web.localization.DefaultLocalizationBundleFactory;
 import org.stripesframework.web.localization.LocalePicker;
 import org.stripesframework.web.localization.LocalizationBundleFactory;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.validation.DefaultTypeConverterFactory;
 import org.stripesframework.web.validation.DefaultValidationMetadataProvider;
 import org.stripesframework.web.validation.TypeConverterFactory;
@@ -81,7 +82,7 @@ import org.stripesframework.web.validation.ValidationMetadataProvider;
 public class DefaultConfiguration implements Configuration {
 
    /** Log implementation for use within this class. */
-   private static final Log log = Log.getInstance(DefaultConfiguration.class);
+   private static final Logger log = LoggerFactory.getLogger(DefaultConfiguration.class);
 
    private boolean                                      _debugMode;
    private BootstrapPropertyResolver                    _resolver;
@@ -260,7 +261,7 @@ public class DefaultConfiguration implements Configuration {
             List<Class<? extends ObjectPostProcessor>> classes = getBootstrapPropertyResolver().getClassPropertyList(ObjectPostProcessor.class);
             List<ObjectPostProcessor> instances = new ArrayList<>();
             for ( Class<? extends ObjectPostProcessor> clazz : classes ) {
-               log.debug("Instantiating object post-processor ", clazz);
+               log.debug("Instantiating object post-processor {}", clazz);
                instances.add(_objectFactory.newInstance(clazz));
             }
             for ( ObjectPostProcessor pp : instances ) {
@@ -349,7 +350,7 @@ public class DefaultConfiguration implements Configuration {
             for ( Interceptor interceptor : interceptors ) {
                Class<? extends Interceptor> clazz = interceptor.getClass();
                if ( classes.contains(clazz) ) {
-                  log.warn("Interceptor ", clazz, " is configured to run more than once for ", entry.getKey());
+                  log.warn("Interceptor {} is configured to run more than once for {}", clazz, entry.getKey());
                } else {
                   classes.add(clazz);
                }
@@ -388,11 +389,12 @@ public class DefaultConfiguration implements Configuration {
       Class<? extends Interceptor> type = interceptor.getClass();
       Intercepts intercepts = type.getAnnotation(Intercepts.class);
       if ( intercepts == null ) {
-         log.error("An interceptor of type ", type.getName(), " was configured ", "but was not marked with an @Intercepts annotation. As a ",
-               "result it is not possible to determine at which ", "lifecycle stages the interceptor should be applied. This ", "interceptor will be ignored.");
+         log.error("An interceptor of type {} was configured but was not marked with an @Intercepts annotation. " +
+                     "As a result it is not possible to determine at which lifecycle stages the interceptor should be applied. This interceptor will be ignored.",
+               type.getName());
          return;
       } else {
-         log.debug("Configuring interceptor '", type.getSimpleName(), "', for lifecycle stages: ", intercepts.value());
+         log.debug("Configuring interceptor '{}', for lifecycle stages: {}", type.getSimpleName(), intercepts.value());
       }
 
       // call init() if the interceptor implements ConfigurableComponent
@@ -401,7 +403,7 @@ public class DefaultConfiguration implements Configuration {
             ((ConfigurableComponent)interceptor).init(this);
          }
          catch ( Exception e ) {
-            log.error("Error initializing interceptor of type " + type.getName(), e);
+            log.error("Error initializing interceptor of type {}", type.getName(), e);
          }
       }
 

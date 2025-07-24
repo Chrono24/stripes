@@ -23,10 +23,11 @@ import java.util.Set;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.config.BootstrapPropertyResolver;
 import org.stripesframework.web.config.Configuration;
 import org.stripesframework.web.controller.AnnotatedClassActionResolver;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.util.ResolverUtil;
 import org.stripesframework.web.util.StringUtil;
 
@@ -71,7 +72,7 @@ import org.stripesframework.web.util.StringUtil;
 public class DelegatingExceptionHandler extends DefaultExceptionHandler {
 
    /** Log instance for use within in this class. */
-   private static final Log log = Log.getInstance(DelegatingExceptionHandler.class);
+   private static final Logger log = LoggerFactory.getLogger(DelegatingExceptionHandler.class);
 
    /**
     * Configuration key used to lookup the list of packages to scan for auto handlers.
@@ -97,7 +98,7 @@ public class DelegatingExceptionHandler extends DefaultExceptionHandler {
       Set<Class<? extends AutoExceptionHandler>> handlers = findClasses();
       for ( Class<? extends AutoExceptionHandler> handler : handlers ) {
          if ( !Modifier.isAbstract(handler.getModifiers()) ) {
-            log.debug("Processing class ", handler, " looking for exception handling methods.");
+            log.debug("Processing class {} looking for exception handling methods.", handler);
             addHandler(handler);
          }
       }
@@ -116,14 +117,13 @@ public class DelegatingExceptionHandler extends DefaultExceptionHandler {
       String[] packages = StringUtil.standardSplit(bootstrap.getProperty(PACKAGES));
       if ( packages == null || packages.length == 0 ) {
          // Config param not found so try autodiscovery
-         log.info("No config parameter '", PACKAGES, "' found. Trying autodiscovery instead.");
+         log.info("No config parameter '" + PACKAGES + "' found. Trying autodiscovery instead.");
          List<Class<? extends AutoExceptionHandler>> classes = bootstrap.getClassPropertyList(AutoExceptionHandler.class);
          if ( !classes.isEmpty() ) {
             return new HashSet<>(classes);
          } else {
             // Autodiscovery found nothing so resort to looking at the ActionBean packages
-            log.info("Autodiscovery found no implementations of AutoExceptionHandler. Using ", "the value of '", AnnotatedClassActionResolver.PACKAGES,
-                  "' instead.");
+            log.info("Autodiscovery found no implementations of AutoExceptionHandler. Using the value of '" + AnnotatedClassActionResolver.PACKAGES + "' instead.");
             packages = StringUtil.standardSplit(bootstrap.getProperty(AnnotatedClassActionResolver.PACKAGES));
          }
       }

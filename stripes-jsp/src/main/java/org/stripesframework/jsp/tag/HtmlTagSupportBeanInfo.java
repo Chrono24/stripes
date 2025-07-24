@@ -20,7 +20,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.stripesframework.web.util.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -36,7 +37,7 @@ import org.stripesframework.web.util.Log;
  */
 public class HtmlTagSupportBeanInfo extends SimpleBeanInfo {
 
-   private static final Log log = Log.getInstance(HtmlTagSupportBeanInfo.class);
+   private static final Logger log = LoggerFactory.getLogger(HtmlTagSupportBeanInfo.class);
 
    /**
     * Generates a simple set of PropertyDescriptors for the HtmlTagSupport class.
@@ -79,7 +80,7 @@ public class HtmlTagSupportBeanInfo extends SimpleBeanInfo {
       }
       catch ( Exception e ) {
          // This is crazy talk, we're only doing things that should always succeed
-         log.fatal(e, "Could not contruct bean info for HtmlTagSupport. This is very bad.");
+         log.error("Could not contruct bean info for HtmlTagSupport. This is very bad.", e);
          return null;
       }
    }
