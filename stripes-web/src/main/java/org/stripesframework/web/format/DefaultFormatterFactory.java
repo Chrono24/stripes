@@ -18,8 +18,9 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.config.Configuration;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.util.TypeHandlerCache;
 
 
@@ -34,7 +35,7 @@ import org.stripesframework.web.util.TypeHandlerCache;
  */
 public class DefaultFormatterFactory implements FormatterFactory {
 
-   private static final Log log = Log.getInstance(DefaultFormatterFactory.class);
+   private static final Logger log = LoggerFactory.getLogger(DefaultFormatterFactory.class);
 
    /** Cache target type to Formatter class mappings. */
    private TypeHandlerCache<Class<? extends Formatter<?>>> cache;
@@ -72,11 +73,11 @@ public class DefaultFormatterFactory implements FormatterFactory {
             return getInstance(formatterClass, formatType, formatPattern, locale);
          }
          catch ( Exception e ) {
-            log.error(e, "Unable to instantiate Formatter ", formatterClass);
+            log.error("Unable to instantiate Formatter {}", formatterClass, e);
             return null;
          }
       } else {
-         log.trace("Couldn't find a formatter for ", clazz);
+         log.trace("Couldn't find a formatter for {}", clazz);
          return null;
       }
    }

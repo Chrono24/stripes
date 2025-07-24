@@ -30,8 +30,9 @@ import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.exception.StripesRuntimeException;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.util.Range;
 
 
@@ -69,7 +70,7 @@ public class StreamingResolution implements Resolution {
    /** Boundary for use in multipart responses. */
    private static final String MULTIPART_BOUNDARY  = "BOUNDARY_F7C98B76AEF711DF86D1B4FCDFD72085";
 
-   private static final Log log = Log.getInstance(StreamingResolution.class);
+   private static final Logger log = LoggerFactory.getLogger(StreamingResolution.class);
 
    private       InputStream       _inputStream;
    private       Reader            _reader;

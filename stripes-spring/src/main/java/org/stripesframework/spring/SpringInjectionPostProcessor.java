@@ -16,11 +16,12 @@ package org.stripesframework.spring;
 
 import jakarta.servlet.ServletContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.config.Configuration;
 
 import org.stripesframework.web.controller.DefaultObjectFactory;
 import org.stripesframework.web.controller.ObjectPostProcessor;
-import org.stripesframework.web.util.Log;
 
 
 /**
@@ -36,7 +37,7 @@ import org.stripesframework.web.util.Log;
  */
 public class SpringInjectionPostProcessor implements ObjectPostProcessor<Object> {
 
-   private static final Log log = Log.getInstance(SpringInjectionPostProcessor.class);
+   private static final Logger log = LoggerFactory.getLogger(SpringInjectionPostProcessor.class);
 
    private ServletContext _servletContext;
 
@@ -46,7 +47,7 @@ public class SpringInjectionPostProcessor implements ObjectPostProcessor<Object>
     */
    @Override
    public Object postProcess( Object object ) {
-      log.debug("Running Spring dependency injection for instance of ", object.getClass().getSimpleName());
+      log.debug("Running Spring dependency injection for instance of {}", object.getClass().getSimpleName());
       SpringHelper.injectBeans(object, _servletContext);
       return object;
    }

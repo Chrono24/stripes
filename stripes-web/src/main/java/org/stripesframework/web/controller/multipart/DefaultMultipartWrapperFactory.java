@@ -22,10 +22,11 @@ import java.util.regex.Pattern;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.config.Configuration;
 import org.stripesframework.web.controller.FileUploadLimitExceededException;
 import org.stripesframework.web.exception.StripesRuntimeException;
-import org.stripesframework.web.util.Log;
 
 
 /**
@@ -48,7 +49,7 @@ public class DefaultMultipartWrapperFactory implements MultipartWrapperFactory {
    /** Key used to lookup the name of the maximum post size. */
    public static final String MAX_POST = "FileUpload.MaximumPostSize";
 
-   private static final Log log = Log.getInstance(DefaultMultipartWrapperFactory.class);
+   private static final Logger log = LoggerFactory.getLogger(DefaultMultipartWrapperFactory.class);
 
    // Instance level fields
    private Configuration                     _configuration;
@@ -80,17 +81,17 @@ public class DefaultMultipartWrapperFactory implements MultipartWrapperFactory {
                break;
             }
             catch ( Throwable t ) {
-               log.debug(getClass().getSimpleName(), " not using ", className, " because it failed to load. This likely means the supporting ",
-                     "file upload library is not present on the classpath.");
+               log.debug("{} not using {} because it failed to load. This likely means the supporting file upload library is not present on the classpath.",
+                     getClass().getSimpleName(), className);
             }
          }
       }
 
       // Log the name of the class we'll be using or a warning if none could be loaded
       if ( _multipartClass == null ) {
-         log.warn("No ", MultipartWrapper.class.getSimpleName(), " implementation could be loaded");
+         log.warn("No {} implementation could be loaded", MultipartWrapper.class.getSimpleName());
       } else {
-         log.info("Using ", _multipartClass.getName(), " as ", MultipartWrapper.class.getSimpleName(), " implementation.");
+         log.info("Using {} as {} implementation.", _multipartClass.getName(), MultipartWrapper.class.getSimpleName());
       }
 
       // Figure out where the temp directory is, and store that info
@@ -103,8 +104,7 @@ public class DefaultMultipartWrapperFactory implements MultipartWrapperFactory {
          if ( tmpDir != null ) {
             _temporaryDirectory = new File(tmpDir).getAbsoluteFile();
          } else {
-            log.warn("The tmpdir system property was null! File uploads will probably fail. ",
-                  "This is normal if you are running on Google App Engine as it doesn't allow ", "file system write access.");
+            log.warn("The tmpdir system property was null! File uploads will probably fail. This is normal if you are running on Google App Engine as it doesn't allow file system write access.");
          }
       }
 
@@ -114,8 +114,8 @@ public class DefaultMultipartWrapperFactory implements MultipartWrapperFactory {
          Pattern pattern = Pattern.compile("([\\d,]+)([kKmMgG]?).*");
          Matcher matcher = pattern.matcher(limit);
          if ( !matcher.matches() ) {
-            log.error("Did not understand value of configuration parameter ", MAX_POST, " You supplied: ", limit, ". Valid values are any string of numbers ",
-                  "optionally followed by (case insensitive) [k|kb|m|mb|g|gb]. ", "Default value of ", _maxPostSizeInBytes, " bytes will be used instead.");
+            log.error("Did not understand value of configuration parameter {} You supplied: {}. Valid values are any string of numbers optionally followed by (case insensitive) [k|kb|m|mb|g|gb]. Default value of {} bytes will be used instead.",
+                  MAX_POST, limit, _maxPostSizeInBytes);
          } else {
             String digits = matcher.group(1);
             String suffix = matcher.group(2).toLowerCase();
@@ -130,7 +130,7 @@ public class DefaultMultipartWrapperFactory implements MultipartWrapperFactory {
             }
 
             _maxPostSizeInBytes = number;
-            log.info("Configured file upload post size limit: ", number, " bytes.");
+            log.info("Configured file upload post size limit: {} bytes.", number);
          }
       }
    }

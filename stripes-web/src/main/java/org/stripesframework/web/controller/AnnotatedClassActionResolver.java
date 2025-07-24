@@ -29,6 +29,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.action.ActionBean;
 import org.stripesframework.web.action.ActionBeanContext;
 import org.stripesframework.web.action.DefaultHandler;
@@ -41,7 +43,6 @@ import org.stripesframework.web.exception.ActionBeanNotFoundException;
 import org.stripesframework.web.exception.StripesRuntimeException;
 import org.stripesframework.web.exception.StripesServletException;
 import org.stripesframework.web.util.HttpUtil;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.util.ResolverUtil;
 import org.stripesframework.web.util.StringUtil;
 
@@ -72,7 +73,7 @@ public class AnnotatedClassActionResolver implements ActionResolver {
    private static final String DEFAULT_HANDLER_KEY = "__default_handler";
 
    /** Log instance for use within in this class. */
-   private static final Log log = Log.getInstance(AnnotatedClassActionResolver.class);
+   private static final Logger log = LoggerFactory.getLogger(AnnotatedClassActionResolver.class);
 
    /** Handle to the configuration. */
    private Configuration _configuration;
@@ -405,25 +406,14 @@ public class AnnotatedClassActionResolver implements ActionResolver {
       if ( proto != null ) {
          proto.initDefaultValueWithDefaultHandlerIfNeeded(this);
       }
-
-      if ( log.getRealLog().isDebugEnabled() ) {
-         // Print out the event mappings nicely
-         for ( Map.Entry<String, Method> entry : classMappings.entrySet() ) {
-            String event = entry.getKey();
-            Method handler = entry.getValue();
-            boolean isDefault = DEFAULT_HANDLER_KEY.equals(event);
-
-            log.debug("Bound: ", clazz.getSimpleName(), ".", handler.getName(), "() ==> ", binding, isDefault ? "" : "?" + event);
-         }
-      }
    }
 
    protected void addBeanNameMappings() {
       Set<String> foundBeanNames = new HashSet<>();
       for ( Class<? extends ActionBean> clazz : getActionBeanClasses() ) {
          if ( foundBeanNames.contains(clazz.getSimpleName()) ) {
-            log.warn("Found multiple action beans with the same simple name: ", clazz.getSimpleName(),
-                  ". You will " + "need to reference these action beans by their fully qualified names");
+            log.warn("Found multiple action beans with the same simple name: {}. You will need to reference these action beans by their fully qualified names",
+                  clazz.getSimpleName());
             _actionBeansByName.remove(clazz.getSimpleName());
             continue;
          }
@@ -498,8 +488,8 @@ public class AnnotatedClassActionResolver implements ActionResolver {
             String otherName = getEventNameFromRequestParams(bean, context);
             if ( otherName != null && !otherName.equals(event) ) {
                String[] otherValue = context.getRequest().getParameterValues(otherName);
-               log.warn("The event name was specified by two request parameters: ", StripesConstants.URL_KEY_EVENT_NAME, "=", event, " and ", otherName, "=",
-                     Arrays.toString(otherValue), ". ", "As of Stripes 1.5, ", StripesConstants.URL_KEY_EVENT_NAME, " overrides all other request parameters.");
+               log.warn("The event name was specified by two request parameters: " + StripesConstants.URL_KEY_EVENT_NAME + "={} and {}={}. As of Stripes 1.5, "
+                     + StripesConstants.URL_KEY_EVENT_NAME + " overrides all other request parameters.", event, otherName, Arrays.toString(otherValue));
             }
          }
          catch ( StripesRuntimeException e ) {

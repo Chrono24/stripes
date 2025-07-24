@@ -26,13 +26,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.action.ActionBean;
 import org.stripesframework.web.action.ActionBeanContext;
 import org.stripesframework.web.action.After;
 import org.stripesframework.web.action.Before;
 import org.stripesframework.web.action.Resolution;
 import org.stripesframework.web.util.CollectionUtil;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.util.ReflectUtil;
 
 
@@ -65,7 +66,7 @@ import org.stripesframework.web.util.ReflectUtil;
 public class BeforeAfterMethodInterceptor implements Interceptor {
 
    /** Log used throughout the intercetor */
-   private static final Log log = Log.getInstance(BeforeAfterMethodInterceptor.class);
+   private static final Logger log = LoggerFactory.getLogger(BeforeAfterMethodInterceptor.class);
 
    /** Cache of the FilterMethods for the different ActionBean classes */
    private final Map<Class<? extends ActionBean>, FilterMethods> _filterMethodsCache = new ConcurrentHashMap<>();
@@ -153,8 +154,9 @@ public class BeforeAfterMethodInterceptor implements Interceptor {
                // Check to ensure that the method has an appropriate signature
                int mods = method.getModifiers();
                if ( method.getParameterTypes().length != 0 || Modifier.isAbstract(mods) ) {
-                  log.warn("Method '", beanClass.getName(), ".", method.getName(), "' is ", "annotated with @Before or @After but has an incompatible ",
-                        "signature. @Before/@After methods must be non-abstract ", "zero-argument methods.");
+                  log.warn(
+                        "Method '{}.{}' is annotated with @Before or @After but has an incompatible signature. @Before/@After methods must be non-abstract zero-argument methods.",
+                        beanClass.getName(), method.getName());
                   continue;
                }
 
@@ -164,9 +166,9 @@ public class BeforeAfterMethodInterceptor implements Interceptor {
                      method.setAccessible(true);
                   }
                   catch ( SecurityException se ) {
-                     log.warn("Method '", beanClass.getName(), ".", method.getName(), "' is ", "annotated with @Before or @After but is not public and  ",
-                           "calling setAccessible(true) on it threw a SecurityException. ", "Please either declare the method as public, or change your ",
-                           "JVM security policy to allow Stripes code to call ", "Method.setAccessible() on your code base.");
+                     log.warn("Method '{}.{}' is annotated with @Before or @After but is not public and  calling setAccessible(true) on it threw a SecurityException. "
+                                 + "Please either declare the method as public, or change your JVM security policy to allow Stripes code to call Method.setAccessible() on your code base.",
+                           beanClass.getName(), method.getName());
                      continue;
                   }
                }
@@ -199,18 +201,19 @@ public class BeforeAfterMethodInterceptor implements Interceptor {
       Class<? extends ActionBean> beanClass = bean.getClass();
       Object retval = null;
 
-      log.debug("Calling @", when.getSimpleName(), " method '", m.getName(), "' at LifecycleStage '", stage, "' on ActionBean '", beanClass.getSimpleName(),
-            "'");
+      log.debug("Calling @{} method '{}' at LifecycleStage '{}' on ActionBean '{}'", when.getSimpleName(), m.getName(), stage, beanClass.getSimpleName());
+
       try {
          retval = m.invoke(bean);
       }
       catch ( IllegalArgumentException e ) {
-         log.error(e, "An InvalidArgumentException was raised when calling @", when.getSimpleName(), " method '", m.getName(), "' at LifecycleStage '", stage,
-               "' on ActionBean '", beanClass.getSimpleName(), "'. See java.lang.reflect.Method.invoke() for possible reasons.");
+         log.error(
+               "An InvalidArgumentException was raised when calling @{} method '{}' at LifecycleStage '{}' on ActionBean '{}'. See java.lang.reflect.Method.invoke() for possible reasons.",
+               when.getSimpleName(), m.getName(), stage, beanClass.getSimpleName(), e);
       }
       catch ( IllegalAccessException e ) {
-         log.error(e, "An IllegalAccessException was raised when calling @", when.getSimpleName(), " method '", m.getName(), "' at LifecycleStage '", stage,
-               "' on ActionBean '", beanClass.getSimpleName(), "'");
+         log.error("An IllegalAccessException was raised when calling @{} method '{}' at LifecycleStage '{}' on ActionBean '{}'", when.getSimpleName(),
+               m.getName(), stage, beanClass.getSimpleName(), e);
       }
       catch ( InvocationTargetException e ) {
          // Method threw an exception, so throw the real cause of it
@@ -265,8 +268,8 @@ public class BeforeAfterMethodInterceptor implements Interceptor {
       public void addBeforeMethod( LifecycleStage[] stages, Method method ) {
          for ( LifecycleStage stage : stages ) {
             if ( stage == LifecycleStage.ActionBeanResolution ) {
-               log.warn("LifecycleStage.ActionBeanResolution is unsupported for @Before ", "methods. Method '", method.getDeclaringClass().getName(), ".",
-                     method.getName(), "' will not be invoked for this stage.");
+               log.warn("LifecycleStage.ActionBeanResolution is unsupported for @Before methods. Method '{}.{}' will not be invoked for this stage.",
+                     method.getDeclaringClass().getName(), method.getName());
             } else {
                addFilterMethod(_beforeMethods, stage, method);
             }

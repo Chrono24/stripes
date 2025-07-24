@@ -20,8 +20,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.controller.StripesConstants;
-import org.stripesframework.web.util.Log;
 
 
 /**
@@ -45,7 +46,7 @@ import org.stripesframework.web.util.Log;
  */
 public class ForwardResolution extends OnwardResolution<ForwardResolution> {
 
-   private static final Log log = Log.getInstance(ForwardResolution.class);
+   private static final Logger log = LoggerFactory.getLogger(ForwardResolution.class);
 
    private boolean _autoInclude = true;
    private String  _event;
@@ -113,10 +114,10 @@ public class ForwardResolution extends OnwardResolution<ForwardResolution> {
 
       // Figure out if we're inside an include, and use an include instead of a forward
       if ( _autoInclude && request.getAttribute(StripesConstants.REQ_ATTR_INCLUDE_PATH) != null ) {
-         log.trace("Including URL: ", path);
+         log.trace("Including URL: {}", path);
          request.getRequestDispatcher(path).include(request, response);
       } else {
-         log.trace("Forwarding to URL: ", path);
+         log.trace("Forwarding to URL: {}", path);
          request.getRequestDispatcher(path).forward(request, response);
       }
 

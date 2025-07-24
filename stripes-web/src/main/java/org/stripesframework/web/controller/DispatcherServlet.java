@@ -22,13 +22,14 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.action.ActionBean;
 import org.stripesframework.web.action.ActionBeanContext;
 import org.stripesframework.web.action.Resolution;
 import org.stripesframework.web.config.Configuration;
 import org.stripesframework.web.exception.StripesServletException;
 import org.stripesframework.web.util.HttpUtil;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.validation.BooleanTypeConverter;
 
 
@@ -53,7 +54,7 @@ public class DispatcherServlet extends HttpServlet {
     */
    public static final String RUN_CUSTOM_VALIDATION_WHEN_ERRORS = "Validation.InvokeValidateWhenErrorsExist";
 
-   private static final Log log = Log.getInstance(DispatcherServlet.class);
+   private static final Logger log = LoggerFactory.getLogger(DispatcherServlet.class);
 
    private Boolean _alwaysInvokeValidate;
 
@@ -189,7 +190,7 @@ public class DispatcherServlet extends HttpServlet {
       ///////////////////////////////////////////////////////////////////////
       // Here beings the real processing of the request!
       ///////////////////////////////////////////////////////////////////////
-      log.trace("Dispatching request to URL: ", HttpUtil.getRequestedPath(request));
+      log.trace("Dispatching request to URL: {}", HttpUtil.getRequestedPath(request));
 
       final ExecutionContext ctx = new ExecutionContext();
 
@@ -298,11 +299,11 @@ public class DispatcherServlet extends HttpServlet {
             public Resolution intercept( ExecutionContext context ) throws Exception {return null;}
          });
          if ( resolution != null ) {
-            log.warn("Resolutions returned from interceptors for ", ctx.getLifecycleStage(), " are ignored because it is too late to execute them.");
+            log.warn("Resolutions returned from interceptors for {} are ignored because it is too late to execute them.", ctx.getLifecycleStage());
          }
       }
       catch ( Exception e ) {
-         log.error(e);
+         log.error("Exception during requestComplete", e);
       }
    }
 

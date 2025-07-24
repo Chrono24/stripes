@@ -32,8 +32,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
 import jakarta.servlet.jsp.PageContext;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.exception.StripesRuntimeException;
-import org.stripesframework.web.util.Log;
 
 
 /**
@@ -46,7 +47,7 @@ import org.stripesframework.web.util.Log;
  */
 public class LayoutContext {
 
-   private static final Log log = Log.getInstance(LayoutContext.class);
+   private static final Logger log = LoggerFactory.getLogger(LayoutContext.class);
 
    /** The attribute name by which the stack of layout contexts can be found in the request. */
    public static final String LAYOUT_CONTEXT_KEY = LayoutContext.class.getName() + "#Context";
@@ -89,7 +90,7 @@ public class LayoutContext {
     */
    public static LayoutContext pop( PageContext pageContext ) {
       LayoutContext context = lookup(pageContext);
-      log.debug("Pop context ", context.getRenderPage(), " -> ", context.getDefinitionPage());
+      log.debug("Pop context {} -> {}", context.getRenderPage(), context.getDefinitionPage());
 
       pageContext.setAttribute(LAYOUT_CONTEXT_KEY, context.previous);
 
@@ -109,7 +110,7 @@ public class LayoutContext {
     */
    public static LayoutContext push( LayoutRenderTag renderTag ) {
       LayoutContext context = new LayoutContext(renderTag);
-      log.debug("Push context ", context.getRenderPage(), " -> ", context.getDefinitionPage());
+      log.debug("Push context {} -> {}", context.getRenderPage(), context.getDefinitionPage());
 
       PageContext pageContext = renderTag.getPageContext();
       LayoutContext previous = lookup(pageContext);
@@ -152,7 +153,7 @@ public class LayoutContext {
       this.renderTag = renderTag;
       renderPage = renderTag.getCurrentPagePath();
       componentPath = new LayoutRenderTagPath(renderTag);
-      log.debug("Path is ", componentPath);
+      log.debug("Path is {}", componentPath);
    }
 
    /**

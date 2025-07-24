@@ -21,8 +21,9 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.config.Configuration;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.util.TypeHandlerCache;
 
 
@@ -35,7 +36,7 @@ import org.stripesframework.web.util.TypeHandlerCache;
  */
 public class DefaultTypeConverterFactory implements TypeConverterFactory {
 
-   private static final Log log = Log.getInstance(DefaultTypeConverterFactory.class);
+   private static final Logger log = LoggerFactory.getLogger(DefaultTypeConverterFactory.class);
 
    /** Caches {@link TypeConverter} to {@link Class} mappings. */
    private TypeHandlerCache<Class<? extends TypeConverter<?>>> _cache;
@@ -90,11 +91,11 @@ public class DefaultTypeConverterFactory implements TypeConverterFactory {
             return getInstance(converterClass, locale);
          }
          catch ( Exception e ) {
-            log.error(e, "Unable to instantiate type converter ", converterClass);
+            log.error("Unable to instantiate type converter {}", converterClass, e);
             return null;
          }
       } else {
-         log.trace("Couldn't find a type converter for ", forType);
+         log.trace("Couldn't find a type converter for {}", forType);
          return null;
       }
    }

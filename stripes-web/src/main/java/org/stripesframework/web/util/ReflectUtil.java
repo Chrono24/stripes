@@ -45,6 +45,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.exception.StripesRuntimeException;
 
 
@@ -55,7 +57,7 @@ import org.stripesframework.web.exception.StripesRuntimeException;
  */
 public class ReflectUtil {
 
-   private static final Log log = Log.getInstance(ReflectUtil.class);
+   private static final Logger log = LoggerFactory.getLogger(ReflectUtil.class);
 
    /** A cache of property descriptors by class and property name */
    private static final Map<Class<?>, Map<String, PropertyDescriptor>> propertyDescriptors = new ConcurrentHashMap<>();
@@ -386,13 +388,13 @@ public class ReflectUtil {
          for ( int i = 0; i < pds.length; i++ ) {
             PropertyDescriptor pd = pds[i];
             if ( (pd.getReadMethod() != null && pd.getReadMethod().isBridge()) || (pd.getWriteMethod() != null && pd.getWriteMethod().isBridge()) ) {
-               log.debug("Working around JVM bug involving PropertyDescriptors ", "and bridge methods for ", clazz);
+               log.debug("Working around JVM bug involving PropertyDescriptors and bridge methods for {}", clazz);
 
                // Work around a JVM bug involving covariant return types from property getters
                if ( pd.getWriteMethod() == null && pd.getReadMethod() != null && pd.getReadMethod().isBridge() ) {
                   try {
                      pd = new PropertyDescriptor(pd.getName(), clazz);
-                     log.debug("Working around JVM bug http://bugs.sun.com/view_bug.do?bug_id=6794807");
+                     log.debug("Working around JVM bug https://bugs.java.com/bugdatabase/view_bug?bug_id=6794807");
                   }
                   catch ( IntrospectionException e ) {
                      // This can happen for read-only properties. Ignore it.
@@ -465,7 +467,7 @@ public class ReflectUtil {
          if ( candidates.size() == 1 ) {
             setter = candidates.get(0);
          } else if ( candidates.isEmpty() ) {
-            log.error("Something has gone awry! I have a bridge to nowhere: ", setter);
+            log.error("Something has gone awry! I have a bridge to nowhere: {}", setter);
          } else {
             // Create a set of all type arguments for all classes declaring the matching methods
             Set<Type> typeArgs = new HashSet<>();
@@ -502,8 +504,9 @@ public class ReflectUtil {
             if ( primeCandidates.size() == 1 ) {
                setter = primeCandidates.get(0);
             } else {
-               log.warn("Unable to locate a bridged setter for ", pd.getName(), " due to a JVM bug and an overloaded method with ",
-                     "the same name as the property setter. This could be a problem. ", "The offending overloaded methods are: ", candidates);
+               log.warn("Unable to locate a bridged setter for {} due to a JVM bug and an overloaded method with the same name as the property setter. "
+                           + "This could be a problem. The offending overloaded methods are: {}",
+                     pd.getName(), candidates);
             }
          }
       }

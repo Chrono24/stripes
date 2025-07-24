@@ -19,9 +19,10 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.action.ActionBean;
 import org.stripesframework.web.controller.StripesFilter;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.validation.TypeConverter;
 import org.stripesframework.web.validation.ValidationError;
 
@@ -36,7 +37,7 @@ import org.stripesframework.web.validation.ValidationError;
  */
 public class MapPropertyAccessor implements PropertyAccessor<Map<?, ?>> {
 
-   private static final Log log = Log.getInstance(MapPropertyAccessor.class);
+   private static final Logger log = LoggerFactory.getLogger(MapPropertyAccessor.class);
 
    /**
     * Gets the value stored in the Map under the key specified by the current node.
@@ -65,9 +66,9 @@ public class MapPropertyAccessor implements PropertyAccessor<Map<?, ?>> {
          String nodeString = evaluation.getNode().getStringValue();
          String declTypeName = evaluation.getKeyType().getName();
          String evalTypeName = key.getClass().getName();
-         log.warn("Unable to bind ", exprString, " because the string \"", nodeString, "\" evaluates to a ", evalTypeName,
-               ", which is not assignable to the map's key type of ", declTypeName, ". This likely means type conversion failed and there is no constructor ",
-               declTypeName, "(String).");
+         log.warn(
+               "Unable to bind {} because the string \"{}\" evaluates to a {}, which is not assignable to the map's key type of {}. This likely means type conversion failed and there is no constructor {}(String).",
+               exprString, nodeString, evalTypeName, declTypeName, declTypeName);
       } else {
          map.put(key, value);
       }
@@ -111,7 +112,7 @@ public class MapPropertyAccessor implements PropertyAccessor<Map<?, ?>> {
             }
          }
          catch ( Exception e ) {
-            log.warn("Exception while converting Map key to appropriate type. Key: ", evaluation.getNode().getStringValue());
+            log.warn("Exception while converting Map key to appropriate type. Key: {}", evaluation.getNode().getStringValue());
          }
 
          // Return the original key if we couldn't type convert it

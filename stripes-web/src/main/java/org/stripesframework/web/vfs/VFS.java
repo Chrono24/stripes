@@ -21,7 +21,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.stripesframework.web.util.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -31,7 +32,7 @@ import org.stripesframework.web.util.Log;
  */
 public abstract class VFS {
 
-   private static final Log log = Log.getInstance(VFS.class);
+   private static final Logger log = LoggerFactory.getLogger(VFS.class);
 
    /** The built-in implementations. */
    public static final Class<?>[] IMPLEMENTATIONS = { DefaultVFS.class };
@@ -76,16 +77,16 @@ public abstract class VFS {
          try {
             vfs = impl.getConstructor().newInstance();
             if ( !vfs.isValid() ) {
-               log.debug("VFS implementation ", impl.getName(), " is not valid in this environment.");
+               log.debug("VFS implementation {} is not valid in this environment.", impl.getName());
             }
          }
          catch ( Exception e ) {
-            log.error(e, "Failed to instantiate ", impl);
+            log.error("Failed to instantiate {}", impl, e);
             return null;
          }
       }
 
-      log.info("Using VFS adapter ", vfs.getClass().getName());
+      log.info("Using VFS adapter {}", vfs.getClass().getName());
       return VFS.instance = vfs;
    }
 

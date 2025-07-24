@@ -24,19 +24,20 @@ import java.util.ResourceBundle;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.jsp.JspException;
-import jakarta.servlet.jsp.JspWriter;
-import jakarta.servlet.jsp.tagext.BodyTag;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.jsp.exception.StripesJspException;
 import org.stripesframework.web.action.ActionBean;
 import org.stripesframework.web.action.ValidationErrorReportResolution;
 import org.stripesframework.web.controller.StripesConstants;
 import org.stripesframework.web.controller.StripesFilter;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.validation.ValidationError;
 import org.stripesframework.web.validation.ValidationErrors;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspWriter;
+import jakarta.servlet.jsp.tagext.BodyTag;
 
 
 /**
@@ -88,7 +89,7 @@ import org.stripesframework.web.validation.ValidationErrors;
  */
 public class ErrorsTag extends HtmlTagSupport implements BodyTag {
 
-   private static final Log log = Log.getInstance(ErrorsTag.class);
+   private static final Logger log = LoggerFactory.getLogger(ErrorsTag.class);
 
    /**
     * True if this tag will display errors, otherwise false. This is determined by the logic
@@ -165,9 +166,8 @@ public class ErrorsTag extends HtmlTagSupport implements BodyTag {
                bundle = StripesFilter.getConfiguration().getLocalizationBundleFactory().getErrorMessageBundle(locale);
             }
             catch ( MissingResourceException mre ) {
-               log.warn("The errors tag could not find the error messages resource bundle. ",
-                     "As a result default headers/footers etc. will be used. Check that ", "you have a StripesResources.properties in your classpath (unless ",
-                     "of course you have configured a different bundle).");
+               log.warn("The errors tag could not find the error messages resource bundle. As a result default headers/footers etc. will be used. "
+                     + "Check that you have a StripesResources.properties in your classpath (unless of course you have configured a different bundle).");
             }
 
             // Fetch the header and footer
@@ -205,8 +205,8 @@ public class ErrorsTag extends HtmlTagSupport implements BodyTag {
          return EVAL_PAGE;
       }
       catch ( IOException e ) {
-         JspException jspe = new JspException("IOException encountered while writing errors " + "tag to the JspWriter.", e);
-         log.warn(jspe);
+         JspException jspe = new JspException("IOException encountered while writing errors tag to the JspWriter.", e);
+         log.warn(jspe.getMessage(), jspe);
          throw jspe;
       }
    }
@@ -323,7 +323,9 @@ public class ErrorsTag extends HtmlTagSupport implements BodyTag {
    }
 
    /** Indicated whether the tag is displaying only global errors. */
-   public boolean isGlobalErrorsOnly() { return _globalErrorsOnly; }
+   public boolean isGlobalErrorsOnly() {
+      return _globalErrorsOnly;
+   }
 
    /** Returns true if the error displayed is the last matching error. */
    public boolean isLast() {

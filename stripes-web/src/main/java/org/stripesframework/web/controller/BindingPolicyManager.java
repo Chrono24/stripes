@@ -28,10 +28,11 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.action.ActionBean;
 import org.stripesframework.web.action.ActionBeanContext;
 import org.stripesframework.web.exception.StripesRuntimeException;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.util.ReflectUtil;
 import org.stripesframework.web.util.bean.NodeEvaluation;
 import org.stripesframework.web.util.bean.PropertyExpressionEvaluation;
@@ -52,7 +53,7 @@ public class BindingPolicyManager {
          ServletRequest.class, ServletResponse.class);
 
    /** Log */
-   private static final Log log = Log.getInstance(BindingPolicyManager.class);
+   private static final Logger log = LoggerFactory.getLogger(BindingPolicyManager.class);
 
    /** Cached instances */
    private static final Map<Class<?>, BindingPolicyManager> instances = new ConcurrentHashMap<>();
@@ -85,7 +86,7 @@ public class BindingPolicyManager {
          _validatedProperties = getValidatedProperties(beanClass);
       }
       catch ( Exception e ) {
-         log.error(e, "%%% Failure instantiating ", getClass().getName());
+         log.error("%%% Failure instantiating {}", getClass().getName(), e);
          StripesRuntimeException sre = new StripesRuntimeException(e.getMessage(), e);
          sre.setStackTrace(e.getStackTrace());
          throw sre;
@@ -120,8 +121,9 @@ public class BindingPolicyManager {
       }
 
       if ( isBindingDeniedLoggingRequired(eval.getBean(), paramName) ) {
-         log.warn("Binding denied for action ", eval.getBean().getClass(), ", param ", paramName,
-               " has no @Validate annotation. CAUTION: Before you allow binding with @Validate, take a step back and make sure that binding this parameter is safe.");
+         log.warn("Binding denied for action {}, param {} has no @Validate annotation. " +
+                     "CAUTION: Before you allow binding with @Validate, take a step back and make sure that binding this parameter is safe.",
+               eval.getBean().getClass(), paramName);
       }
 
       return false;

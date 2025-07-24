@@ -20,10 +20,11 @@ import java.util.Map;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.controller.StripesConstants;
 import org.stripesframework.jsp.exception.StripesJspException;
 import org.stripesframework.web.util.CryptoUtil;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.util.UrlBuilder;
 
 
@@ -37,7 +38,7 @@ import org.stripesframework.web.util.UrlBuilder;
  */
 public abstract class LinkTagSupport extends HtmlTagSupport implements ParameterizableTag {
 
-   private static final Log log = Log.getInstance(LinkTagSupport.class);
+   private static final Logger log = LoggerFactory.getLogger(LinkTagSupport.class);
 
    /** Initial value for fields to indicate they were not set by a tag attribute. */
    private static final String VALUE_NOT_SET = "VALUE_NOT_SET";

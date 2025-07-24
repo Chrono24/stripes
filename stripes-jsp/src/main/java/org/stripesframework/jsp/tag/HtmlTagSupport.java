@@ -23,9 +23,10 @@ import jakarta.servlet.jsp.JspWriter;
 import jakarta.servlet.jsp.tagext.BodyContent;
 import jakarta.servlet.jsp.tagext.DynamicAttributes;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.jsp.exception.StripesJspException;
 import org.stripesframework.web.util.HtmlUtil;
-import org.stripesframework.web.util.Log;
 
 
 /**
@@ -39,7 +40,7 @@ import org.stripesframework.web.util.Log;
 public abstract class HtmlTagSupport extends StripesTagSupport implements DynamicAttributes {
 
    /** Log implementation used to log errors during tag writing. */
-   private static final Log log = Log.getInstance(HtmlTagSupport.class);
+   private static final Logger log = LoggerFactory.getLogger(HtmlTagSupport.class);
 
    /** Map containing all attributes of the tag. */
    private final Map<String, String> _attributes = new HashMap<>();
@@ -288,7 +289,7 @@ public abstract class HtmlTagSupport extends StripesTagSupport implements Dynami
       }
       catch ( IOException ioe ) {
          JspException jspe = new JspException("IOException encountered while writing close tag </" + tag + "> to the JspWriter.", ioe);
-         log.warn(jspe);
+         log.warn(jspe.getMessage(), jspe);
          throw jspe;
       }
    }
@@ -311,7 +312,7 @@ public abstract class HtmlTagSupport extends StripesTagSupport implements Dynami
       }
       catch ( IOException ioe ) {
          JspException jspe = new JspException("IOException encountered while writing open tag <" + tag + "> to the JspWriter.", ioe);
-         log.warn(jspe);
+         log.warn(jspe.getMessage(), jspe);
          throw jspe;
       }
    }
@@ -333,7 +334,7 @@ public abstract class HtmlTagSupport extends StripesTagSupport implements Dynami
       }
       catch ( IOException ioe ) {
          JspException jspe = new JspException("IOException encountered while writing singleton tag <" + tag + "/> to the JspWriter.", ioe);
-         log.warn(jspe);
+         log.warn(jspe.getMessage(), jspe);
          throw jspe;
       }
    }

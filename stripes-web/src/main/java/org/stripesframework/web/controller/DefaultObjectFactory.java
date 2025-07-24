@@ -32,10 +32,11 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.config.Configuration;
 import org.stripesframework.web.config.TargetTypes;
 import org.stripesframework.web.exception.StripesRuntimeException;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.util.ReflectUtil;
 import org.stripesframework.web.util.TypeHandlerCache;
 
@@ -52,7 +53,7 @@ import org.stripesframework.web.util.TypeHandlerCache;
 @SuppressWarnings("unchecked")
 public class DefaultObjectFactory implements ObjectFactory {
 
-   private static final Log log = Log.getInstance(DefaultObjectFactory.class);
+   private static final Logger log = LoggerFactory.getLogger(DefaultObjectFactory.class);
 
    /**
     * Holds a map of commonly used interface types (mostly collections) to a class that implements
@@ -113,7 +114,7 @@ public class DefaultObjectFactory implements ObjectFactory {
          if ( typeArguments[0] instanceof Class ) {
             targetTypes.add((Class<?>)typeArguments[0]);
          } else {
-            log.warn("Type parameter for non-abstract post-processor [", postProcessor.getClass().getName(), "] is not a class.");
+            log.warn("Type parameter for non-abstract post-processor [{}] is not a class.", postProcessor.getClass().getName());
          }
       }
 
@@ -135,7 +136,7 @@ public class DefaultObjectFactory implements ObjectFactory {
             list = new ArrayList<>();
             postProcessors.add(targetType, list);
          }
-         log.debug("Adding post-processor of type ", postProcessor.getClass().getName(), " for ", targetType);
+         log.debug("Adding post-processor of type {} for {}", postProcessor.getClass().getName(), targetType);
          list.add(postProcessor);
       }
 

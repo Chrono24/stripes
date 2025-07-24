@@ -21,8 +21,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.exception.StripesRuntimeException;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.util.ReflectUtil;
 import org.stripesframework.web.util.ResolverUtil;
 import org.stripesframework.web.util.StringUtil;
@@ -49,7 +50,7 @@ import jakarta.servlet.FilterConfig;
  */
 public class BootstrapPropertyResolver {
 
-   private static final Log log = Log.getInstance(BootstrapPropertyResolver.class);
+   private static final Logger log = LoggerFactory.getLogger(BootstrapPropertyResolver.class);
 
    /** The Configuration Key for looking up the comma separated list of VFS classes. */
    public static final String VFS_CLASSES = "VFS.Classes";
@@ -82,10 +83,10 @@ public class BootstrapPropertyResolver {
          // web.xml takes precedence
          try {
             clazz = ReflectUtil.findClass(className);
-            log.info("Class implementing/extending ", targetType.getSimpleName(), " found in web.xml: ", className);
+            log.info("Class implementing/extending {} found in web.xml: {}", targetType.getSimpleName(), className);
          }
          catch ( ClassNotFoundException e ) {
-            log.error("Couldn't find class specified in web.xml under param ", paramName, ": ", className);
+            log.error("Couldn't find class specified in web.xml under param {}: {}", paramName, className);
          }
       } else {
          // we didn't find it in web.xml so now we check any extension packages
@@ -98,7 +99,7 @@ public class BootstrapPropertyResolver {
          if ( classes.size() == 1 ) {
             clazz = classes.iterator().next();
             className = clazz.getName();
-            log.info("Class implementing/extending ", targetType.getSimpleName(), " found via auto-discovery: ", className);
+            log.info("Class implementing/extending {} found via auto-discovery: {}", targetType.getSimpleName(), className);
          } else if ( classes.size() > 1 ) {
             throw new StripesRuntimeException(
                   StringUtil.combineParts("Found too many classes implementing/extending ", targetType.getSimpleName(), ": ", classes));
@@ -212,7 +213,7 @@ public class BootstrapPropertyResolver {
       List<Class<?>> vfsImpls = getClassPropertyList(VFS_CLASSES);
       for ( Class<?> clazz : vfsImpls ) {
          if ( !VFS.class.isAssignableFrom(clazz) ) {
-            log.warn("Class ", clazz.getName(), " does not extend ", VFS.class.getName());
+            log.warn("Class {} does not extend {}", clazz.getName(), VFS.class.getName());
          } else {
             VFS.addImplClass((Class<? extends VFS>)clazz);
          }
@@ -225,10 +226,10 @@ public class BootstrapPropertyResolver {
       while ( iterator.hasNext() ) {
          Class<? extends T> clazz = iterator.next();
          if ( clazz.isInterface() ) {
-            log.trace("Ignoring ", clazz, " because it is an interface.");
+            log.trace("Ignoring {} because it is an interface.", clazz);
             iterator.remove();
          } else if ( (clazz.getModifiers() & Modifier.ABSTRACT) == Modifier.ABSTRACT ) {
-            log.trace("Ignoring ", clazz, " because it is abstract.");
+            log.trace("Ignoring {} because it is abstract.", clazz);
             iterator.remove();
          }
       }
@@ -240,7 +241,7 @@ public class BootstrapPropertyResolver {
       while ( iterator.hasNext() ) {
          Class<? extends T> clazz = iterator.next();
          if ( clazz.isAnnotationPresent(DontAutoLoad.class) ) {
-            log.debug("Ignoring ", clazz, " because @DontAutoLoad is present.");
+            log.debug("Ignoring {} because @DontAutoLoad is present.", clazz);
             iterator.remove();
          }
       }

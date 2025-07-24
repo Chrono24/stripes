@@ -19,6 +19,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.controller.ObjectPostProcessor;
 import org.stripesframework.web.format.Formatter;
 import org.stripesframework.web.validation.TypeConverter;
@@ -50,7 +52,7 @@ import org.stripesframework.web.validation.TypeConverter;
  */
 public class TypeHandlerCache<T> {
 
-   private static final Log log = Log.getInstance(TypeHandlerCache.class);
+   private static final Logger log = LoggerFactory.getLogger(TypeHandlerCache.class);
 
    /** A direct map of target types to handlers. */
    private final Map<Class<?>, T> _handlers = new ConcurrentHashMap<>();
@@ -108,7 +110,7 @@ public class TypeHandlerCache<T> {
 
       if ( handler == null ) {
          handler = getDefaultHandler();
-         log.trace("Couldn't find a handler for ", targetType, ". Using default handler ", getDefaultHandler(), " instead.");
+         log.trace("Couldn't find a handler for {}. Using default handler {} instead.", targetType, getDefaultHandler());
       }
 
       return handler;
@@ -171,10 +173,10 @@ public class TypeHandlerCache<T> {
     */
    protected T cacheHandler( Class<?> targetType, T handler ) {
       if ( handler == null ) {
-         log.debug("Caching no handler for ", targetType);
+         log.debug("Caching no handler for {}", targetType);
          _negativeCache.add(targetType);
       } else {
-         log.debug("Caching handler for ", targetType, " => ", handler);
+         log.debug("Caching handler for {} => {}", targetType, handler);
          _indirectCache.put(targetType, handler);
       }
 

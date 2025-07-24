@@ -18,11 +18,12 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.action.ActionBean;
 import org.stripesframework.web.config.Configuration;
 import org.stripesframework.web.controller.ParameterName;
 import org.stripesframework.web.controller.StripesFilter;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.validation.ValidationMetadata;
 
 
@@ -35,7 +36,7 @@ import org.stripesframework.web.validation.ValidationMetadata;
  */
 public class LocalizationUtility {
 
-   private static final Log log = Log.getInstance(LocalizationUtility.class);
+   private static final Logger log = LoggerFactory.getLogger(LocalizationUtility.class);
 
    /**
     * Looks up the specified key in the error message resource bundle. If the
@@ -82,7 +83,7 @@ public class LocalizationUtility {
          bundle = StripesFilter.getConfiguration().getLocalizationBundleFactory().getFormFieldBundle(locale);
       }
       catch ( MissingResourceException mre ) {
-         log.error(mre);
+         log.error("Missing resource", mre);
          return null;
       }
 

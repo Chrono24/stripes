@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.controller.ActionBeanContextFactory;
 import org.stripesframework.web.controller.ActionBeanPropertyBinder;
 import org.stripesframework.web.controller.ActionResolver;
@@ -33,7 +35,6 @@ import org.stripesframework.web.format.Formatter;
 import org.stripesframework.web.format.FormatterFactory;
 import org.stripesframework.web.localization.LocalePicker;
 import org.stripesframework.web.localization.LocalizationBundleFactory;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.util.ReflectUtil;
 import org.stripesframework.web.validation.TypeConverter;
 import org.stripesframework.web.validation.TypeConverterFactory;
@@ -58,7 +59,7 @@ import org.stripesframework.web.validation.ValidationMetadataProvider;
 public class RuntimeConfiguration extends DefaultConfiguration {
 
    /** Log implementation for use within this class. */
-   private static final Log log = Log.getInstance(RuntimeConfiguration.class);
+   private static final Logger log = LoggerFactory.getLogger(RuntimeConfiguration.class);
 
    /** The Configuration Key for enabling debug mode. */
    public static final String DEBUG_MODE = "Stripes.DebugMode";
@@ -114,20 +115,20 @@ public class RuntimeConfiguration extends DefaultConfiguration {
       List<Class<? extends Formatter>> formatters = getBootstrapPropertyResolver().getClassPropertyList(Formatter.class);
       for ( Class<? extends Formatter> formatter : formatters ) {
          Type[] typeArguments = ReflectUtil.getActualTypeArguments(formatter, Formatter.class);
-         log.trace("Found Formatter [", formatter, "] - type parameters: ", typeArguments);
+         log.trace("Found Formatter [{}] - type parameters: {}", formatter, typeArguments);
          if ( (typeArguments != null) && (typeArguments.length == 1) && !typeArguments[0].equals(Object.class) ) {
             if ( typeArguments[0] instanceof Class ) {
-               log.debug("Adding auto-discovered Formatter [", formatter, "] for [", typeArguments[0], "] (from type parameter)");
+               log.debug("Adding auto-discovered Formatter [{}] for [{}] (from type parameter)", formatter, typeArguments[0]);
                getFormatterFactory().add((Class<?>)typeArguments[0], (Class<? extends Formatter<?>>)formatter);
             } else {
-               log.warn("Type parameter for non-abstract Formatter [", formatter, "] is not a class.");
+               log.warn("Type parameter for non-abstract Formatter [{}] is not a class.", formatter);
             }
          }
 
          TargetTypes targetTypes = formatter.getAnnotation(TargetTypes.class);
          if ( targetTypes != null ) {
             for ( Class<?> targetType : targetTypes.value() ) {
-               log.debug("Adding auto-discovered Formatter [", formatter, "] for [", targetType, "] (from TargetTypes annotation)");
+               log.debug("Adding auto-discovered Formatter [{}] for [{}] (from TargetTypes annotation)", formatter, targetType);
                getFormatterFactory().add(targetType, (Class<? extends Formatter<?>>)formatter);
             }
          }
@@ -136,20 +137,20 @@ public class RuntimeConfiguration extends DefaultConfiguration {
       List<Class<? extends TypeConverter>> typeConverters = getBootstrapPropertyResolver().getClassPropertyList(TypeConverter.class);
       for ( Class<? extends TypeConverter> typeConverter : typeConverters ) {
          Type[] typeArguments = ReflectUtil.getActualTypeArguments(typeConverter, TypeConverter.class);
-         log.trace("Found TypeConverter [", typeConverter, "] - type parameters: ", typeArguments);
+         log.trace("Found TypeConverter [{}] - type parameters: {}", typeConverter, typeArguments);
          if ( (typeArguments != null) && (typeArguments.length == 1) && !typeArguments[0].equals(Object.class) ) {
             if ( typeArguments[0] instanceof Class ) {
-               log.debug("Adding auto-discovered TypeConverter [", typeConverter, "] for [", typeArguments[0], "] (from type parameter)");
+               log.debug("Adding auto-discovered TypeConverter [{}] for [{}] (from type parameter)", typeConverter, typeArguments[0]);
                getTypeConverterFactory().add((Class<?>)typeArguments[0], (Class<? extends TypeConverter<?>>)typeConverter);
             } else {
-               log.warn("Type parameter for non-abstract TypeConverter [", typeConverter, "] is not a class.");
+               log.warn("Type parameter for non-abstract TypeConverter [{}] is not a class.", typeConverter);
             }
          }
 
          TargetTypes targetTypes = typeConverter.getAnnotation(TargetTypes.class);
          if ( targetTypes != null ) {
             for ( Class<?> targetType : targetTypes.value() ) {
-               log.debug("Adding auto-discovered TypeConverter [", typeConverter, "] for [", targetType, "] (from TargetTypes annotation)");
+               log.debug("Adding auto-discovered TypeConverter [{}] for [{}] (from TargetTypes annotation)", typeConverter, targetType);
                getTypeConverterFactory().add(targetType, (Class<? extends TypeConverter<?>>)typeConverter);
             }
          }

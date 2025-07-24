@@ -28,6 +28,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.action.ActionBean;
 import org.stripesframework.web.action.ActionBeanContext;
 import org.stripesframework.web.action.FileBean;
@@ -40,7 +42,6 @@ import org.stripesframework.web.controller.ExecutionContext;
 import org.stripesframework.web.controller.FileUploadLimitExceededException;
 import org.stripesframework.web.controller.StripesConstants;
 import org.stripesframework.web.controller.StripesRequestWrapper;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.util.ReflectUtil;
 import org.stripesframework.web.validation.LocalizableError;
 
@@ -81,7 +82,7 @@ import org.stripesframework.web.validation.LocalizableError;
  */
 public class DefaultExceptionHandler implements ExceptionHandler {
 
-   private static final Log log = Log.getInstance(DefaultExceptionHandler.class);
+   private static final Logger log = LoggerFactory.getLogger(DefaultExceptionHandler.class);
 
    private Configuration configuration;
 
@@ -125,7 +126,7 @@ public class DefaultExceptionHandler implements ExceptionHandler {
          } else {
             // If there's no sensible proxy, rethrow the original throwable,
             // NOT the unwrapped one since they may add extra information
-            log.warn(throwable, "Unhandled exception caught by the Stripes default exception handler.");
+            log.warn("Unhandled exception caught by the Stripes default exception handler.", throwable);
             throw throwable;
          }
       }
@@ -137,7 +138,7 @@ public class DefaultExceptionHandler implements ExceptionHandler {
       }
       catch ( Throwable t ) {
          String message = "Unhandled exception in exception handler.";
-         log.error(t, message);
+         log.error(message, t);
          throw new StripesServletException(message, t);
       }
    }
@@ -206,12 +207,12 @@ public class DefaultExceptionHandler implements ExceptionHandler {
          HandlerProxy proxy = new HandlerProxy(handler, method);
          HandlerProxy previous = _handlers.get(type);
          if ( previous != null ) {
-            log.warn("More than one exception handler for exception type ", type, " in ", handler.getClass().getSimpleName(), ". '", method.getName(),
-                  "()' will be used instead of '", previous.getHandlerMethod().getName(), "()'.");
+            log.warn("More than one exception handler for exception type {} in {}. '{}()' will be used instead of '{}()'.", type,
+                  handler.getClass().getSimpleName(), method.getName(), previous.getHandlerMethod().getName());
          }
          _handlers.put(type, proxy);
 
-         log.debug("Added exception handler '", handler.getClass().getSimpleName(), ".", method.getName(), "()' for exception type: ", type);
+         log.debug("Added exception handler '{}.{}()' for exception type: {}", handler.getClass().getSimpleName(), method.getName(), type);
       }
    }
 
@@ -351,7 +352,7 @@ public class DefaultExceptionHandler implements ExceptionHandler {
          wrapper.setAttribute(StripesConstants.REQ_ATTR_ACTION_BEAN, actionBean);
       }
       catch ( ServletException e ) {
-         log.error(e);
+         log.error("Exception during file upload limit exception handling", e);
          throw exception;
       }
 

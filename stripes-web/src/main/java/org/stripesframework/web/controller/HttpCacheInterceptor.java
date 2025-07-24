@@ -20,10 +20,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.action.ActionBean;
 import org.stripesframework.web.action.HttpCache;
 import org.stripesframework.web.action.Resolution;
-import org.stripesframework.web.util.Log;
 
 
 /**
@@ -37,7 +38,7 @@ import org.stripesframework.web.util.Log;
 @Intercepts(LifecycleStage.ResolutionExecution)
 public class HttpCacheInterceptor implements Interceptor {
 
-   private static final Log logger = Log.getInstance(HttpCacheInterceptor.class);
+   private static final Logger logger = LoggerFactory.getLogger(HttpCacheInterceptor.class);
 
    /** Null values are not allowed by {@link ConcurrentHashMap} so use this reference instead. */
    private static final HttpCache NULL_CACHE = CacheKey.class.getAnnotation(HttpCache.class);
@@ -51,14 +52,14 @@ public class HttpCacheInterceptor implements Interceptor {
       if ( actionBean != null && handler != null ) {
          final Class<? extends ActionBean> beanClass = actionBean.getClass();
          // if caching is disabled, then set the appropriate response headers
-         logger.debug("Looking for ", HttpCache.class.getSimpleName(), " on ", beanClass.getName(), ".", handler.getName(), "()");
+         logger.debug("Looking for {} on {}.{}()", HttpCache.class.getSimpleName(), beanClass.getName(), handler.getName());
          final HttpCache annotation = getAnnotation(handler, beanClass);
          if ( annotation != null ) {
             final HttpServletResponse response = ctx.getActionBeanContext().getResponse();
             if ( annotation.allow() ) {
                long expires = annotation.expires();
                if ( expires != HttpCache.DEFAULT_EXPIRES ) {
-                  logger.debug("Response expires in ", expires, " seconds");
+                  logger.debug("Response expires in {} seconds", expires);
                   expires = expires * 1000 + System.currentTimeMillis();
                   response.setDateHeader("Expires", expires);
                }
@@ -104,13 +105,12 @@ public class HttpCacheInterceptor implements Interceptor {
 
       // check for weirdness
       if ( annotation != null ) {
-         logger.debug("Found ", HttpCache.class.getSimpleName(), " for ", beanClass.getName(), ".", method.getName(), "()");
+         logger.debug("Found {} for {}.{}()", HttpCache.class.getSimpleName(), beanClass.getName(), method.getName());
          final int expires = annotation.expires();
          if ( annotation.allow() && expires != HttpCache.DEFAULT_EXPIRES && expires < 0 ) {
-            logger.warn(HttpCache.class.getSimpleName(), " for ", beanClass.getName(), ".", method.getName(), "() allows caching but expires in the past");
+            logger.warn("{} for {}.{}() allows caching but expires in the past", HttpCache.class.getSimpleName(), beanClass.getName(), method.getName());
          } else if ( !annotation.allow() && expires != HttpCache.DEFAULT_EXPIRES ) {
-            logger.warn(HttpCache.class.getSimpleName(), " for ", beanClass.getName(), ".", method.getName(),
-                  "() disables caching but explicitly sets expires");
+            logger.warn("{} for {}.{}() disables caching but explicitly sets expires", HttpCache.class.getSimpleName(), beanClass.getName(), method.getName());
          }
       } else {
          annotation = NULL_CACHE;

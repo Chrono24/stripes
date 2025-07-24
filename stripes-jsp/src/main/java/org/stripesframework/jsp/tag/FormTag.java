@@ -29,6 +29,8 @@ import jakarta.servlet.jsp.JspWriter;
 import jakarta.servlet.jsp.tagext.BodyTag;
 import jakarta.servlet.jsp.tagext.TryCatchFinally;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.action.ActionBean;
 import org.stripesframework.web.action.Wizard;
 import org.stripesframework.web.controller.ActionResolver;
@@ -37,7 +39,6 @@ import org.stripesframework.web.controller.StripesFilter;
 import org.stripesframework.jsp.exception.StripesJspException;
 import org.stripesframework.web.util.CryptoUtil;
 import org.stripesframework.web.util.HtmlUtil;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.util.StringUtil;
 import org.stripesframework.web.util.UrlBuilder;
 import org.stripesframework.web.validation.ValidationError;
@@ -54,7 +55,7 @@ import org.stripesframework.web.validation.ValidationErrors;
 public class FormTag extends HtmlTagSupport implements BodyTag, TryCatchFinally, ParameterizableTag {
 
    /** Log used to log error and debugging information for this class. */
-   private static final Log log = Log.getInstance(FormTag.class);
+   private static final Logger log = LoggerFactory.getLogger(FormTag.class);
 
    /** Stores the field name (or magic values ''/'first') to set focus on. */
    private String  _focus;
@@ -145,7 +146,7 @@ public class FormTag extends HtmlTagSupport implements BodyTag, TryCatchFinally,
 
          // Write out a warning if focus didn't find a field
          if ( _focus != null && !_focusSet ) {
-            log.error("Form with action [", getAction(), "] has 'focus' set to '", _focus, "', but did not find a field with matching name to set focus on.");
+            log.error("Form with action [{}] has 'focus' set to '{}', but did not find a field with matching name to set focus on.", getAction(), _focus);
          }
 
          // Clean up any state that we've modified during tag processing, so that the container
@@ -421,8 +422,9 @@ public class FormTag extends HtmlTagSupport implements BodyTag, TryCatchFinally,
          clazz = getActionBeanClass();
 
          if ( clazz == null ) {
-            log.error("Could not locate an ActionBean that was bound to the URL [", actionWithoutContext, "]. Without an ActionBean class Stripes ",
-                  "cannot determine whether the ActionBean is a wizard or not. ", "As a result wizard behaviour will be disabled.");
+            log.error("Could not locate an ActionBean that was bound to the URL [{}]. " +
+                        "Without an ActionBean class Stripes cannot determine whether the ActionBean is a wizard or not. " +
+                        "As a result wizard behaviour will be disabled.", actionWithoutContext);
             return false;
          }
       } else {

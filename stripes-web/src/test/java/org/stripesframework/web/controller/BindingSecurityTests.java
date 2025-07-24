@@ -13,13 +13,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.FilterEnabledTestBase;
 import org.stripesframework.web.action.ActionBean;
 import org.stripesframework.web.action.ActionBeanContext;
 import org.stripesframework.web.action.DefaultHandler;
 import org.stripesframework.web.action.Resolution;
 import org.stripesframework.web.mock.MockRoundtrip;
-import org.stripesframework.web.util.Log;
 import org.stripesframework.web.util.bean.EvaluationException;
 import org.stripesframework.web.util.bean.PropertyExpression;
 import org.stripesframework.web.util.bean.PropertyExpressionEvaluation;
@@ -32,7 +33,7 @@ import org.stripesframework.web.validation.ValidateNestedProperties;
  */
 class BindingSecurityTests extends FilterEnabledTestBase {
 
-   private static final Log log = Log.getInstance(BindingSecurityTests.class);
+   private static final Logger log = LoggerFactory.getLogger(BindingSecurityTests.class);
 
    @Test
    void testDefaultAnnotation() {
@@ -131,7 +132,7 @@ class BindingSecurityTests extends FilterEnabledTestBase {
       final TestBean bean = new TestBean();
       final BindingPolicyManager bpm = new BindingPolicyManager(TestBean.class);
       for ( String expression : expressions ) {
-         log.debug("Testing illegal expression: " + expression);
+         log.debug("Testing illegal expression: {}", expression);
          PropertyExpression pe = PropertyExpression.getExpression(expression);
          PropertyExpressionEvaluation eval = new PropertyExpressionEvaluation(pe, bean);
          assertThat(bpm.isBindingAllowed(eval)).describedAs("Binding should not be allowed for expression " + expression).isFalse();
@@ -162,7 +163,7 @@ class BindingSecurityTests extends FilterEnabledTestBase {
       bean = trip.getActionBean(beanType);
       for ( int i = 0; i < properties.length; i++ ) {
          String fullName = beanType.getSimpleName() + "." + properties[i];
-         log.debug("Testing binding security on ", fullName);
+         log.debug("Testing binding security on {}", fullName);
          PropertyExpression pe = PropertyExpression.getExpression(properties[i]);
          PropertyExpressionEvaluation eval = new PropertyExpressionEvaluation(pe, bean);
          Object value = eval.getValue();

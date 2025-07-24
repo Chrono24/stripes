@@ -18,9 +18,10 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.controller.FlashScope;
 import org.stripesframework.web.controller.StripesConstants;
-import org.stripesframework.web.util.Log;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -51,7 +52,7 @@ import jakarta.servlet.http.HttpServletResponse;
  */
 public class RedirectResolution extends OnwardResolution<RedirectResolution> {
 
-   private static final Log log = Log.getInstance(RedirectResolution.class);
+   private static final Logger log = LoggerFactory.getLogger(RedirectResolution.class);
 
    private boolean                _prependContext = true;
    private boolean                _includeRequestParameters;
