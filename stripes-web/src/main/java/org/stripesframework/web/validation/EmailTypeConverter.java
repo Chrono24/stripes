@@ -17,14 +17,11 @@ package org.stripesframework.web.validation;
 import java.util.Collection;
 import java.util.Locale;
 
-import jakarta.mail.internet.AddressException;
-import jakarta.mail.internet.InternetAddress;
+import org.apache.commons.validator.routines.EmailValidator;
 
 
 /**
- * <p>A faux TypeConverter that validates that the String supplied is a valid email address.
- * Relies on javax.mail.internet.InternetAddress for the bulk of the work (note that this means
- * in order to use this type converter you must have JavaMail available in your classpath).</p>
+ * <p>A faux TypeConverter that validates that the String supplied is a valid email address.</p>
  *
  * <p>If the String cannot be parsed, or it represents a "local" address (one with no @domain) a
  * single error message will be generated.  The error message is a scoped message with a default
@@ -56,22 +53,13 @@ public class EmailTypeConverter implements TypeConverter<String> {
     */
    @Override
    public String convert( String input, Class<? extends String> targetType, Collection<ValidationError> errors ) {
-
-      String result = null;
-
-      try {
-         InternetAddress address = new InternetAddress(input, true);
-         result = address.getAddress();
-         if ( !result.contains("@") ) {
-            result = null;
-            throw new AddressException();
-         }
-      }
-      catch ( AddressException ae ) {
+      if ( !EmailValidator.getInstance().isValid(input) ) {
          errors.add(new ScopedLocalizableError("converter.email", "invalidEmail"));
+
+         return null;
       }
 
-      return result;
+      return input;
    }
 
    /** Accepts the Locale provided, but does nothing with it since emails are Locale-less. */

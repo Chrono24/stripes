@@ -26,8 +26,9 @@
 			<artifactId>jakarta.servlet-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.sun.mail</groupId>
-			<artifactId>jakarta.mail</artifactId>
+			<groupId>commons-validator</groupId>
+			<artifactId>commons-validator</artifactId>
+			<version>1.10.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
