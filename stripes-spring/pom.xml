@@ -22,6 +22,12 @@
 			<groupId>org.stripesframework</groupId>
 			<artifactId>stripes-web</artifactId>
 			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.stripesframework</groupId>
