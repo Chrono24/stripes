@@ -18,11 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
 import java.util.UUID;
-
-import jakarta.mail.internet.ContentDisposition;
-import jakarta.mail.internet.ParseException;
 
 import org.junit.jupiter.api.Test;
 import org.stripesframework.web.mock.MockHttpServletResponse;
@@ -53,34 +49,22 @@ public class TestStreamingResolution {
       resolution.stream(response);
       assertThat(data).isEqualTo(response.getOutputBytes());
 
-      ContentDisposition disposition = getContentDisposition(response);
+      String disposition = response.getHeader("Content-Disposition");
       if ( attachment ) {
          if ( filename == null ) {
             assertThat(disposition).isNotNull();
-            assertThat(disposition.getDisposition()).isEqualTo("attachment");
-            assertThat(disposition.getParameter("filename")).isNull();
+            assertThat(disposition).isEqualTo("attachment");
          } else {
             assertThat(disposition).isNotNull();
-            assertThat(disposition.getDisposition()).isEqualTo("attachment");
-            assertThat(disposition.getParameter("filename")).isNotNull();
+            assertThat(disposition).isEqualTo("attachment;filename=\"" + filename + "\"");
          }
       } else {
          if ( filename == null ) {
             assertThat(disposition).isNull();
          } else {
             assertThat(disposition).isNotNull();
-            assertThat(disposition.getDisposition()).isEqualTo("attachment");
-            assertThat(disposition.getParameter("filename")).isNotNull();
+            assertThat(disposition).isEqualTo("attachment;filename=\"" + filename + "\"");
          }
-      }
-   }
-
-   private ContentDisposition getContentDisposition( MockHttpServletResponse response ) throws ParseException {
-      final Collection<String> list = response.getHeaders("Content-Disposition");
-      if ( list == null || list.isEmpty() ) {
-         return null;
-      } else {
-         return new ContentDisposition(list.iterator().next());
       }
    }
 }
