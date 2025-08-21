@@ -14,10 +14,13 @@
  */
 package org.stripesframework.web.util.bean;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.stripesframework.web.observability.OpenTelemetry;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 
 
 /**
@@ -25,7 +28,7 @@ import java.util.regex.Pattern;
  * a combination of all three. Capable of parsing String property expressions into a series of
  * {@link Node}s representing each sub-property or indexed property.  Expression nodes can be
  * separated with periods, or square-bracket indexing.  Items inside square brackets can be
- * single or double quoted, or bare int/long/float/double/boolean literals in the same manner they
+ * single or double-quoted, or bare int/long/float/double/boolean literals in the same manner they
  * appear in Java source code (e.g. 123.6F for a float).</p>
  *
  * @author Tim Fennell
@@ -38,13 +41,11 @@ public class PropertyExpression {
    private static final Pattern REGEX_LONG    = Pattern.compile("^(-?\\d+)L$", Pattern.CASE_INSENSITIVE);
    private static final Pattern REGEX_DOUBLE  = Pattern.compile("^-?\\d+\\.\\d+$");
    private static final Pattern REGEX_FLOAT   = Pattern.compile("^(-?\\d+\\.?\\d+)F$", Pattern.CASE_INSENSITIVE);
-   private static final Pattern REGEX_BOOLEAN = Pattern.compile("^(true|false)$", Pattern.CASE_INSENSITIVE);
 
    /** The set of characters which can terminate an expression node in one way or another. */
    private static final String TERMINATOR_CHARS = ".[]";
 
-   /** A static cache of parse expressions. */
-   private static final Map<String, PropertyExpression> expressions = new ConcurrentHashMap<>();
+   private static final Cache<String, PropertyExpression> expressions = createExpressionCache();
 
    /**
     * Factory method for retrieving PropertyExpression objects for expression strings.
@@ -53,13 +54,27 @@ public class PropertyExpression {
     * @return PropertyExpression the parsed form of the expression passed in
     */
    public static PropertyExpression getExpression( String expression ) throws ParseException {
-      PropertyExpression parsed = PropertyExpression.expressions.get(expression);
-      if ( parsed == null ) {
-         parsed = new PropertyExpression(expression);
-         PropertyExpression.expressions.put(expression, parsed);
-      }
+      return expressions.get(expression, PropertyExpression::new);
+   }
 
-      return parsed;
+   private static Cache<String, PropertyExpression> createExpressionCache() {
+      int sizeLimit = 10000;
+
+      Cache<String, PropertyExpression> cache = Caffeine.newBuilder().maximumSize(sizeLimit).recordStats().build();
+
+      OpenTelemetry.getMeter()
+            .gaugeBuilder("property_expression.cache.hitrate")
+            .buildWithCallback(observableDoubleMeasurement -> observableDoubleMeasurement.record(cache.stats().hitRate()));
+
+      OpenTelemetry.getMeter()
+            .gaugeBuilder("property_expression.cache.size")
+            .buildWithCallback(observableDoubleMeasurement -> observableDoubleMeasurement.record(cache.estimatedSize()));
+
+      OpenTelemetry.getMeter()
+            .gaugeBuilder("property_expression.cache.limit")
+            .buildWithCallback(observableDoubleMeasurement -> observableDoubleMeasurement.record(sizeLimit));
+
+      return cache;
    }
 
    /** The original property string, or 'source' of the expression. */
@@ -162,7 +177,7 @@ public class PropertyExpression {
          }
          // Deal with square brackets
          else if ( !inSquareBrackets && ch == '[' ) {
-            if ( builder.length() > 0 ) {
+            if ( !builder.isEmpty() ) {
                addNode(builder.toString(), null, inSquareBrackets);
                builder.setLength(0);
             }
@@ -170,7 +185,7 @@ public class PropertyExpression {
          } else if ( inSquareBrackets ) {
             // Using the nested IF allows us to consume periods in unquoted strings of digits
             if ( ch == ']' ) {
-               if ( builder.length() > 0 ) {
+               if ( !builder.isEmpty() ) {
                   addNode(builder.toString(), null, inSquareBrackets);
                   builder.setLength(0);
                }
@@ -181,7 +196,7 @@ public class PropertyExpression {
          }
          // If it's a bare period, it's the end of the current node
          else if ( ch == '.' ) {
-            if ( builder.length() < 1 ) {
+            if ( builder.isEmpty() ) {
                // Ignore pseudo-zero-length nodes
             } else {
                addNode(builder.toString(), null, inSquareBrackets);
@@ -199,7 +214,7 @@ public class PropertyExpression {
                throw new ParseException(expression, "Expression appears to terminate inside of double quoted string.");
             } else if ( inSquareBrackets ) {
                throw new ParseException(expression, "Expression appears to terminate inside of square bracketed sub-expression.");
-            } else if ( builder.length() > 0 ) {
+            } else if ( !builder.isEmpty() ) {
                addNode(builder.toString(), null, inSquareBrackets);
             }
          }
@@ -214,28 +229,7 @@ public class PropertyExpression {
     * @param bracketed True if {@code nodeValue} was inside square brackets.
     */
    private void addNode( String nodeValue, Object typedValue, boolean bracketed ) {
-      // Determine the primitive/wrapper type of the node
-      if ( typedValue != null ) {
-         // skip ahead
-      } else if ( REGEX_INTEGER.matcher(nodeValue).matches() ) {
-         typedValue = Integer.parseInt(nodeValue);
-      } else if ( REGEX_DOUBLE.matcher(nodeValue).matches() ) {
-         typedValue = Double.parseDouble(nodeValue);
-      } else if ( REGEX_LONG.matcher(nodeValue).matches() ) {
-         Matcher matcher = REGEX_LONG.matcher(nodeValue);
-         matcher.matches();
-         typedValue = Long.parseLong(matcher.group(1));
-      } else if ( REGEX_FLOAT.matcher(nodeValue).matches() ) {
-         Matcher matcher = REGEX_FLOAT.matcher(nodeValue);
-         matcher.find();
-         typedValue = Float.parseFloat(matcher.group(1));
-      } else if ( REGEX_BOOLEAN.matcher(nodeValue).matches() ) {
-         typedValue = Boolean.parseBoolean(nodeValue);
-      } else {
-         typedValue = nodeValue;
-      }
-
-      Node node = new Node(nodeValue, typedValue, bracketed);
+      Node node = new Node(nodeValue, getTypedValue(nodeValue, typedValue), bracketed);
 
       // Attach the node at the appropriate point in the expression
       if ( _root == null ) {
@@ -245,5 +239,44 @@ public class PropertyExpression {
          _leaf.setNext(node);
          _leaf = node;
       }
+   }
+
+   private Object getTypedValue( String nodeValue, Object typedValue ) {
+      if ( typedValue != null ) {
+         return typedValue;
+      }
+
+      if ( nodeValue.isEmpty() ) {
+         return nodeValue;
+      }
+
+      char firstChar = nodeValue.charAt(0);
+
+      if ( firstChar == '-' || firstChar >= '0' && firstChar <= '9' ) {
+         if ( REGEX_INTEGER.matcher(nodeValue).matches() ) {
+            return Integer.parseInt(nodeValue);
+         }
+
+         if ( REGEX_DOUBLE.matcher(nodeValue).matches() ) {
+            return Double.parseDouble(nodeValue);
+         }
+
+         Matcher longMatcher = REGEX_LONG.matcher(nodeValue);
+         if ( longMatcher.matches() ) {
+            return Long.parseLong(longMatcher.group(1));
+         }
+
+         Matcher floatMatcher = REGEX_FLOAT.matcher(nodeValue);
+         if ( floatMatcher.matches() ) {
+            return Float.parseFloat(floatMatcher.group(1));
+         }
+      }
+
+      int length = nodeValue.length();
+      if ( length == 4 && "true".equalsIgnoreCase(nodeValue) || length == 5 && "false".equalsIgnoreCase(nodeValue) ) {
+         return Boolean.parseBoolean(nodeValue);
+      }
+
+      return nodeValue;
    }
 }
