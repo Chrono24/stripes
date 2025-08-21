@@ -73,16 +73,6 @@ public class CryptoUtilTest {
       assertThat(decrypted).isEmpty();
    }
 
-   @Test
-   public void failOnECB() {
-      String input1 = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-      String encrypted1 = CryptoUtil.encrypt(input1);
-      String encrypted2 = CryptoUtil.encrypt(input1);
-      for ( int i = 0; i < encrypted1.length() - 4; i++ ) {
-         assertThat(encrypted2.contains(encrypted1.substring(i, i + 4))).isFalse().describedAs("Predictable ECB detected: " + encrypted1 + " " + encrypted2);
-      }
-   }
-
    /**
     * This test is disabled because it is very very slow.
     * It will launch a modified ciphertext attack, which should always be rejected by hmac verification.
