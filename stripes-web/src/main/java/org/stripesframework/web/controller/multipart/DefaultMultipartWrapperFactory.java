@@ -121,13 +121,12 @@ public class DefaultMultipartWrapperFactory implements MultipartWrapperFactory {
             String suffix = matcher.group(2).toLowerCase();
             long number = Long.parseLong(digits);
 
-            if ( "k".equals(suffix) ) {
-               number = number * 1024;
-            } else if ( "m".equals(suffix) ) {
-               number = number * 1024 * 1024;
-            } else if ( "g".equals(suffix) ) {
-               number = number * 1024 * 1024 * 1024;
-            }
+            number = switch ( suffix ) {
+               case "k" -> number * 1024;
+               case "m" -> number * 1024 * 1024;
+               case "g" -> number * 1024 * 1024 * 1024;
+               default -> number;
+            };
 
             _maxPostSizeInBytes = number;
             log.info("Configured file upload post size limit: {} bytes.", number);
@@ -152,14 +151,11 @@ public class DefaultMultipartWrapperFactory implements MultipartWrapperFactory {
          wrapper.build(request, _temporaryDirectory, _maxPostSizeInBytes);
          return wrapper;
       }
-      catch ( IOException ioe ) {
-         throw ioe;
+      catch ( IOException | FileUploadLimitExceededException exception ) {
+         throw exception;
       }
-      catch ( FileUploadLimitExceededException fulee ) {
-         throw fulee;
-      }
-      catch ( Exception e ) {
-         throw new StripesRuntimeException("Could not construct a MultipartWrapper for the current request.", e);
+      catch ( Exception exception ) {
+         throw new StripesRuntimeException("Could not construct a MultipartWrapper for the current request.", exception);
       }
    }
 

@@ -155,7 +155,9 @@ public class CommonsMultipartWrapper implements MultipartWrapper {
          return new FileBean(null, item.getContentType(), filename, _charset) {
 
             @Override
-            public void delete() throws IOException {item.delete();}
+            public void delete() throws IOException {
+               item.delete();
+            }
 
             @Override
             public InputStream getInputStream() throws IOException {
@@ -163,7 +165,9 @@ public class CommonsMultipartWrapper implements MultipartWrapper {
             }
 
             @Override
-            public long getSize() {return item.getSize();}
+            public long getSize() {
+               return item.getSize();
+            }
 
             @Override
             public void save( File toFile ) throws IOException {
@@ -217,18 +221,24 @@ public class CommonsMultipartWrapper implements MultipartWrapper {
       /**
        * Constructs an enumeration that consumes from the underlying iterator.
        */
-      IteratorEnumeration( Iterator<String> iterator ) {_iterator = iterator;}
+      IteratorEnumeration( Iterator<String> iterator ) {
+         _iterator = iterator;
+      }
 
       /**
        * Returns true if more elements can be consumed, false otherwise.
        */
       @Override
-      public boolean hasMoreElements() {return _iterator.hasNext();}
+      public boolean hasMoreElements() {
+         return _iterator.hasNext();
+      }
 
       /**
        * Gets the next element out of the iterator.
        */
       @Override
-      public String nextElement() {return _iterator.next();}
+      public String nextElement() {
+         return _iterator.next();
+      }
    }
 }
