@@ -27,9 +27,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.DispatcherType;
+import jakarta.servlet.ServletConnection;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletInputStream;
@@ -87,6 +89,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
    private String _servletPath = "";
    private String _pathInfo    = "";
    private String _queryString = "";
+   private String _requestId   = UUID.randomUUID().toString();
 
    /**
     * Minimal constructor that makes sense. Requires a context path (should be the same as
@@ -111,7 +114,9 @@ public class MockHttpServletRequest implements HttpServletRequest {
    }
 
    /** Adds a Locale to the set of requested locales. */
-   public void addLocale( Locale locale ) { _locales.add(locale); }
+   public void addLocale( Locale locale ) {
+      _locales.add(locale);
+   }
 
    @Override
    public boolean authenticate( HttpServletResponse httpServletResponse ) throws IOException, ServletException {
@@ -130,7 +135,9 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
    /** Gets the named request attribute from an internal Map. */
    @Override
-   public Object getAttribute( String key ) { return _attributes.get(key); }
+   public Object getAttribute( String key ) {
+      return _attributes.get(key);
+   }
 
    /** Gets an enumeration of all request attribute names. */
    @Override
@@ -140,15 +147,21 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
    /** Gets the auth type being used by this request. */
    @Override
-   public String getAuthType() { return _authType; }
+   public String getAuthType() {
+      return _authType;
+   }
 
    /** Gets the character encoding, defaults to UTF-8. */
    @Override
-   public String getCharacterEncoding() { return _characterEncoding; }
+   public String getCharacterEncoding() {
+      return _characterEncoding;
+   }
 
    /** Always returns -1 (unknown). */
    @Override
-   public int getContentLength() { return -1; }
+   public int getContentLength() {
+      return -1;
+   }
 
    @Override
    public long getContentLengthLong() {
@@ -157,19 +170,27 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
    /** Always returns null. */
    @Override
-   public String getContentType() { return null; }
+   public String getContentType() {
+      return null;
+   }
 
    /** Returns the context path. Defaults to the empty string. */
    @Override
-   public String getContextPath() { return _contextPath; }
+   public String getContextPath() {
+      return _contextPath;
+   }
 
    /** Returns any cookies that are set on the request. */
    @Override
-   public Cookie[] getCookies() { return _cookies; }
+   public Cookie[] getCookies() {
+      return _cookies;
+   }
 
    /** Gets the named header as a long. Must have been set as a long with addHeader(). */
    @Override
-   public long getDateHeader( String name ) { return (Long)_headers.get(name); }
+   public long getDateHeader( String name ) {
+      return (Long)_headers.get(name);
+   }
 
    @Override
    public DispatcherType getDispatcherType() {
@@ -177,7 +198,9 @@ public class MockHttpServletRequest implements HttpServletRequest {
    }
 
    /** Gets the URL that was forwarded to, if a forward was processed. Null otherwise. */
-   public String getForwardUrl() { return _forwardUrl; }
+   public String getForwardUrl() {
+      return _forwardUrl;
+   }
 
    /** Returns any header as a String if it exists. */
    @Override
@@ -188,7 +211,9 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
    /** Returns an enumeration containing all the names of headers supplied. */
    @Override
-   public Enumeration<String> getHeaderNames() { return Collections.enumeration(_headers.keySet()); }
+   public Enumeration<String> getHeaderNames() {
+      return Collections.enumeration(_headers.keySet());
+   }
 
    /** Returns an enumeration with single value of the named header, or an empty enum if no value. */
    @Override
@@ -202,11 +227,15 @@ public class MockHttpServletRequest implements HttpServletRequest {
    }
 
    /** Gets the list (potentially empty) or URLs that were included during the request. */
-   public List<String> getIncludedUrls() { return _includedUrls; }
+   public List<String> getIncludedUrls() {
+      return _includedUrls;
+   }
 
    /** Always returns null. */
    @Override
-   public ServletInputStream getInputStream() throws IOException { return null; }
+   public ServletInputStream getInputStream() throws IOException {
+      return null;
+   }
 
    /** Gets the named header as an int. Must have been set as an Integer with addHeader(). */
    @Override
@@ -220,19 +249,27 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
    /** Always returns 127.0.0.1). */
    @Override
-   public String getLocalAddr() { return "127.0.0.1"; }
+   public String getLocalAddr() {
+      return "127.0.0.1";
+   }
 
    /** Always returns the same value as getServerName(). */
    @Override
-   public String getLocalName() { return getServerName(); }
+   public String getLocalName() {
+      return getServerName();
+   }
 
    /** Always returns the same value as getServerPort(). */
    @Override
-   public int getLocalPort() { return getServerPort(); }
+   public int getLocalPort() {
+      return getServerPort();
+   }
 
    /** Returns the preferred locale. Defaults to the system locale. */
    @Override
-   public Locale getLocale() { return getLocales().nextElement(); }
+   public Locale getLocale() {
+      return getLocales().nextElement();
+   }
 
    /** Returns an enumeration of requested locales. Defaults to the system locale. */
    @Override
@@ -246,7 +283,9 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
    /** Gets the method used by the request. Defaults to POST. */
    @Override
-   public String getMethod() { return _method; }
+   public String getMethod() {
+      return _method;
+   }
 
    /** Gets the first value of the named parameter or null if a value does not exist. */
    @Override
@@ -293,39 +332,56 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
    /** Returns the path info. Defaults to the empty string. */
    @Override
-   public String getPathInfo() { return _pathInfo; }
+   public String getPathInfo() {
+      return _pathInfo;
+   }
 
    /** Always returns the same as getPathInfo(). */
    @Override
-   public String getPathTranslated() { return getPathInfo(); }
+   public String getPathTranslated() {
+      return getPathInfo();
+   }
 
    /** Gets the protocol for the request. Defaults to "https". */
    @Override
-   public String getProtocol() { return _protocol; }
+   public String getProtocol() {
+      return _protocol;
+   }
+
+   @Override
+   public String getProtocolRequestId() {
+      return "";
+   }
 
    /** Returns the query string set on the request. */
    @Override
-   public String getQueryString() { return _queryString; }
+   public String getQueryString() {
+      return _queryString;
+   }
 
    /** Always returns null. */
    @Override
-   public BufferedReader getReader() throws IOException { return null; }
-
-   /** Always returns the path passed in without any alteration. */
-   @Override
-   public String getRealPath( String path ) { return path; }
+   public BufferedReader getReader() throws IOException {
+      return null;
+   }
 
    /** Aways returns "127.0.0.1". */
    @Override
-   public String getRemoteAddr() { return "127.0.0.1"; }
+   public String getRemoteAddr() {
+      return "127.0.0.1";
+   }
 
    /** Always returns "localhost". */
    @Override
-   public String getRemoteHost() { return "localhost"; }
+   public String getRemoteHost() {
+      return "localhost";
+   }
 
    /** Always returns 1088 (and yes, that was picked arbitrarily). */
    @Override
-   public int getRemotePort() { return 1088; }
+   public int getRemotePort() {
+      return 1088;
+   }
 
    /** Returns the name from the user principal if one exists, otherwise null. */
    @Override
@@ -344,9 +400,16 @@ public class MockHttpServletRequest implements HttpServletRequest {
       return new MockRequestDispatcher(url);
    }
 
+   @Override
+   public String getRequestId() {
+      return _requestId;
+   }
+
    /** Returns the request URI as defined by the servlet spec. */
    @Override
-   public String getRequestURI() { return _contextPath + _servletPath + _pathInfo; }
+   public String getRequestURI() {
+      return _contextPath + _servletPath + _pathInfo;
+   }
 
    /** Returns (an attempt at) a reconstructed URL based on it's constituent parts. */
    @Override
@@ -372,15 +435,26 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
    /** Always returns the same as getProtocol. */
    @Override
-   public String getScheme() { return getProtocol(); }
+   public String getScheme() {
+      return getProtocol();
+   }
 
    /** Gets the server name. Defaults to "localhost". */
    @Override
-   public String getServerName() { return _serverName; }
+   public String getServerName() {
+      return _serverName;
+   }
 
    /** Returns the server port. Defaults to 8080. */
    @Override
-   public int getServerPort() { return _serverPort; }
+   public int getServerPort() {
+      return _serverPort;
+   }
+
+   @Override
+   public ServletConnection getServletConnection() {
+      return null;
+   }
 
    @Override
    public ServletContext getServletContext() {
@@ -389,19 +463,27 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
    /** Gets the part of the path which matched the servlet. */
    @Override
-   public String getServletPath() { return _servletPath; }
+   public String getServletPath() {
+      return _servletPath;
+   }
 
    /** Gets the session object attached to this request. */
    @Override
-   public HttpSession getSession( boolean b ) { return _session; }
+   public HttpSession getSession( boolean b ) {
+      return _session;
+   }
 
    /** Gets the session object attached to this request. */
    @Override
-   public HttpSession getSession() { return _session; }
+   public HttpSession getSession() {
+      return _session;
+   }
 
    /** Returns the Principal if one is set on the request. */
    @Override
-   public Principal getUserPrincipal() { return _userPrincipal; }
+   public Principal getUserPrincipal() {
+      return _userPrincipal;
+   }
 
    @Override
    public boolean isAsyncStarted() {
@@ -415,19 +497,21 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
    /** Always returns true. */
    @Override
-   public boolean isRequestedSessionIdFromCookie() { return true; }
+   public boolean isRequestedSessionIdFromCookie() {
+      return true;
+   }
 
    /** Always returns false. */
    @Override
-   public boolean isRequestedSessionIdFromURL() { return false; }
-
-   /** Always returns false. */
-   @Override
-   public boolean isRequestedSessionIdFromUrl() { return false; }
+   public boolean isRequestedSessionIdFromURL() {
+      return false;
+   }
 
    /** Always returns true. */
    @Override
-   public boolean isRequestedSessionIdValid() { return true; }
+   public boolean isRequestedSessionIdValid() {
+      return true;
+   }
 
    /** Returns true if the protocol is set to https (default), false otherwise. */
    @Override
@@ -442,18 +526,22 @@ public class MockHttpServletRequest implements HttpServletRequest {
    }
 
    @Override
+   @SuppressWarnings("RedundantThrows")
    public void login( String s, String s1 ) throws ServletException {
 
    }
 
    @Override
+   @SuppressWarnings("RedundantThrows")
    public void logout() throws ServletException {
 
    }
 
    /** Removes any value for the named request attribute. */
    @Override
-   public void removeAttribute( String name ) { _attributes.remove(name); }
+   public void removeAttribute( String name ) {
+      _attributes.remove(name);
+   }
 
    /** Sets the supplied value for the named request attribute. */
    @Override
@@ -462,44 +550,70 @@ public class MockHttpServletRequest implements HttpServletRequest {
    }
 
    /** Sets the auth type that will be reported by this request. */
-   public void setAuthType( String authType ) { _authType = authType; }
+   public void setAuthType( String authType ) {
+      _authType = authType;
+   }
 
    /** Sets the character encoding that will be returned by getCharacterEncoding(). */
    @Override
-   public void setCharacterEncoding( String encoding ) { _characterEncoding = encoding; }
+   public void setCharacterEncoding( String encoding ) {
+      _characterEncoding = encoding;
+   }
 
    /** Sets the context path. Defaults to the empty string. */
-   public void setContextPath( String contextPath ) { _contextPath = contextPath; }
+   public void setContextPath( String contextPath ) {
+      _contextPath = contextPath;
+   }
 
    /** Sets the array of cookies that will be available from the request. */
-   public void setCookies( Cookie[] cookies ) { _cookies = cookies; }
+   public void setCookies( Cookie[] cookies ) {
+      _cookies = cookies;
+   }
 
    /** Sets the method used by the request. Defaults to POST. */
-   public void setMethod( String method ) { _method = method; }
+   public void setMethod( String method ) {
+      _method = method;
+   }
 
    /** Sets the path info. Defaults to the empty string. */
-   public void setPathInfo( String pathInfo ) { _pathInfo = pathInfo; }
+   public void setPathInfo( String pathInfo ) {
+      _pathInfo = pathInfo;
+   }
 
    /** Sets the protocol for the request. Defaults to "https". */
-   public void setProtocol( String protocol ) { _protocol = protocol; }
+   public void setProtocol( String protocol ) {
+      _protocol = protocol;
+   }
 
    /** Sets the query string set on the request; this value is not parsed for anything. */
-   public void setQueryString( String queryString ) { _queryString = queryString; }
+   public void setQueryString( String queryString ) {
+      _queryString = queryString;
+   }
 
    /** Sets the set of roles that the user is deemed to be in for the request. */
-   public void setRoles( Set<String> roles ) { _roles = roles; }
+   public void setRoles( Set<String> roles ) {
+      _roles = roles;
+   }
 
    /** Sets the server name. Defaults to "localhost". */
-   public void setServerName( String serverName ) { _serverName = serverName; }
+   public void setServerName( String serverName ) {
+      _serverName = serverName;
+   }
 
    /** Sets the server port. Defaults to 8080. */
-   public void setServerPort( int serverPort ) { _serverPort = serverPort; }
+   public void setServerPort( int serverPort ) {
+      _serverPort = serverPort;
+   }
 
    /** Allows a session to be associated with the request. */
-   public void setSession( HttpSession session ) { _session = session; }
+   public void setSession( HttpSession session ) {
+      _session = session;
+   }
 
    /** Sets the Principal for the current request. */
-   public void setUserPrincipal( Principal userPrincipal ) { _userPrincipal = userPrincipal; }
+   public void setUserPrincipal( Principal userPrincipal ) {
+      _userPrincipal = userPrincipal;
+   }
 
    @Override
    public AsyncContext startAsync() throws IllegalStateException {
@@ -512,13 +626,18 @@ public class MockHttpServletRequest implements HttpServletRequest {
    }
 
    @Override
+   @SuppressWarnings("RedundantThrows")
    public <T extends HttpUpgradeHandler> T upgrade( Class<T> aClass ) throws IOException, ServletException {
       return null;
    }
 
    /** Used by the request dispatcher to record that a URL was included. */
-   void addIncludedUrl( String url ) { _includedUrls.add(url); }
+   void addIncludedUrl( String url ) {
+      _includedUrls.add(url);
+   }
 
    /** Used by the request dispatcher to set the forward URL when a forward is invoked. */
-   void setForwardUrl( String url ) { _forwardUrl = url; }
+   void setForwardUrl( String url ) {
+      _forwardUrl = url;
+   }
 }

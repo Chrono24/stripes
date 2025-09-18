@@ -183,18 +183,6 @@ public class MockServletContext implements ServletContext {
    public void close() {
       removeListeners();
       removeFilters();
-      Enumeration<?> servlets = getServlets();
-      while ( servlets.hasMoreElements() ) {
-         Object servlet = servlets.nextElement();
-         if ( servlet instanceof Servlet ) {
-            try {
-               ((Servlet)servlet).destroy();
-            }
-            catch ( Exception e ) {
-               log("Exception caught destroying servlet " + servlet + " contextName=" + _contextName, e);
-            }
-         }
-      }
    }
 
    @Override
@@ -358,20 +346,10 @@ public class MockServletContext implements ServletContext {
       return "Stripes Mock Servlet Environment, version 1.0.";
    }
 
-   /** Deprecated method always returns null. */
-   @Override
-   public Servlet getServlet( String string ) throws ServletException { return null; }
-
    /** Returns the name of the mock context. */
    @Override
    public String getServletContextName() {
       return _contextName;
-   }
-
-   /** Deprecated method always returns an empty enumeration. */
-   @Override
-   public Enumeration<String> getServletNames() {
-      return Collections.enumeration(Collections.emptySet());
    }
 
    @Override
@@ -382,12 +360,6 @@ public class MockServletContext implements ServletContext {
    @Override
    public Map<String, ? extends ServletRegistration> getServletRegistrations() {
       return null;
-   }
-
-   /** Deprecated method always returns an empty enumeration. */
-   @Override
-   public Enumeration<Servlet> getServlets() {
-      return Collections.enumeration(Collections.emptySet());
    }
 
    @Override
@@ -428,12 +400,6 @@ public class MockServletContext implements ServletContext {
    @Override
    public void log( String message ) {
       System.out.println("MockServletContext: " + message);
-   }
-
-   /** Logs the message and exception to System.out. */
-   @Override
-   public void log( Exception exception, String message ) {
-      log(message, exception);
    }
 
    /** Logs the message and exception to System.out. */
