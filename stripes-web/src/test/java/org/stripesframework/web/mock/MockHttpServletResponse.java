@@ -54,7 +54,6 @@ public class MockHttpServletResponse implements HttpServletResponse {
    private       String                    _characterEncoding = "UTF-8";
    private       int                       _contentLength;
    private       String                    _contentType;
-   private       String                    _redirectUrl;
 
    public MockHttpServletResponse() {
       setContentType("text/html");
@@ -104,19 +103,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
    /** Returns the URL unchanged. */
    @Override
-   public String encodeRedirectUrl( String url ) {
-      return url;
-   }
-
-   /** Returns the URL unchanged. */
-   @Override
    public String encodeURL( String url ) {
-      return url;
-   }
-
-   /** Returns the URL unchanged. */
-   @Override
-   public String encodeUrl( String url ) {
       return url;
    }
 
@@ -279,9 +266,9 @@ public class MockHttpServletResponse implements HttpServletResponse {
     * later with getRedirectUrl.
     */
    @Override
+   @SuppressWarnings("RedundantThrows")
    public void sendRedirect( String url ) throws IOException {
       _status = HttpServletResponse.SC_MOVED_TEMPORARILY;
-      _redirectUrl = url;
    }
 
    /** Has no effect. */
@@ -343,12 +330,5 @@ public class MockHttpServletResponse implements HttpServletResponse {
    @Override
    public void setStatus( int statusCode ) {
       _status = statusCode;
-   }
-
-   /** Saves the HTTP status code and the message provided. */
-   @Override
-   public void setStatus( int status, String errorMessage ) {
-      _status = status;
-      _errorMessage = errorMessage;
    }
 }

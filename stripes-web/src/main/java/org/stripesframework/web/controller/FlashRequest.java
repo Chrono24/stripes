@@ -2,6 +2,7 @@ package org.stripesframework.web.controller;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.security.Principal;
 import java.util.Collection;
@@ -12,9 +13,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.stripesframework.web.exception.StripesRuntimeException;
+
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletConnection;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletInputStream;
@@ -26,8 +30,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpUpgradeHandler;
 import jakarta.servlet.http.Part;
-
-import org.stripesframework.web.exception.StripesRuntimeException;
 
 
 /**
@@ -45,6 +47,7 @@ import org.stripesframework.web.exception.StripesRuntimeException;
  */
 public class FlashRequest implements HttpServletRequest, Serializable {
 
+   @Serial
    private static final long serialVersionUID = 1L;
 
    /**
@@ -88,9 +91,9 @@ public class FlashRequest implements HttpServletRequest, Serializable {
    private final String                    _serverName;
    private final String                    _servletPath;
    private final StringBuffer              _requestURL;
+   private final String                    _requestId;
    private final boolean                   _requestedSessionIdFromCookie;
    private final boolean                   _requestedSessionIdFromURL;
-   private final boolean                   _requestedSessionIdFromUrl;
    private final boolean                   _requestedSessionIdValid;
    private final boolean                   _secure;
    private final int                       _localPort;
@@ -103,7 +106,6 @@ public class FlashRequest implements HttpServletRequest, Serializable {
     *
     * @param prototype the HttpServletRequest to create a disconnected copy of
     */
-   @SuppressWarnings({ "deprecation" })
    public FlashRequest( HttpServletRequest prototype ) {
       // copy properties
       _authType = prototype.getAuthType();
@@ -126,10 +128,10 @@ public class FlashRequest implements HttpServletRequest, Serializable {
       _remoteUser = prototype.getRemoteUser();
       _requestURI = prototype.getRequestURI();
       _requestURL = prototype.getRequestURL();
+      _requestId = prototype.getRequestId();
       _requestedSessionId = prototype.getRequestedSessionId();
       _requestedSessionIdFromCookie = prototype.isRequestedSessionIdFromCookie();
       _requestedSessionIdFromURL = prototype.isRequestedSessionIdFromURL();
-      _requestedSessionIdFromUrl = prototype.isRequestedSessionIdFromUrl();
       _requestedSessionIdValid = prototype.isRequestedSessionIdValid();
       _scheme = prototype.getScheme();
       _secure = prototype.isSecure();
@@ -234,7 +236,7 @@ public class FlashRequest implements HttpServletRequest, Serializable {
    @Override
    public String getHeader( String name ) {
       List<String> values = _headers.get(name);
-      return values != null && !values.isEmpty() ? values.get(0) : null;
+      return values != null && !values.isEmpty() ? values.getFirst() : null;
    }
 
    @Override
@@ -314,11 +316,13 @@ public class FlashRequest implements HttpServletRequest, Serializable {
    }
 
    @Override
+   @SuppressWarnings("RedundantThrows")
    public Part getPart( String s ) throws IOException, ServletException {
       return null;
    }
 
    @Override
+   @SuppressWarnings("RedundantThrows")
    public Collection<Part> getParts() throws IOException, ServletException {
       return Collections.emptyList();
    }
@@ -339,6 +343,11 @@ public class FlashRequest implements HttpServletRequest, Serializable {
    }
 
    @Override
+   public String getProtocolRequestId() {
+      return "";
+   }
+
+   @Override
    public String getQueryString() {
       return _queryString;
    }
@@ -346,12 +355,6 @@ public class FlashRequest implements HttpServletRequest, Serializable {
    @Override
    public BufferedReader getReader() {
       return null;
-   }
-
-   @Override
-   @Deprecated
-   public String getRealPath( String name ) {
-      return getDelegate().getRealPath(name);
    }
 
    @Override
@@ -377,6 +380,11 @@ public class FlashRequest implements HttpServletRequest, Serializable {
    @Override
    public RequestDispatcher getRequestDispatcher( String name ) {
       return getDelegate().getRequestDispatcher(name);
+   }
+
+   @Override
+   public String getRequestId() {
+      return _requestId;
    }
 
    @Override
@@ -407,6 +415,11 @@ public class FlashRequest implements HttpServletRequest, Serializable {
    @Override
    public int getServerPort() {
       return _serverPort;
+   }
+
+   @Override
+   public ServletConnection getServletConnection() {
+      return getDelegate().getServletConnection();
    }
 
    @Override
@@ -452,12 +465,6 @@ public class FlashRequest implements HttpServletRequest, Serializable {
    @Override
    public boolean isRequestedSessionIdFromURL() {
       return _requestedSessionIdFromURL;
-   }
-
-   @Override
-   @Deprecated
-   public boolean isRequestedSessionIdFromUrl() {
-      return _requestedSessionIdFromUrl;
    }
 
    @Override
