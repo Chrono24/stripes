@@ -24,16 +24,24 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 import org.apache.commons.fileupload2.core.DiskFileItem;
 import org.apache.commons.fileupload2.core.DiskFileItemFactory;
 import org.apache.commons.fileupload2.core.FileUploadByteCountLimitException;
 import org.apache.commons.fileupload2.core.FileUploadException;
+import org.apache.commons.fileupload2.jakarta.servlet6.JakartaFileCleaner;
 import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletFileUpload;
+import org.apache.commons.io.FileCleaningTracker;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.stripesframework.web.action.FileBean;
 import org.stripesframework.web.controller.FileUploadLimitExceededException;
 
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 
 
@@ -49,12 +57,34 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 public class CommonsMultipartWrapper implements MultipartWrapper {
 
+   private static final Logger log = LoggerFactory.getLogger(CommonsMultipartWrapper.class);
+
+   private static final AtomicBoolean _missingFileCleaningTrackerLogged = new AtomicBoolean(false);
+
    private static final Pattern WINDOWS_PATH_PREFIX_PATTERN = Pattern.compile("(?i:^[A-Z]:\\\\)");
 
    /* Ensure this class will not load unless Commons FileUpload is on the classpath. */
    static {
       //noinspection ResultOfMethodCallIgnored
       FileUploadException.class.getName();
+   }
+
+   /**
+    * Returns the {@link FileCleaningTracker} associated with the {@link ServletContext}, creating and storing one if
+    * absent. The tracker deletes spilled temporary upload files once the corresponding {@link DiskFileItem} becomes
+    * garbage collected. Applications should register {@link JakartaFileCleaner} in {@code web.xml} so the tracker's
+    * reaper thread is terminated cleanly on undeploy.
+    */
+   private static @Nullable FileCleaningTracker getFileCleaningTracker( @NonNull ServletContext servletContext ) {
+      FileCleaningTracker tracker = JakartaFileCleaner.getFileCleaningTracker(servletContext);
+      if ( tracker == null ) {
+         if ( !_missingFileCleaningTrackerLogged.getAndSet(true) ) {
+            log.warn("Temporary files from uploads won't be cleaned due to a missing FileCleaningTracker; register {} in web.xml as listener",
+                  JakartaFileCleaner.class.getName());
+         }
+      }
+
+      return tracker;
    }
 
    private final Map<String, DiskFileItem> _files      = new HashMap<>();
@@ -78,7 +108,8 @@ public class CommonsMultipartWrapper implements MultipartWrapper {
    public void build( HttpServletRequest request, File tempDir, long maxPostSize ) throws IOException, FileUploadLimitExceededException {
       try {
          _charset = request.getCharacterEncoding();
-         DiskFileItemFactory factory = DiskFileItemFactory.builder().setPath(tempDir.toPath()).get();
+         FileCleaningTracker tracker = getFileCleaningTracker(request.getServletContext());
+         DiskFileItemFactory factory = DiskFileItemFactory.builder().setPath(tempDir.toPath()).setFileCleaningTracker(tracker).get();
          JakartaServletFileUpload<DiskFileItem, DiskFileItemFactory> upload = new JakartaServletFileUpload<>(factory);
          upload.setSizeMax(maxPostSize);
          Object maxFormKeys = request.getAttribute("maxFormKeys");
