@@ -34,7 +34,6 @@ import org.apache.commons.fileupload2.core.FileUploadException;
 import org.apache.commons.fileupload2.jakarta.servlet6.JakartaFileCleaner;
 import org.apache.commons.fileupload2.jakarta.servlet6.JakartaServletFileUpload;
 import org.apache.commons.io.FileCleaningTracker;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +74,12 @@ public class CommonsMultipartWrapper implements MultipartWrapper {
     * garbage collected. Applications should register {@link JakartaFileCleaner} in {@code web.xml} so the tracker's
     * reaper thread is terminated cleanly on undeploy.
     */
-   private static @Nullable FileCleaningTracker getFileCleaningTracker( @NonNull ServletContext servletContext ) {
+   private static @Nullable FileCleaningTracker getFileCleaningTracker( @Nullable ServletContext servletContext ) {
+      // This is the case for tests, e.g. in org.stripesframework.web.mock.MockHttpServletRequest
+      if ( servletContext == null ) {
+         return null;
+      }
+
       FileCleaningTracker tracker = JakartaFileCleaner.getFileCleaningTracker(servletContext);
       if ( tracker == null ) {
          if ( !_missingFileCleaningTrackerLogged.getAndSet(true) ) {
