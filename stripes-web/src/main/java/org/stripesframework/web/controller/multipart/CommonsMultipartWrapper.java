@@ -111,9 +111,9 @@ public class CommonsMultipartWrapper implements MultipartWrapper {
          FileCleaningTracker tracker = getFileCleaningTracker(request.getServletContext());
          DiskFileItemFactory factory = DiskFileItemFactory.builder().setPath(tempDir.toPath()).setFileCleaningTracker(tracker).get();
          JakartaServletFileUpload<DiskFileItem, DiskFileItemFactory> upload = new JakartaServletFileUpload<>(factory);
-         upload.setSizeMax(maxPostSize);
+         upload.setMaxSize(maxPostSize);
          Object maxFormKeys = request.getAttribute("maxFormKeys");
-         upload.setFileCountMax(maxFormKeys != null ? (Long)maxFormKeys : 1000);
+         upload.setMaxFileCount(maxFormKeys != null ? (Long)maxFormKeys : 1000);
          List<DiskFileItem> items = upload.parseRequest(request);
          Map<String, List<String>> params = new HashMap<>();
 
