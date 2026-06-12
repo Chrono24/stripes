@@ -6,7 +6,7 @@
    <parent>
       <groupId>org.stripesframework</groupId>
       <artifactId>stripes-parent</artifactId>
-      <version>5.0.0-SNAPSHOT</version>
+      <version>5.0.0-EAP-1</version>
       <relativePath>../pom.xml</relativePath>
    </parent>
 
