@@ -271,6 +271,11 @@ public class MockHttpServletResponse implements HttpServletResponse {
       _status = HttpServletResponse.SC_MOVED_TEMPORARILY;
    }
 
+   @Override
+   public void sendRedirect( String location, int sc, boolean clearBuffer ) throws IOException {
+      _status = sc;
+   }
+
    /** Has no effect. */
    @Override
    public void setBufferSize( int i ) {}
