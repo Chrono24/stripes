@@ -25,7 +25,6 @@ import jakarta.servlet.jsp.tagext.DynamicAttributes;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.stripesframework.jsp.exception.StripesJspException;
 import org.stripesframework.web.util.HtmlUtil;
 
 
@@ -179,27 +178,6 @@ public abstract class HtmlTagSupport extends StripesTagSupport implements Dynami
    @Override
    public String toString() {
       return getClass().getSimpleName() + "{" + "attributes=" + _attributes + ", parentTag=" + _parentTag + ", pageContext=" + _pageContext + "}";
-   }
-
-   /**
-    * Evaluates a single expression and returns the result.  If the expression cannot be evaluated
-    * then an ELException is caught, wrapped in a JspException and re-thrown.
-    *
-    * @param expression the expression to be evaluated
-    * @param resultType the Class representing the desired return type from the expression
-    * @throws StripesJspException when an ELException occurs trying to evaluate the expression
-    */
-   @SuppressWarnings({ "unchecked", "deprecation" })
-   protected <R> R evaluateExpression( String expression, Class<R> resultType ) throws StripesJspException {
-      try {
-         return (R)_pageContext.getExpressionEvaluator().
-               evaluate(expression, resultType, _pageContext.getVariableResolver(), null);
-      }
-      catch ( jakarta.servlet.jsp.el.ELException ele ) {
-         throw new StripesJspException(
-               "Could not evaluate EL expression  [" + expression + "] with result type [" + resultType.getName() + "] in tag class of type: "
-                     + getClass().getName(), ele);
-      }
    }
 
    /** Gets the value of the named attribute, or null if it is not set. */
